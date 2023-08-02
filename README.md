@@ -1,0 +1,1 @@
+ffmpeg -i GGGabc.mp4 -r 15 %3d.jpg    

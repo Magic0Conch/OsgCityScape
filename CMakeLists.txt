@@ -8,8 +8,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 if(MSVC)
-endif()
-if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
