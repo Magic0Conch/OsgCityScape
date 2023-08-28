@@ -1,10 +1,10 @@
 #ifndef RENDERTEXTURE_H
 #define RENDERTEXTURE_H
 #include <Windows.h>
-#include "osg/CopyOp"
-#include "osg/Referenced"
-#include "osg/Texture2D"
-#include "osg/ref_ptr"
+#include <osg/CopyOp>
+#include <osg/Referenced>
+#include <osg/Texture2D>
+#include <osg/ref_ptr>
 
 namespace cs{
 class RenderTexture:public osg::Texture2D{

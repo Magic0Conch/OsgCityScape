@@ -1,6 +1,4 @@
 #include "BaseGeometryFactory/GeometryFactory.h"
-#include "osg/Geometry"
-#include "osg/Vec3"
 using namespace cs;
 osg::ref_ptr<osg::Geometry> BaseGeometryFactory::createBaseGeometry(const BaseGeometryType type){
     osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();

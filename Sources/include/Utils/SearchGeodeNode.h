@@ -2,8 +2,8 @@
 #define SearchGeodeNode_H
 #include <windows.h>
 #include <string>
-#include "osg/Geode"
-#include "osg/ref_ptr"
+#include <osg/Geode>
+#include <osg/ref_ptr>
 #include <osg/Program>
 #include <osgDB/ReadFile>
 #include <osgViewer/Viewer>

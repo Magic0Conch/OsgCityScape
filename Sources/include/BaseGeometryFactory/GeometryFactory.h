@@ -1,8 +1,8 @@
 #ifndef GeometryFactory_H
 #define GeometryFactory_H
 #include <windows.h>
-#include "osg/Geometry"
-#include "osg/ref_ptr"
+#include <osg/Geometry>
+#include <osg/ref_ptr>
 namespace cs{
 enum class BaseGeometryType{
     QUAD

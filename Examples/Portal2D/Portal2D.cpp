@@ -8,13 +8,13 @@
 #include <osg/StateSet>
 #include <osg/Texture2D>
 #include <osg/Uniform>
-#include "osg/Notify"
-#include "osg/Vec2f"
-#include "osg/Vec3"
-#include "osgDB/AuthenticationMap"
-#include "osgDB/Registry"
-#include "utils/SearchGeodeNode.h"
-#include "utils/ShaderUtils.h"
+#include <osg/Notify>
+#include <osg/Vec2f>
+#include <osg/Vec3>
+#include <osgDB/AuthenticationMap>
+#include <osgDB/Registry>
+#include "Utils/SearchGeodeNode.h"
+#include "Utils/ShaderUtils.h"
 #include <osg/Geode>
 #include <osg/ref_ptr>
 #include <osg/Vec4>
@@ -129,5 +129,8 @@ int main(){
     viewer.addEventHandler(new osgViewer::StatsHandler());
     auto scene = setupScene();
     viewer.setSceneData(scene.get());
-    return viewer.run();
+    while (!viewer.done()){
+      viewer.frame();  
+    } 
+    return 0;
 }

@@ -2,14 +2,14 @@
 #define RTTCAMERA_H
 #include <string>
 #include <windows.h>
-#include "osg/Camera"
-#include "osg/Geode"
-#include "osg/Group"
-#include "osg/Referenced"
-#include "osg/Uniform"
-#include "osg/Vec4f"
-#include "osg/ref_ptr"
-#include "RenderTexture.h"
+#include <osg/Camera>
+#include <osg/Geode>
+#include <osg/Group>
+#include <osg/Referenced>
+#include <osg/Uniform>
+#include <osg/Vec4f>
+#include <osg/ref_ptr>
+#include <RenderTexture.h>
 namespace cs{
 class RTTCamera:public osg::Camera{
 public:

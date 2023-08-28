@@ -1,15 +1,15 @@
 #include "Movie.h"
-#include "baseGeometryFactory/GeometryFactory.h"
-#include "osg/FrameBufferObject"
-#include "osg/Image"
-#include "osg/ImageSequence"
-#include "osg/ImageStream"
-#include "osg/Program"
-#include "osg/StateAttribute"
-#include "osg/TextureRectangle"
-#include "osg/Uniform"
-#include "osg/ref_ptr"
-#include "utils/ShaderUtils.h"
+#include "BaseGeometryFactory/GeometryFactory.h"
+#include "Utils/ShaderUtils.h"
+#include <osg/FrameBufferObject>
+#include <osg/Image>
+#include <osg/ImageSequence>
+#include <osg/ImageStream>
+#include <osg/Program>
+#include <osg/StateAttribute>
+#include <osg/TextureRectangle>
+#include <osg/Uniform>
+#include <osg/ref_ptr>
 #include <iostream>
 #include <osgDB/ReadFile>
 #include <osgDB/FileNameUtils>
@@ -51,7 +51,7 @@ osg::ref_ptr<osg::ImageSequence> Movie::getImageSequence() const{
     return m_imageSequence;
 }
 
-void Movie::updateFrame() const{
+void Movie::updateFrame(){
     auto stateSet = m_screenQuad->getOrCreateStateSet();
     auto index = (m_currentFrameIndex++)%(m_imageList.size()-2);
     m_frame->setImage(m_imageSequence->getImage(index));

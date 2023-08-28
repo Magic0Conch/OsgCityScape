@@ -1,1 +1,0 @@
-add_subdirectory(osg-3.6.4)

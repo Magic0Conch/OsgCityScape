@@ -2,16 +2,16 @@
 #define MOVIE_H
 #include <string>
 #include <windows.h>
-#include "osg/Drawable"
-#include "osg/Geometry"
+#include <osg/Drawable>
+#include <osg/Geometry>
 #include <osg/TextureRectangle>
-#include "osg/Image"
-#include "osg/Node"
-#include "osg/NodeVisitor"
-#include "osg/Program"
-#include "osg/Referenced"
-#include "osg/Texture2D"
-#include "osg/ref_ptr"
+#include <osg/Image>
+#include <osg/Node>
+#include <osg/NodeVisitor>
+#include <osg/Program>
+#include <osg/Referenced>
+#include <osg/Texture2D>
+#include <osg/ref_ptr>
 #include <osgDB/FileUtils>
 #include <osgDB/Archive>
 #include <osg/ImageSequence>
@@ -21,7 +21,7 @@ public:
     Movie(const std::string& moviePath);
     osg::ref_ptr<osg::Geometry> getScreenQuadGeometry() const;
     osg::ref_ptr<osg::ImageSequence>  getImageSequence() const;
-    void updateFrame() const;
+    void updateFrame();
     osg::ref_ptr<osg::Texture2D> getFrame() const;
 private:
     const std::string m_vertPath = "resources/shaders/screen.vert";
