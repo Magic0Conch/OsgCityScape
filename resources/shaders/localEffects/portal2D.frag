@@ -83,8 +83,8 @@ uniform float osg_FrameTime;
 
 uniform float _EmitCenterUVX;
 uniform float _EmitCenterUVY;
-uniform float _EffectOutterHeight;
-uniform float _EffectOutterWidth;
+uniform float _EffectOuterHeight;
+uniform float _EffectOuterWidth;
 uniform float _EffectInnerWidth;        
 
 uniform vec4 _WaveColor;
@@ -117,18 +117,19 @@ void main(){
     uv = _IsHorizontal?vec2(uv.y,uv.x):uv;
     vec4 blurColor = texture2D(_MainTex,uv);
 
-    float effectRatio = smoothstep(_EffectOutterWidth/2.0,_EffectInnerWidth/2.0,abs(uv.x-_EmitCenterUVX));
-    effectRatio*=smoothstep(_EffectOutterHeight/2.0,_EffectOutterHeight/4.0,abs(uv.y-_EmitCenterUVY));
+    float effectRatio = smoothstep(_EffectOuterWidth/2.0,_EffectInnerWidth/2.0,abs(uv.x-_EmitCenterUVX));
+    effectRatio*=smoothstep(_EffectOuterHeight/2.0,_EffectOuterHeight/4.0,abs(uv.y-_EmitCenterUVY));
     uv-=.5;
     uv.x = uv.x - _EmitCenterUVX+.5;
-    uv.x/=_EffectOutterWidth;
+    uv.x/=_EffectOuterWidth;
     uv.y = uv.y - _EmitCenterUVY+.5;
-    uv.y/=_EffectOutterHeight;
+    uv.y/=_EffectOuterHeight;
     effectRatio *= uv.y>=-0.5&&uv.y<=0.5?1.:0.;
     vec4 waveColor = uv.y>=-0.5&&uv.y<=0.5? portal(uv):vec4(.0f);
     vec4 additiveColor = mix(blurColor,waveColor,waveColor.a);
+    float gamma = 1.0/2.2;
+	additiveColor.rgb = pow(additiveColor.rgb, vec3(gamma));
     FragColor = mix(originalColor,additiveColor,effectRatio);
 	//gamma correction
-    float gamma = 2.2;
-    FragColor.rgb = pow(FragColor.rgb, vec3(1.0/gamma));
+    // FragColor.rgb = pow(FragColor.rgb, vec3(gamma));
 }

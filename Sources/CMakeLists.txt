@@ -12,8 +12,8 @@ target_include_directories(
 
 target_link_libraries(${TEST_NAME}
     PUBLIC
-        imgui
-        ${OSG_LIB}
+      imgui
+      ${OSG_LIB}
 )
 
 install (TARGETS ${TEST_NAME}

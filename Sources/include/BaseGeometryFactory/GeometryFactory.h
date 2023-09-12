@@ -5,13 +5,13 @@
 #include <osg/ref_ptr>
 namespace cs{
 enum class BaseGeometryType{
-    QUAD
+    QUAD,Cylinder,Circle
 };
 
 class BaseGeometryFactory{
 public:
     static osg::ref_ptr<osg::Geometry> createBaseGeometry(const BaseGeometryType );
-     
+    static osg::ref_ptr<osg::Geometry> createCircle(float radius);
 };
 }
 #endif

@@ -1,1 +1,2 @@
-SETUP_EXAMPLE(Portal2D Portal2D.cpp)
+SETUP_EXAMPLE(Portal2D ${CMAKE_CURRENT_SOURCE_DIR})
+# message("当前源代码目录： ${CMAKE_CURRENT_SOURCE_DIR}")

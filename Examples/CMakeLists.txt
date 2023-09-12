@@ -1,9 +1,10 @@
 # set(OSGCITYSCAPE_SRC_DIR "${OSGCITYSPACE_SOURCES_DIR}/src")
 
-function(SETUP_EXAMPLE EXAMPLE_NAME EXAMPLE_SRC)
+function(SETUP_EXAMPLE EXAMPLE_NAME EXAMPLE_DIR)
+    file(GLOB_RECURSE EXAMPLE_SRC "${EXAMPLE_DIR}/*.cpp")
     add_executable(${EXAMPLE_NAME} ${EXAMPLE_SRC})
     target_link_libraries(${EXAMPLE_NAME}
-        PUBLIC
+        PRIVATE
             osgcityscape_base
 
     )
@@ -12,3 +13,4 @@ function(SETUP_EXAMPLE EXAMPLE_NAME EXAMPLE_SRC)
     )
 endfunction()
 add_subdirectory(Portal2D)
+add_subdirectory(HighlightArea)

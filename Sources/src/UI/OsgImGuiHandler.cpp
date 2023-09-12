@@ -1,4 +1,4 @@
-#include "UI/OsgImGuiHandler.hpp"
+#include "UI/OsgImGuiHandler.h"
 #include <iostream>
 #include <osg/Camera>
 #include <osgUtil/GLObjectsVisitor>
@@ -28,12 +28,10 @@ private:
 struct OsgImGuiHandler::ImGuiRenderCallback : public osg::Camera::DrawCallback
 {
     ImGuiRenderCallback(OsgImGuiHandler& handler)
-        : handler_(handler)
-    {
+        : handler_(handler){
     }
 
-    void operator()(osg::RenderInfo& renderInfo) const override
-    {
+    void operator()(osg::RenderInfo& renderInfo) const override{
         handler_.render(renderInfo);
     }
 
