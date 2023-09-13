@@ -5,7 +5,9 @@
 #include "UI/OsgImGuiHandler.h"
 #include "UI/ImGuiInitOperation.h"
 #include "Render/RenderPipelinePostProcess.h"
+#include "Render/Effects/GaussianBlur.h"
 #include "Utils/ShaderUtils.h"
+#include "osg/ref_ptr"
 
 
 const int width = 1728;
@@ -75,13 +77,15 @@ namespace cs {
     };
 
     std::shared_ptr<RenderPipelinePostProcess> portal2DPipeline;
+    osg::ref_ptr<GaussianBlur> gaussianBlurPipeline;
 
     class Portal2DUpdateUniformCallback:public UpdateUniformCallback{
     public:
         Portal2DUpdateUniformCallback(std::shared_ptr<RenderPipelinePostProcess> rp):UpdateUniformCallback(rp){};
         virtual void setUniforms() override{
+            const auto& x = portal2DPipeline->getRenderPasses();
+            const auto& renderPasses = gaussianBlurPipeline->getRenderPasses();
             for (int i = 0; i<blurIterations; i++) {
-                const auto& renderPasses = portal2DPipeline->getRenderPasses();
                 renderPasses[i*2+1]->setUniform("_BlurSize", 1.f+i*blurSpeed);
                 renderPasses[i*2+2]->setUniform("_BlurSize", 1.f+i*blurSpeed);
             }
@@ -101,32 +105,18 @@ namespace cs {
         portal2DPipeline->addRenderPass(new RTTCamera(geodeMovieQuad,buffer0,"resources/shaders/screen.vert", "resources/shaders/screen.frag"));
         
         //Pass1 & 2: gaussian blur
-        const auto texelSize = new osg::Uniform("_MainTex_TexelSize",osg::Vec2f(1./width,1./height));
         osg::ref_ptr<RenderTexture> buffer1 = new RenderTexture(width,height);
-        for (int i = 0; i<blurIterations; i++) {
-            //vertical pass
-            osg::ref_ptr<RTTCamera> verticalPass = new RTTCamera(buffer0,buffer1,
-            "resources/shaders/gaussianBlurVertical.vert", "resources/shaders/gaussianBlur.frag");
-            verticalPass->addUniform("_BlurSize",1.f+i*blurSpeed);
-            verticalPass->addUniform(texelSize);
-            portal2DPipeline->addRenderPass(verticalPass);
-            //horizontal pass
-            osg::ref_ptr<RTTCamera> horizontalPass = new RTTCamera(buffer1,buffer0,
-            "resources/shaders/gaussianBlurHorizontal.vert", "resources/shaders/gaussianBlur.frag");
-            horizontalPass->addUniform("_BlurSize",1.f+i*blurSpeed);
-            horizontalPass->addUniform(texelSize);
-            portal2DPipeline->addRenderPass(horizontalPass);
-        }
+        gaussianBlurPipeline = new GaussianBlur(buffer0,buffer1,width,height,blurIterations,blurSpeed); 
+        portal2DPipeline->addRenderPipeline(gaussianBlurPipeline);
         
         //Pass 3:wave pass
-        const auto wavePass = new RTTCamera(buffer0,buffer1,
+        const auto wavePass = new RTTCamera(buffer1,buffer0,
         "resources/shaders/portal2D.vert","resources/shaders/portal2D.frag");
         wavePass->addUniform("_EmitCenterUVX", &emitCenterUVX);
         wavePass->addUniform("_EffectOuterWidth", &effectOuterWidth);
         wavePass->addUniform("_EffectInnerWidth", &effectInnerWidth);
-        wavePass->getDestinationQuadGeode()->getStateSet()->setTextureAttributeAndModes(1,static_cast<RenderTexture*>(movie->getFrame().get()),
-        osg::StateAttribute::ON| osg::StateAttribute::OVERRIDE);
-        
+        wavePass->getDestinationQuadStateSet()->setTextureAttributeAndModes(1,static_cast<RenderTexture*>(movie->getFrame().get()),
+        osg::StateAttribute::ON| osg::StateAttribute::OVERRIDE);        
         wavePass->addUniform("_OriginalTexture",1);
         wavePass->addUniform("_EmitCenterUVY",&emitCenterUVY);
         wavePass->addUniform("_EffectOuterHeight",&effectOuterHeight);
