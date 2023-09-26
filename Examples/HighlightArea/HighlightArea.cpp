@@ -56,13 +56,14 @@ osg::Vec4 bottomPatternColor = osg::Vec4(1.0,0.0,0.0,0.0);
 int bottomPatternShape = 1;
 
 //bloom
-
 int blurIterations = 4;
 float blurSpeed = 0.6f;
 int downSample = 2;
 float luminanceThreshold = 0.4f;
 
 namespace cs {
+    osg::ref_ptr<Circle> circle;
+    osg::ref_ptr<Cylinder> geometryCylinder;
     class ImGuiDemo : public OsgImGuiHandler
     {
     protected:
@@ -74,6 +75,18 @@ namespace cs {
 
             bool p_open = true;
             if(ImGui::Begin("Area Highlight",&p_open,window_flags)){
+                if (ImGui::TreeNode("Geometry")){
+                    ImGui::SliderFloat("_Radius",&radius,0.1f,10.0f);
+                    if(ImGui::IsItemEdited()){
+                        circle->setRadius(radius);
+                        geometryCylinder->setRadius(radius);
+                    }
+                    ImGui::SliderFloat("_Height",&height,0.1f,10.0f);
+                    if(ImGui::IsItemEdited()){
+                        geometryCylinder->setHeight(height);
+                    }
+                    ImGui::TreePop();
+                }
                 if (ImGui::TreeNode("Bottom")){
                     ImGui::SliderFloat("_Outline",&bottomOuterWidth, 0.0f, 1.0f);
                     ImGui::ColorEdit4("_InnerColor",reinterpret_cast<float*>(&bottomInnerTintColor));
@@ -114,6 +127,7 @@ namespace cs {
 
     std::shared_ptr<RenderPipelinePostProcess> areaHighlightPipeline;
     osg::ref_ptr<GaussianBlur> gaussianBlurPipeline;
+
     class AreaHighlightUpdateUniformCallback:public UpdateUniformCallback{
     public:
         AreaHighlightUpdateUniformCallback(std::shared_ptr<RenderPipelinePostProcess> rp):UpdateUniformCallback(rp){};
@@ -128,7 +142,7 @@ namespace cs {
 
     auto setupScene(){
         areaHighlightPipeline.reset(new RenderPipelinePostProcess());
-        auto circle = BaseGeometryFactory::createCircle(1.0f);
+        circle = new Circle(1.0f);
         osg::ref_ptr<osg::Geode> geodeCircle = new osg::Geode;
         geodeCircle->addDrawable(circle);
 
@@ -144,7 +158,7 @@ namespace cs {
         materialCircle->addUniform("_AnimSpeed",&bottomAnimSpeed);
         materialCircle->addUniform("_OutlineColor",&bottomOuterTintColor);
 
-        osg::ref_ptr<osg::Geometry> geometryCylinder = new Cylinder();
+        geometryCylinder = new Cylinder();
         osg::ref_ptr<osg::Geode> geodeCylinder = new osg::Geode();
         geodeCylinder->addDrawable(geometryCylinder);
         std::unique_ptr<Material> materialCylinder= std::make_unique<Material>(geodeCylinder,"resources/shaders/highlightCylinder.vert", "resources/shaders/highlightCylinder.frag");
@@ -223,7 +237,7 @@ int main(){
     viewer.setRealizeOperation(new ImGuiInitOperation);
     auto scene = setupScene();
     
-    viewer.getCamera()->getGraphicsContext()->getState()->setUseModelViewAndProjectionUniforms(true);
+    // viewer.getCamera()->getGraphicsContext()->getState()->setUseModelViewAndProjectionUniforms(true);
     viewer.setSceneData(scene.get());
     return viewer.run();                
 }

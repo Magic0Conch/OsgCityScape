@@ -16,7 +16,7 @@
 
 #include <osg/GL>
 #include <osg/Image>
-#include <osg/StateAttribute>
+#include <osg/TextureAttribute>
 #include <osg/GraphicsContext>
 #include <osg/ref_ptr>
 #include <osg/Vec4>
@@ -57,12 +57,16 @@
     #define GL_TEXTURE_COMPRESSED_IMAGE_SIZE_ARB    0x86A0
 #endif
 
-#ifndef GL_EXT_texture_compression_s3tc
+//#ifndef GL_EXT_texture_compression_s3tc
     #define GL_COMPRESSED_RGB_S3TC_DXT1_EXT         0x83F0
     #define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT        0x83F1
     #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT        0x83F2
     #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT        0x83F3
-#endif
+    #define GL_COMPRESSED_SRGB_S3TC_DXT1_EXT        0x8C4C
+    #define GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT  0x8C4D
+    #define GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT  0x8C4E
+    #define GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT  0x8C4F
+//#endif
 
 #ifndef GL_EXT_texture_compression_rgtc
   #define GL_COMPRESSED_RED_RGTC1_EXT                0x8DBB
@@ -418,7 +422,7 @@ class TextureObjectManager;
 /** Texture pure virtual base class that encapsulates OpenGL texture
   * functionality common to the various types of OSG textures.
 */
-class OSG_EXPORT Texture : public osg::StateAttribute
+class OSG_EXPORT Texture : public osg::TextureAttribute
 {
 
     public :
@@ -1047,7 +1051,7 @@ class OSG_EXPORT Texture : public osg::StateAttribute
             }
 
 
-            void bind();
+            void bind(osg::State& state);
 
             inline GLenum id() const { return _id; }
             inline GLenum target() const { return _profile._target; }

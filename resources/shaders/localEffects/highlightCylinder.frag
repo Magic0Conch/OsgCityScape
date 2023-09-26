@@ -67,7 +67,7 @@ vec2 plotVerticalLine(vec2 uv){
 
 float radialDistance(vec2 uv){
     float angle = fmod(osg_FrameTime*_AnimSpeed,2*PI);
-    float fragAngle = atan(uv.y/uv.x)+PI;
+    float fragAngle = atan(uv.y,uv.x)+PI;
     return fmod(angle - fragAngle + 2*PI,2*PI)/(2*PI);
 }
 
@@ -75,7 +75,7 @@ void main()
 {
     vec2 pattern;
     vec2 xz = vec2(vs_out.localPos.x,vs_out.localPos.z);
-    float fragAngle = atan(xz.y/xz.x)+PI;
+    float fragAngle = atan(xz.y,xz.x)+PI;
     float radius = length(vs_out.localPos.xz);
     vec2 uv = vec2(fragAngle*_Radius,vs_out.localPos.y);
 

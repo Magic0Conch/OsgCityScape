@@ -149,5 +149,7 @@ int main(){
     auto scene = setupScene();
     scene->setUpdateCallback(new Portal2DUpdateUniformCallback(portal2DPipeline));
     viewer.setSceneData(scene.get());
+    // viewer.getCamera()->getGraphicsContext()->getState()->setUseModelViewAndProjectionUniforms(true);
+    //     viewer.getCamera()->getGraphicsContext()->getState()->setUseVertexAttributeAliasing(true);
     return viewer.run();
 }

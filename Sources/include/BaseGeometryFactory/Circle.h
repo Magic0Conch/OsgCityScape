@@ -1,32 +1,34 @@
 #ifndef CIRCLE_H
 #define CIRCLE_H
+#include "BaseGeometryFactory/BaseGeometry.h"
+
+#include "osg/ref_ptr"
 #include <corecrt_math_defines.h>
+#include <memory>
 #define _USE_MATH_DEFINES 
 #include "osg/Vec3"
 #include<Windows.h>
 #include <osg/Geometry>
 #include <osg/Geode>
 #include <cmath>
-class Circle:public osg::Geometry{
+
+namespace cs {
+
+class Circle:public BaseGeometry{
 public:
     float radius;
-    int segments;
-    bool isDirty = true;
 public:
-    Circle(float radius=1.0f,int segment=32):radius(radius),segments(segment){
-        updateMesh();
-    }
+    Circle(float radius=1.0f,int segment=32):radius(radius),BaseGeometry(segment){}
 
     void setRadius(float rhs){
-        radius = rhs;        
+        if(rhs!=radius){
+            radius = rhs;       
+            isDirty = true; 
+        }
     }
 
-    void setSegments(float rhs){
-        segments = rhs;
-    }
-
-    void updateMesh(){
-        // if(isDirty){
+    void updateMesh() override{
+        if(isDirty){
             osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array();
             vertices->resizeArray(segments+1);
             osg::ref_ptr<osg::Vec2Array> texCoords = new osg::Vec2Array();
@@ -57,17 +59,17 @@ public:
                     (*indices)[(i - 1) * 3 + 1] = i;
                     (*indices)[(i - 1) * 3 + 2] = 1;
                 }
-
                 angle += angleStep;
             }
-
             setVertexArray(vertices.get());
             setTexCoordArray(0,texCoords.get());
             setVertexAttribArray(0,getVertexArray());
             setVertexAttribArray(1,getTexCoordArray(0));
-            addPrimitiveSet(indices);
-        // }
+            setPrimitiveSet(0,indices);
+            isDirty = false;
+        }
     }
 };
+}
 
 #endif

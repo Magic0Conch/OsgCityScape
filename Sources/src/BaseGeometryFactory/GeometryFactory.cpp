@@ -5,9 +5,6 @@
 #include "osg/ref_ptr"
 using namespace cs;
 
-osg::ref_ptr<osg::Geometry> BaseGeometryFactory::createCircle(float radius) {
-    return new Circle(radius);
-}
 
 osg::ref_ptr<osg::Geometry> BaseGeometryFactory::createBaseGeometry(const BaseGeometryType type){
     osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();
@@ -18,13 +15,16 @@ osg::ref_ptr<osg::Geometry> BaseGeometryFactory::createBaseGeometry(const BaseGe
             geom->setVertexAttribArray(1,geom->getTexCoordArray(0));
             break;
         }
-        case BaseGeometryType::Circle:{
-            return new Circle();
-            break;
-        }
-        case BaseGeometryType::Cylinder:{
-            osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
-            break;
+        // case BaseGeometryType::Circle:{
+        //     return new Circle();
+        //     break;
+        // }
+        // case BaseGeometryType::Cylinder:{
+        //     osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+        //     break;
+        // }
+        default:{
+            //do nothing
         }
     }
     return geom;
