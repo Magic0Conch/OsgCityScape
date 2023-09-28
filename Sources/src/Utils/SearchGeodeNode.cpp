@@ -1,6 +1,6 @@
 #include "Utils/SearchGeodeNode.h"
 
-using namespace cs;
+using namespace CSEditor::Utils;
 
 void SearchGeodeNode::apply(osg::Node &searchNode){
     auto dynamicTry=dynamic_cast<osg::Geode*>(&searchNode);

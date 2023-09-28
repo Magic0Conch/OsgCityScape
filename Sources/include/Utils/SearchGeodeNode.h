@@ -9,7 +9,7 @@
 #include <osgViewer/Viewer>
 #include <osg/Camera>
 #include <iostream>
-namespace cs{
+namespace CSEditor::Utils{
 class SearchGeodeNode:public osg::NodeVisitor{
 public:
     SearchGeodeNode();

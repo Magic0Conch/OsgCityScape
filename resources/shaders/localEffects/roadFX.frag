@@ -64,16 +64,20 @@ vec2 plotPattern(vec2 uv, float time)
 
 void main()
 {
+    if(_OuterWidth==1){
+        FragColor = mix(_OuterColor* _OuterGradientLowerBound,_OuterColor ,abs(0.5-TexCoords.x)*2);
+        return;
+    }
     vec2 uv = vec2((TexCoords.x - _OuterWidth * 0.5) / (1.0 - _OuterWidth), TexCoords.y);
     vec2 pattern = (uv.x >= 0.0 && uv.x <= 1.0) ? plotPattern(uv, osg_FrameTime) : vec2(0.0, 0.0);
-
-    vec4 backColor = vec4((1.0 - pattern.x) * _BackColor.rgb, (1.0 - pattern.x) * _BackColor.a)*(1.0 - pattern.y);
-    vec4 patternColor = vec4(pattern.x * _PatternColor.rgb, pattern.y * _PatternColor.a);
+    float outerWidthScale = 0.5*_OuterWidth/(1-_OuterWidth);
+    vec4 backColor = (uv.x >= 0.0&&uv.x<=1.0) ?(1.0 - pattern.x) * _BackColor:vec4(0,0,0,0);
+    vec4 patternColor = _PatternColor * pattern.x * pattern.y;
     vec4 outerColor = vec4(0.0, 0.0, 0.0, 0.0);
-    float t = uv.x / _OuterWidth * 2.0;
-    outerColor.rgb = (uv.x < 0.0) ? mix(_OuterColor.rgb * _OuterColor.a, _OuterColor.rgb * _OuterColor.a * _OuterGradientLowerBound, t) : outerColor.rgb;
-    t = (1.0 - uv.x) / _OuterWidth * 2.0;
-    outerColor.rgb = (uv.x > 1.0) ? mix(_OuterColor.rgb * _OuterColor.a, _OuterColor.rgb * _OuterColor.a * _OuterGradientLowerBound, t) : outerColor.rgb;
+    float t = (uv.x + outerWidthScale) / outerWidthScale;
+    outerColor = (uv.x < 0.0) ? mix(_OuterColor, _OuterColor * _OuterGradientLowerBound, t) : outerColor;
+    t = (uv.x - 1.0) / outerWidthScale;
+    outerColor = (uv.x > 1.0) ? mix(_OuterColor, _OuterColor * _OuterGradientLowerBound, 1-t) : outerColor;
 
     float brightness = sin(osg_FrameTime * _FlashFrequency) + 1.5;
     patternColor.rgb *= brightness;

@@ -1,6 +1,6 @@
-#include "Render/Movie.h"
-#include "BaseGeometryFactory/GeometryFactory.h"
-#include "Utils/ShaderUtils.h"
+#include "Render/Frontend/Movie.h"
+#include "Render/Core/GeometryFactory.h"
+#include "Resources/Loaders/ShaderUtils.h"
 #include <osg/FrameBufferObject>
 #include <osg/Image>
 #include <osg/ImageSequence>
@@ -14,11 +14,13 @@
 #include <osgDB/ReadFile>
 #include <osgDB/FileNameUtils>
 #include <osg/Texture2D>
-using namespace cs;
+
+
+using namespace CSEditor::Resources;
 
 Movie::Movie(const std::string& moviePath):
 m_moviePath(moviePath),m_frame(new osg::Texture2D),
-m_screenQuad(BaseGeometryFactory::createBaseGeometry(BaseGeometryType::QUAD)){    
+m_screenQuad(Render::BaseGeometryFactory::createBaseGeometry(Render:: BaseGeometryType::QUAD)){    
     m_frame->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     m_frame->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
     m_frame->setResizeNonPowerOfTwoHint(false);

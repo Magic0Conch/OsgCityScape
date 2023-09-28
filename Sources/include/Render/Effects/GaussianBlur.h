@@ -1,10 +1,9 @@
 #ifndef GAUSSIANBLUR_H
 #define GAUSSIANBLUR_H
-#include "Render/RenderPipelinePostProcess.h"
-#include "Render/RenderTexture.h"
+#include "Render/LowRender/RenderPipelinePostProcess.h"
 #include "osg/ref_ptr"
 #include <memory>
-namespace cs {
+namespace CSEditor::Render {
 class GaussianBlur:public RenderPipelinePostProcess{
 private:
     int m_width,m_height;
@@ -37,10 +36,6 @@ public:
 
     GaussianBlur(RenderTexture* sourceTexture,RenderTexture* destinationTexture,int width,int height,int blurIterations,float blurSpeed):
     m_sourceTexture(sourceTexture),m_destinationTexture(destinationTexture),m_width(width),m_height(height),m_blurIterations(){
-        // m_blurIterations = std::make_shared<int>();
-        // m_blurSpeed = std::make_shared<float>();
-        // m_blurIterations.reset(blurIterations);
-        // m_blurSpeed.reset(blurSpeed);
         m_blurIterations = blurIterations;
         m_blurSpeed = blurSpeed;
         generateRenderPasses();
@@ -48,10 +43,6 @@ public:
 
     GaussianBlur(RenderTexture* sourceTexture,RenderTexture* destinationTexture,int blurIterations,float blurSpeed):
     m_sourceTexture(sourceTexture),m_destinationTexture(destinationTexture),m_width(sourceTexture->getTextureWidth()),m_height(sourceTexture->getTextureHeight()){
-        // m_blurIterations = std::make_shared<int>();
-        // m_blurSpeed = std::make_shared<float>();
-        // m_blurIterations.reset(blurIterations);
-        // m_blurSpeed.reset(blurSpeed);
         m_blurIterations = blurIterations;
         m_blurSpeed = blurSpeed;
         generateRenderPasses();

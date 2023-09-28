@@ -3,11 +3,10 @@
 #include <utility>
 #include <vector>
 #include <windows.h>
-#include "BaseGeometryFactory/Road.h"
-#include "Render/Material.h"
-#include "Render/RenderPipelinePostProcess.h"
-#include "UI/ImGuiInitOperation.h"
-#include "Utils/ShaderUtils.h"
+#include "Render/Entities/Road.h"
+#include "Render/Effects/Bloom.h"
+#include "GUI/Core/UIManager.h"
+#include "Resources/Loaders/ShaderUtils.h"
 #include "imgui.h"
 #include "osg/Camera"
 #include "osg/Depth"
@@ -24,9 +23,13 @@
 #include <osgGA/FlightManipulator>
 #include <iostream>
 #include <osgViewer/Viewer>
-#include "UI/OsgImGuiHandler.h"
+#include "GUI/Helper/ImGuiInitOperation.h"
 #include<Windows.h>
 #include <stdio.h>
+#include <nfd.h>
+
+using namespace CSEditor::Render;
+using namespace CSEditor::GUI;
 
 const auto resolution = osg::Vec2i(1728,702);
 
@@ -45,131 +48,179 @@ osg::Vec4f patternColor = osg::Vec4f(0.3162602,0.6164126,0.6509434,0.6470588);
 int patternShape = 2;
 float animSpeed = 1;
 
-osg::ref_ptr<cs::Road> roadGeometry;
+//bloom parameters
+int blurIterations = 4;
+float blurSpeed = 0.6f;
+int downSample = 2;
+float luminanceThreshold = 0.4f;
+osg::ref_ptr<Road> roadGeometry;
 osg::Camera* cam;
-namespace cs {
-    class ImGuiDemo : public OsgImGuiHandler
-    {
-    protected:
-        virtual void drawUi() override{
-            const auto main_viewport = ImGui::GetMainViewport();
-            ImGuiWindowFlags window_flags = 0;
-            ImGui::SetNextWindowPos(ImVec2(main_viewport->GetWorkCenter()),ImGuiCond_FirstUseEver);
-            ImGui::SetNextWindowSize(ImVec2(550,680),ImGuiCond_FirstUseEver);
+class PanelProperties : public UIManager
+{
+protected:
+    virtual void drawUi() override{
+        const auto main_viewport = ImGui::GetMainViewport();
+        ImGuiWindowFlags window_flags = 0;
+        ImGui::SetNextWindowPos(ImVec2(main_viewport->GetWorkCenter()),ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(550,680),ImGuiCond_FirstUseEver);
 
-            bool p_open = true;
-            if(ImGui::Begin("Area Highlight",&p_open,window_flags)){
-                if (ImGui::TreeNode("Geometry")){
-                    ImGui::SliderInt("Segments",&segments,2,32);
-                    if(ImGui::IsItemEdited()){
-                        roadGeometry->setSegments(segments);
-                    }
-                    ImGui::DragFloat("PathWidth",&pathWidth);
-                    if(ImGui::IsItemEdited()){
-                        roadGeometry->setPathWidth(pathWidth);
-                    }
-                    ImGui::DragFloat("InnerRadius",&innerRadius);
-                    if(ImGui::IsItemEdited()){
-                        roadGeometry->setInnerRadius(innerRadius);
-                    }
-                    ImGui::TreePop();
+        bool p_open = true;
+        if(ImGui::Begin("Path FX",&p_open,window_flags)){
+            if (ImGui::TreeNode("Geometry")){
+                ImGui::SliderInt("Segments",&segments,2,32);
+                if(ImGui::IsItemEdited()){
+                    roadGeometry->setSegments(segments);
                 }
-                if (ImGui::TreeNode("Pattern")){
-                    ImGui::SliderFloat("outerWidth",&outerWidth,0,1);
-                    ImGui::ColorEdit4("backColor",reinterpret_cast<float*>(&backColor));
-                    ImGui::SliderFloat("flashFrequency",&flashFrequency,0,25);
-                    ImGui::ColorEdit4("outerColor",reinterpret_cast<float*>(&outerColor));
-                    ImGui::SliderFloat("outerGradientLowerBound",&outerGradientLowerBound,0,1);
-                    ImGui::SliderFloat("patternDensity",&patternDensity,0,5);
-                    ImGui::SliderFloat("patternWidth",&patternWidth,0,1);
-                    ImGui::ColorEdit4("patternColor",reinterpret_cast<float*>(&patternColor));
-                    ImGui::SliderInt("patternShape",&patternShape,0,2);
-                    ImGui::SliderFloat("animSpeed",&animSpeed,0,10);
-
-                    // ImGui::SliderFloat("_Outline",&bottomOuterWidth, 0.0f, 1.0f);
-                    // ImGui::ColorEdit4("_InnerColor",reinterpret_cast<float*>(&bottomInnerTintColor));
-                    ImGui::TreePop();
+                ImGui::DragFloat("PathWidth",&pathWidth);
+                if(ImGui::IsItemEdited()){
+                    roadGeometry->setPathWidth(pathWidth);
                 }
+                ImGui::DragFloat("InnerRadius",&innerRadius);
+                if(ImGui::IsItemEdited()){
+                    roadGeometry->setInnerRadius(innerRadius);
+                }
+                ImGui::TreePop();
             }
-            
-            ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
-            ImGui::PopItemWidth();
-            ImGui::End();
+            if (ImGui::TreeNode("Pattern")){
+                ImGui::SliderFloat("outerWidth",&outerWidth,0,1);
+                ImGui::ColorEdit4("backColor",reinterpret_cast<float*>(&backColor));
+                ImGui::SliderFloat("flashFrequency",&flashFrequency,0,25);
+                ImGui::ColorEdit4("outerColor",reinterpret_cast<float*>(&outerColor));
+                ImGui::SliderFloat("outerGradientLowerBound",&outerGradientLowerBound,0,1);
+                ImGui::SliderFloat("patternDensity",&patternDensity,0,5);
+                ImGui::SliderFloat("patternWidth",&patternWidth,0,1);
+                ImGui::ColorEdit4("patternColor",reinterpret_cast<float*>(&patternColor));
+                ImGui::SliderInt("patternShape",&patternShape,0,2);
+                ImGui::SliderFloat("animSpeed",&animSpeed,0,10);
+                
+                // ImGui::SliderFloat("_Outline",&bottomOuterWidth, 0.0f, 1.0f);
+                // ImGui::ColorEdit4("_InnerColor",reinterpret_cast<float*>(&bottomInnerTintColor));
+                ImGui::TreePop();
+            }
+            if (ImGui::TreeNode("Bloom")){
+                ImGui::SliderFloat("blurSpeed", &blurSpeed,0.2f,10.0f);
+                ImGui::SliderFloat("_LuminanceThreshold", &luminanceThreshold,0,1);
+                // ImGui::SliderInt("blurIterations", &blurIterations,0,32);
+                ImGui::TreePop();
+            }
         }
-    };
-
-    std::shared_ptr<RenderPipelinePostProcess> roadFXPipeline;
-    
-
-    auto setupScene(){
-        roadFXPipeline.reset(new RenderPipelinePostProcess());
-        auto pathKeyPoints = std::make_unique<std::vector<osg::Vec3f>>();
-        pathKeyPoints->emplace_back(osg::Vec3f(-2.0,0.0,4.0));
-        pathKeyPoints->emplace_back(osg::Vec3f(10.0,0.0,10.0));
-        pathKeyPoints->emplace_back(osg::Vec3f(10.0,0.0,-10.0));
-        pathKeyPoints->emplace_back(osg::Vec3f(20.0,0.0,-10.0));
-        pathKeyPoints->emplace_back(osg::Vec3f(24.0,0.0,15.0));
-         
-        roadGeometry = new Road(std::move(pathKeyPoints));
-        roadGeometry->setPathWidth(pathWidth);
-        roadGeometry->setInnerRadius(innerRadius);
-        roadGeometry->setSegments(segments);
-        osg::ref_ptr<osg::Geode> roadGeode = new osg::Geode;
-        roadGeode->addDrawable(roadGeometry);
         
-        auto materialRoadFX= std::make_unique<Material>(roadGeode,"resources/shaders/triangle.vert", "resources/shaders/roadFX.frag");
-
-
-        materialRoadFX->addUniform("_BackColor",&backColor);
-        materialRoadFX->addUniform("_FlashFrequency",&flashFrequency);
-        materialRoadFX->addUniform("_OuterWidth",&outerWidth);
-        materialRoadFX->addUniform("_PatternDensity",&patternDensity);
-        materialRoadFX->addUniform("_PatternWidth",&patternWidth);
-        materialRoadFX->addUniform("_PatternColor",&patternColor);
-        materialRoadFX->addUniform("_PatternShape",&patternShape);
-        materialRoadFX->addUniform("_AnimSpeed",&animSpeed);
-        materialRoadFX->addUniform("_PathWidth",&pathWidth);
-        materialRoadFX->addUniform("_OuterGradientLowerBound",&outerGradientLowerBound);
-        materialRoadFX->addUniform("_OuterColor",&outerColor);
-        roadGeode->setUpdateCallback(new UpdateUniformCallback(materialRoadFX.get()));
-        
-        // osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc;
-        // osg::ref_ptr<osg::Depth> depth = new osg::Depth;
-        // depth->setWriteMask(false);
-        // depth->setRange(0.0f, 0.0f);
-        // blend->setFunction(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE_MINUS_SRC_ALPHA);
-
-        // roadGeode->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-        // roadGeode->getStateSet()->setAttributeAndModes(blend.get(),osg::StateAttribute::ON);
-        // roadGeode->getStateSet()->setAttributeAndModes(depth.get(),osg::StateAttribute::ON);
-        // roadGeode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
-        
-        osg::ref_ptr<osg::Group> scene = new osg::Group;
-        
-        //display quad
-        scene->addChild(roadGeode);
-        //off-screen rendering
-        // roadFXPipeline->addRenderPassesToOsgGroup(*scene);
-        return scene;
+        ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
+        ImGui::PopItemWidth();
+        ImGui::End();
     }
+};
 
+std::shared_ptr<RenderPipelinePostProcess> roadFXPipeline;
+osg::ref_ptr<Bloom> bloomPipeline;
+
+class BloomUniformCallback:public UpdateUniformCallback{
+public:
+    BloomUniformCallback(std::shared_ptr<RenderPipelinePostProcess> rp):UpdateUniformCallback(rp){};
+    virtual void setUniforms() override{
+        const auto& renderPasses = bloomPipeline->getGaussianPipeline()->getRenderPasses();
+        for (int i = 0; i<blurIterations; i++) {
+            renderPasses[i*2+1]->setUniform("_BlurSize", 1.f+i*blurSpeed);
+            renderPasses[i*2+2]->setUniform("_BlurSize", 1.f+i*blurSpeed);
+        }
+    }
+};
+
+auto setupScene(){
+    roadFXPipeline.reset(new RenderPipelinePostProcess());
+    //set roadGeometry init parameters.
+    auto pathKeyPoints = std::make_unique<std::vector<osg::Vec3f>>();
+    pathKeyPoints->emplace_back(osg::Vec3f(-2.0,0.0,4.0));
+    pathKeyPoints->emplace_back(osg::Vec3f(10.0,0.0,10.0));
+    pathKeyPoints->emplace_back(osg::Vec3f(10.0,0.0,-10.0));
+    pathKeyPoints->emplace_back(osg::Vec3f(20.0,0.0,-10.0));
+    pathKeyPoints->emplace_back(osg::Vec3f(24.0,0.0,15.0));         
+    roadGeometry = new Road(std::move(pathKeyPoints));
+    roadGeometry->setPathWidth(pathWidth);
+    roadGeometry->setInnerRadius(innerRadius);
+    roadGeometry->setSegments(segments);
+
+    osg::ref_ptr<osg::Geode> roadGeode = new osg::Geode;
+    roadGeode->addDrawable(roadGeometry);
+
+    //Bind shader file and set uniform parameters
+    auto materialRoadFX= std::make_unique<Material>(roadGeode,"resources/shaders/triangle.vert", "resources/shaders/roadFX.frag");
+    materialRoadFX->addUniform("_BackColor",&backColor);
+    materialRoadFX->addUniform("_FlashFrequency",&flashFrequency);
+    materialRoadFX->addUniform("_OuterWidth",&outerWidth);
+    materialRoadFX->addUniform("_PatternDensity",&patternDensity);
+    materialRoadFX->addUniform("_PatternWidth",&patternWidth);
+    materialRoadFX->addUniform("_PatternColor",&patternColor);
+    materialRoadFX->addUniform("_PatternShape",&patternShape);
+    materialRoadFX->addUniform("_AnimSpeed",&animSpeed);
+    materialRoadFX->addUniform("_PathWidth",&pathWidth);
+    materialRoadFX->addUniform("_OuterGradientLowerBound",&outerGradientLowerBound);
+    materialRoadFX->addUniform("_OuterColor",&outerColor);
+    roadGeode->setUpdateCallback(new UpdateUniformCallback(materialRoadFX.get()));
+    
+    //Adjust render state(depth write off,blend on)
+    osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc;
+    osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+    depth->setWriteMask(false);
+    depth->setRange(0.0f, 0.0f);
+    blend->setFunction(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE_MINUS_SRC_ALPHA);
+
+    roadGeode->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+    roadGeode->getStateSet()->setAttributeAndModes(blend.get(),osg::StateAttribute::ON);
+    roadGeode->getStateSet()->setAttributeAndModes(depth.get(),osg::StateAttribute::ON);
+    roadGeode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
+    
+    //post process
+    //render geode to a screen texture
+    osg::ref_ptr<RenderTexture> screenTexture = new RenderTexture(resolution.x(),resolution.y());
+    osg::ref_ptr<RTTCamera> screenRenderPass = new RTTCamera(screenTexture);
+    screenRenderPass->addChildToRTTCamera(roadGeode);
+    roadFXPipeline->addRenderPass(screenRenderPass);
+    //bloom:render screen texture
+    bloomPipeline = new Bloom(screenTexture,nullptr,blurIterations,blurSpeed,&luminanceThreshold);
+    roadFXPipeline->addRenderPipeline(bloomPipeline);
+    roadFXPipeline->getDestinationQuadGeode()->setUpdateCallback(new BloomUniformCallback(roadFXPipeline));
+    // bloomPipeline->enableUpdateUniformPerFrame();
+    osg::ref_ptr<osg::Group> scene = new osg::Group;
+    
+    //display quad
+    scene->addChild(roadFXPipeline->getDestinationQuadGeode());
+    
+    //off-screen rendering
+    roadFXPipeline->addRenderPassesToOsgGroup(*scene);
+    return scene;
 }
 
+
 int main(){
-    using namespace cs;
+    using namespace CSEditor;
+    nfdchar_t *outPath = NULL;
+    nfdresult_t result = NFD_OpenDialog( NULL, NULL, &outPath );
+        
+    if ( result == NFD_OKAY ) {
+        puts("Success!");
+        puts(outPath);
+        free(outPath);
+    }
+    else if ( result == NFD_CANCEL ) {
+        puts("User pressed cancel.");
+    }
+    else {
+        printf("Error: %s\n", NFD_GetError() );
+    }
+        
     osg::DisplaySettings::instance()->setGLContextVersion("3.3");
     osg::DisplaySettings::instance()->setGLContextProfileMask(0x1); 
     std::cout<< osg::DisplaySettings::instance()->getGLContextVersion();
     osgViewer::Viewer viewer;
     osg::ref_ptr<osgGA::FirstPersonManipulator> manipulator = new osgGA::FirstPersonManipulator();
-    manipulator->setHomePosition(osg::Vec3d(0,90,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
+    manipulator->setHomePosition(osg::Vec3d(0,40,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
     viewer.setCameraManipulator(manipulator);
     viewer.setUpViewInWindow(100, 100,resolution.x(),resolution.y());
     viewer.addEventHandler(new osgViewer::StatsHandler());
-    viewer.addEventHandler(new ImGuiDemo);
+    viewer.addEventHandler(new PanelProperties);
 
     viewer.setRealizeOperation(new ImGuiInitOperation);
-
 
     auto scene = setupScene();
     viewer.setSceneData(scene.get());
@@ -181,13 +232,13 @@ int main(){
     return 0;                
 }
 
-    // if(ImGui::Button("set position")){
-    //     auto camViewMat = cam->getViewMatrix();
-    //     auto camPos = camViewMat.getTrans();
-    //     std::cout<<camPos.x()<<","<<camPos.y()<<","<<camPos.z()<<std::endl;                        
-    //     auto q = camViewMat.getRotate();
-    //     std::cout<<q.x()<<","<<q.y()<<","<<q.z()<<q.w()<<std::endl;
+// if(ImGui::Button("set position")){
+//     auto camViewMat = cam->getViewMatrix();
+//     auto camPos = camViewMat.getTrans();
+//     std::cout<<camPos.x()<<","<<camPos.y()<<","<<camPos.z()<<std::endl;                        
+//     auto q = camViewMat.getRotate();
+//     std::cout<<q.x()<<","<<q.y()<<","<<q.z()<<q.w()<<std::endl;
 
-    // }
-    // cam = viewer.getCamera();
-    // cam->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+// }
+// cam = viewer.getCamera();
+// cam->setReferenceFrame(osg::Transform::ABSOLUTE_RF);

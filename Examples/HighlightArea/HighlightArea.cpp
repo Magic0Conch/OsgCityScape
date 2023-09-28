@@ -1,14 +1,10 @@
 #include <memory>
 #include <windows.h>
-#include "BaseGeometryFactory/Circle.h"
-#include "BaseGeometryFactory/Cylinder.h"
-#include "BaseGeometryFactory/GeometryFactory.h"
+#include "Render/Entities/Circle.h"
+#include "Render/Entities/Cylinder.h"
+#include "Render/Effects/Bloom.h"
 #include "Render/Effects/GaussianBlur.h"
-#include "Render/Material.h"
-#include "Render/RenderPipelinePostProcess.h"
-#include "Render/RTTCamera.h"
-#include "UI/ImGuiInitOperation.h"
-#include "Utils/ShaderUtils.h"
+#include "GUI/Helper/ImGuiInitOperation.h"
 #include "imgui.h"
 #include "osg/Geode"
 #include "osg/Geometry"
@@ -19,7 +15,7 @@
 #include "osg/Depth"
 #include <iostream>
 #include <osgViewer/Viewer>
-#include "UI/OsgImGuiHandler.h"
+#include "GUI/Core/UIManager.h"
 #include <osg/BlendFunc>
 #include <osg/CullFace>
 #include <osgViewer/GraphicsWindow>
@@ -29,20 +25,20 @@ const auto resolution = osg::Vec2i(1728,702);
 float radius=1.0f;
 
 float height=2.0f;
-osg::Vec4 wallTintColor = osg::Vec4(0,0.87,1.,1.0);
+osg::Vec4 wallTintColor = osg::Vec4(0,0.87,1.,0.235);
 
 float wallTextureDensity = 1.9;
 float wallAnimSpeed = -.6;
 float wallPatternWidth = .258;
 osg::Vec4 wallPatternColor = osg::Vec4(0,0.87,1.,1.0);
-float wallFlashFrequency = 0;
+float wallFlashFrequency = 4;
 int wallBackStyle = 0;
-int wallPatternShape = 0;
+int wallPatternShape = 1;
 float wallOuterWidth = 0;
 
-float bottomOuterWidth = 0.103;
-osg::Vec4 bottomOuterTintColor = osg::Vec4(0,0.87,1.,1.0);;
-osg::Vec4 bottomInnerTintColor = osg::Vec4(0,0.87,1.,1.0);;
+float bottomOuterWidth = 0.2;
+osg::Vec4 bottomOuterTintColor = osg::Vec4(0,0.87,1.,1.0);
+osg::Vec4 bottomInnerTintColor = osg::Vec4(0,0.87,1.,0);
 bool wallFade = true;
 
 
@@ -61,10 +57,10 @@ float blurSpeed = 0.6f;
 int downSample = 2;
 float luminanceThreshold = 0.4f;
 
-namespace cs {
-    osg::ref_ptr<Circle> circle;
-    osg::ref_ptr<Cylinder> geometryCylinder;
-    class ImGuiDemo : public OsgImGuiHandler
+namespace CSEditor {
+    osg::ref_ptr<Render::Circle> circle;
+    osg::ref_ptr<Render::Cylinder> geometryCylinder;
+    class PanelProperties : public GUI::UIManager
     {
     protected:
         virtual void drawUi() override{
@@ -125,14 +121,14 @@ namespace cs {
         }
     };
 
-    std::shared_ptr<RenderPipelinePostProcess> areaHighlightPipeline;
-    osg::ref_ptr<GaussianBlur> gaussianBlurPipeline;
+    std::shared_ptr<Render::RenderPipelinePostProcess> areaHighlightPipeline;
+    osg::ref_ptr<Render::Bloom> bloomPipeline;
 
-    class AreaHighlightUpdateUniformCallback:public UpdateUniformCallback{
+    class BloomUniformCallback:public Render::UpdateUniformCallback{
     public:
-        AreaHighlightUpdateUniformCallback(std::shared_ptr<RenderPipelinePostProcess> rp):UpdateUniformCallback(rp){};
+        BloomUniformCallback(std::shared_ptr<Render::RenderPipelinePostProcess> rp):UpdateUniformCallback(rp){};
         virtual void setUniforms() override{
-            const auto& renderPasses = gaussianBlurPipeline->getRenderPasses();
+            const auto& renderPasses = bloomPipeline->getGaussianPipeline()->getRenderPasses();
             for (int i = 0; i<blurIterations; i++) {
                 renderPasses[i*2+1]->setUniform("_BlurSize", 1.f+i*blurSpeed);
                 renderPasses[i*2+2]->setUniform("_BlurSize", 1.f+i*blurSpeed);
@@ -141,12 +137,12 @@ namespace cs {
     };
 
     auto setupScene(){
-        areaHighlightPipeline.reset(new RenderPipelinePostProcess());
-        circle = new Circle(1.0f);
+        areaHighlightPipeline.reset(new Render::RenderPipelinePostProcess());
+        circle = new Render::Circle(1.0f);
         osg::ref_ptr<osg::Geode> geodeCircle = new osg::Geode;
         geodeCircle->addDrawable(circle);
 
-        std::unique_ptr<Material> materialCircle= std::make_unique<Material>(geodeCircle,"resources/shaders/highlightCircle.vert", "resources/shaders/highlightCircle.frag");
+        std::unique_ptr<Render::Material> materialCircle= std::make_unique<Render::Material>(geodeCircle,"resources/shaders/highlightCircle.vert", "resources/shaders/highlightCircle.frag");
 
         materialCircle->addUniform("_OutlineRatio",&bottomOuterWidth);
         materialCircle->addUniform("_InnerColor",&bottomInnerTintColor);
@@ -158,10 +154,10 @@ namespace cs {
         materialCircle->addUniform("_AnimSpeed",&bottomAnimSpeed);
         materialCircle->addUniform("_OutlineColor",&bottomOuterTintColor);
 
-        geometryCylinder = new Cylinder();
+        geometryCylinder = new Render::Cylinder();
         osg::ref_ptr<osg::Geode> geodeCylinder = new osg::Geode();
         geodeCylinder->addDrawable(geometryCylinder);
-        std::unique_ptr<Material> materialCylinder= std::make_unique<Material>(geodeCylinder,"resources/shaders/highlightCylinder.vert", "resources/shaders/highlightCylinder.frag");
+        std::unique_ptr<Render::Material> materialCylinder= std::make_unique<Render::Material>(geodeCylinder,"resources/shaders/highlightCylinder.vert", "resources/shaders/highlightCylinder.frag");
 
         materialCylinder->addUniform("_Color",&wallTintColor);
         materialCylinder->addUniform("_PatternColor",&wallPatternColor);
@@ -180,8 +176,8 @@ namespace cs {
         
         highlightArea->addChild(geodeCircle);
         highlightArea->addChild(geodeCylinder);
-        geodeCircle->setUpdateCallback(new UpdateUniformCallback(materialCircle.get()));
-        geodeCylinder->setUpdateCallback(new UpdateUniformCallback(materialCylinder.get()));
+        geodeCircle->setUpdateCallback(new Render::UpdateUniformCallback(materialCircle.get()));
+        geodeCylinder->setUpdateCallback(new Render::UpdateUniformCallback(materialCylinder.get()));
         osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc;
         osg::ref_ptr<osg::Depth> depth = new osg::Depth;
         depth->setWriteMask(false);
@@ -197,27 +193,19 @@ namespace cs {
         geodeCircle->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
         geodeCylinder->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
         
-        osg::ref_ptr<RenderTexture> buffer0 = new RenderTexture(resolution.x(),resolution.y());
-        osg::ref_ptr<RenderTexture> buffer1 = new RenderTexture(resolution.x(),resolution.y());
-        osg::ref_ptr<RenderTexture> screenTexture = new RenderTexture(resolution.x(),resolution.y());
-        osg::ref_ptr<RTTCamera> screenRenderPass = new RTTCamera(screenTexture);
+        //render geode to a screen texture
+        osg::ref_ptr<Render::RenderTexture> screenTexture = new Render::RenderTexture(resolution.x(),resolution.y());
+        osg::ref_ptr<Render::RTTCamera> screenRenderPass = new Render::RTTCamera(screenTexture);
         screenRenderPass->addChildToRTTCamera(geodeCircle);
         screenRenderPass->addChildToRTTCamera(geodeCylinder);
         areaHighlightPipeline->addRenderPass(screenRenderPass);
-        //bloom
-        osg::ref_ptr<RTTCamera> bloomRenderPass = new RTTCamera(screenTexture,buffer0,"resources/shaders/screen.vert", "resources/shaders/bloomExtractBright.frag");
-        areaHighlightPipeline->addRenderPass(bloomRenderPass);
-        bloomRenderPass->addUniform("_LuminanceThreshold",luminanceThreshold);
-        gaussianBlurPipeline = new GaussianBlur(buffer0,buffer1,blurIterations,blurSpeed);
-        areaHighlightPipeline->addRenderPipeline(gaussianBlurPipeline);
         
-        osg::ref_ptr<RTTCamera> bloomFinalPass = new RTTCamera(screenTexture,buffer0,"resources/shaders/screen.vert", "resources/shaders/bloomFinalPass.frag");
-        bloomFinalPass->getDestinationQuadStateSet()->setTextureAttributeAndModes(1,static_cast<RenderTexture*>(buffer1),osg::StateAttribute::ON| osg::StateAttribute::OVERRIDE);
-        bloomFinalPass->addUniform("_Bloom",1);
+        //bloom from a screen texture
+        bloomPipeline = new Render::Bloom(screenTexture,nullptr,blurIterations,blurSpeed,&luminanceThreshold);
+        areaHighlightPipeline->addRenderPipeline(bloomPipeline);
 
-        areaHighlightPipeline->addRenderPass(bloomFinalPass);
         osg::ref_ptr<osg::Group> scene = new osg::Group;
-        scene->setUpdateCallback(new AreaHighlightUpdateUniformCallback(areaHighlightPipeline));
+        scene->setUpdateCallback(new BloomUniformCallback(areaHighlightPipeline));
 
         //display quad
         scene->addChild(areaHighlightPipeline->getDestinationQuadGeode());
@@ -229,12 +217,12 @@ namespace cs {
 }
 
 int main(){
-    using namespace cs;
+    using namespace CSEditor;
     osgViewer::Viewer viewer;
     viewer.setUpViewInWindow(100, 100,resolution.x(),resolution.y());
     viewer.addEventHandler(new osgViewer::StatsHandler());
-    viewer.addEventHandler(new ImGuiDemo);
-    viewer.setRealizeOperation(new ImGuiInitOperation);
+    viewer.addEventHandler(new PanelProperties);
+    viewer.setRealizeOperation(new GUI::ImGuiInitOperation);
     auto scene = setupScene();
     
     // viewer.getCamera()->getGraphicsContext()->getState()->setUseModelViewAndProjectionUniforms(true);

@@ -1,9 +1,9 @@
-#include "BaseGeometryFactory/GeometryFactory.h"
-#include "BaseGeometryFactory/Circle.h"
+#include "Render/Core/GeometryFactory.h"
+#include "Render/Entities/Circle.h"
 #include "osg/Array"
 #include "osg/Shape"
 #include "osg/ref_ptr"
-using namespace cs;
+using namespace CSEditor::Render;
 
 
 osg::ref_ptr<osg::Geometry> BaseGeometryFactory::createBaseGeometry(const BaseGeometryType type){

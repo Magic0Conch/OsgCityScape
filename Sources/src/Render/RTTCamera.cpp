@@ -1,7 +1,5 @@
-#include "Render/RTTCamera.h"
-#include "Render/Material.h"
-#include "Utils/ShaderUtils.h"
-#include "BaseGeometryFactory/GeometryFactory.h"
+#include "Render/LowRender/RTTCamera.h"
+#include "Render/Core/GeometryFactory.h"
 #include "osg/Geometry"
 #include <osg/Camera>
 #include <osg/Geode>
@@ -12,7 +10,7 @@
 #include <ostream>
 #include <string>
 
-using namespace cs;
+using namespace CSEditor::Render;
 
 RTTCamera::RTTCamera(RenderTexture* source,RenderTexture* destination,const std::string& vertPath,const std::string& fragPath):
 m_sourceTexture(source),m_destinationTexture(destination),Material(vertPath,fragPath){

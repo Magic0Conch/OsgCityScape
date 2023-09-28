@@ -1,10 +1,8 @@
-#include "Render/RenderPipelinePostProcess.h"
-#include "Render/Material.h"
-#include "Render/RTTCamera.h"
+#include "Render/LowRender/RenderPipelinePostProcess.h"
 #include <memory>
 #include <variant>
 
-using namespace cs;
+using namespace CSEditor::Render;
 
 void RenderPipeline::addRenderPass(const osg::ref_ptr<Material> pass){
     renderPasses.emplace_back(pass);
@@ -23,6 +21,12 @@ void RenderPipelinePostProcess::addRenderPassesToOsgGroup(osg::Group& group) con
         group.addChild(rttCamera);
     }
 }
+
+void RenderPipelinePostProcess::enableUpdateUniformPerFrame(){
+    getDestinationQuadGeode()->addUpdateCallback(new UpdateUniformCallback(this));
+}
+
+
 osg::ref_ptr<osg::Geode> RenderPipelinePostProcess::getDestinationQuadGeode() const{
     auto rttCamera = dynamic_cast<RTTCamera*>(renderPasses.back().get());
     return rttCamera->getDestinationQuadGeode();

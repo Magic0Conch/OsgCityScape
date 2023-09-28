@@ -1,6 +1,6 @@
-#include "Utils/ShaderUtils.h"
+#include "Resources/Loaders/ShaderUtils.h"
 
-using namespace cs;
+using namespace CSEditor::Resources;
 
 void ShaderUtils::setShaderProgram(osg::ref_ptr<osg::StateSet> stateSet, const std::string &vert, const std::string &frag){
     auto vertShader = osgDB::readRefShaderFile(osg::Shader::VERTEX,vert);
