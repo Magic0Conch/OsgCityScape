@@ -1,6 +1,4 @@
-#ifndef MATERIAL_H
-#define MATERIAL_H
-#include <iostream>
+#pragma once
 #include <memory>
 #include <string>
 #include <utility>
@@ -33,43 +31,25 @@ protected:
     std::string m_vertShaderPath;
     std::string m_fragShaderPath;
 public:
-    Material(osg::Geode* source):m_sourceGeode(source){}
-    Material(osg::Geode* source,const std::string& vertPath,const std::string& fragPath)
-    :m_sourceGeode(source),m_vertShaderPath(vertPath),m_fragShaderPath(fragPath){
-        ShaderUtils::setShaderProgram(m_sourceGeode->getOrCreateStateSet(),m_vertShaderPath, m_fragShaderPath);
-    }
-    Material(const std::string& vertPath,const std::string& fragPath)
-    :m_vertShaderPath(vertPath),m_fragShaderPath(fragPath){}
-    Material() = default;
-    void addUniform(osg::Uniform* uniform){
-        m_sourceGeode->getOrCreateStateSet()->addUniform(uniform);
-    }
+    Material(osg::Geode* source);
+    Material(osg::Geode* source,const std::string& vertPath,const std::string& fragPath);
+    Material(const std::string& vertPath,const std::string& fragPath);    
+    Material() = default;    
+    void addUniform(osg::Uniform* uniform);
     
-    template<class T>
-    void addUniform(const std::string& name,T* val,bool updatePerFrame = true){
-        m_sourceGeode->getOrCreateStateSet()->addUniform(new osg::Uniform(name.c_str(),*val));
-        std::shared_ptr<std::string> pname = std::make_shared<std::string>(name);
-        std::shared_ptr<Attribute> pval = std::make_shared<Attribute>(val);
-        if(updatePerFrame)
-            m_attributeList.emplace_back(std::make_pair(pname, pval));
-    }
-    
-    template<class T>
-    void addUniform(const std::string& name,const T& val){
-        m_sourceGeode->getOrCreateStateSet()->addUniform(new osg::Uniform(name.c_str(),val));
-    }
+
+    std::vector<std::pair<std::shared_ptr<std::string>, std::shared_ptr<Attribute>>>getAttributeList();
 
     template<class T>
-    void setUniform(const std::string& name,const T& val){
-        auto ss = m_sourceGeode->getOrCreateStateSet();
-        ss->getUniform(name)->set(val);
-    }
+    void addUniform(const std::string& name,T* val,bool updatePerFrame = true);
+    
+    template<class T>
+    void addUniform(const std::string& name,const T& val);
 
-    std::vector<std::pair<std::shared_ptr<std::string>, std::shared_ptr<Attribute>>>getAttributeList(){
-        return m_attributeList;
-    }
+    template<class T>
+    void setUniform(const std::string& name,const T& val);
 
 };
 }
 
-#endif
+#include "Material.inl"

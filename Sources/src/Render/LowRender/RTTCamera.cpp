@@ -1,5 +1,4 @@
 #include "Render/LowRender/RTTCamera.h"
-#include "Render/Core/GeometryFactory.h"
 #include "osg/Geometry"
 #include <osg/Camera>
 #include <osg/Geode>
@@ -17,7 +16,11 @@ m_sourceTexture(source),m_destinationTexture(destination),Material(vertPath,frag
     m_camera = new osg::Camera();
     initializeRTTCameraParameters();
     m_sourceGeode = new osg::Geode;
-    m_sourceGeode->addDrawable(BaseGeometryFactory::createBaseGeometry(BaseGeometryType::QUAD));
+    osg::ref_ptr<osg::Geometry> quad = osg::createTexturedQuadGeometry(osg::Vec3(-1,-1,0), osg::Vec3(2,0,0), osg::Vec3(0,2,0));
+    quad->setVertexAttribArray(0,quad->getVertexArray());
+    quad->setVertexAttribArray(1,quad->getTexCoordArray(0));
+    m_sourceGeode->addDrawable(quad);
+
     setDefaultUniformParameters();
     m_camera->addChild(m_sourceGeode);
 }
@@ -71,4 +74,11 @@ osg::ref_ptr<osg::Geode> RTTCamera::getDestinationQuadGeode() const{
 }
 osg::ref_ptr<osg::Camera> RTTCamera::getRTTCamera() const{
     return m_camera;
+}
+
+void RTTCamera::addChildToRTTCamera(osg::Group* rhs){
+    m_camera->addChild(rhs);
+}
+osg::ref_ptr<osg::StateSet> RTTCamera::getDestinationQuadStateSet() const{
+    return getDestinationQuadGeode()->getStateSet();
 }
