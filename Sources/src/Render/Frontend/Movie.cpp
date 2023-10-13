@@ -1,5 +1,4 @@
 #include "Render/Frontend/Movie.h"
-#include "Render/Core/GeometryFactory.h"
 #include "Resources/Loaders/ShaderUtils.h"
 #include <osg/FrameBufferObject>
 #include <osg/Image>
@@ -19,8 +18,11 @@
 using namespace CSEditor::Resources;
 
 Movie::Movie(const std::string& moviePath)
-:m_moviePath(moviePath),m_frame(new osg::Texture2D),
-m_screenQuad(Render::BaseGeometryFactory::createBaseGeometry(Render:: BaseGeometryType::QUAD)){
+:m_moviePath(moviePath),m_frame(new osg::Texture2D){
+    m_screenQuad = osg::createTexturedQuadGeometry(osg::Vec3(-1,-1,0), osg::Vec3(2,0,0), osg::Vec3(0,2,0));
+    m_screenQuad->setVertexAttribArray(0,m_screenQuad->getVertexArray());
+    m_screenQuad->setVertexAttribArray(1,m_screenQuad->getTexCoordArray(0));
+
     m_frame->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     m_frame->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
     m_frame->setResizeNonPowerOfTwoHint(false);

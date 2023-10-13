@@ -4,7 +4,6 @@
 #include <iostream>
 using namespace CSEditor::Core;
 
-
 std::string NfdDialog::OpenFileDlg(){
     nfdchar_t* outPath = NULL;
     nfdresult_t result = NFD_OpenDialog(NULL,NULL, &outPath);

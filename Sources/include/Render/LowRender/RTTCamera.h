@@ -41,12 +41,8 @@ public:
     osg::ref_ptr<RenderTexture> getDestinationTexture() const;
     osg::ref_ptr<osg::Geode> getDestinationQuadGeode() const;
     osg::ref_ptr<osg::Camera> getRTTCamera() const;
-    void addChildToRTTCamera(osg::Group* rhs){
-        m_camera->addChild(rhs);
-    }
-    osg::ref_ptr<osg::StateSet> getDestinationQuadStateSet() const{
-        return getDestinationQuadGeode()->getStateSet();
-    }
+    void addChildToRTTCamera(osg::Group* rhs);
+    osg::ref_ptr<osg::StateSet> getDestinationQuadStateSet() const;
 
     // void renderToImage(RenderTexture* source,RenderTexture* destination){
     //     m_camera->setViewport(0, 0, destination->getTextureWidth(), destination->getTextureHeight());
