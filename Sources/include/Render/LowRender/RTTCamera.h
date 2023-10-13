@@ -32,7 +32,6 @@ private:
     void setDefaultUniformParameters();
 
 public:
-
     RTTCamera(RenderTexture* source,RenderTexture* destination,const std::string& vertPath,const std::string& fragPath);
     RTTCamera(osg::Group* source,RenderTexture* destination,const std::string& vertPath,const std::string& fragPath);
     RTTCamera(RenderTexture* destination):m_destinationTexture(destination){

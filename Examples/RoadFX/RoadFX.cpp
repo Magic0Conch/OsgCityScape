@@ -194,24 +194,6 @@ auto setupScene(){
 
 int main(){
     using namespace CSEditor;
-    nfdchar_t *outPath = NULL;
-    nfdresult_t result = NFD_OpenDialog( NULL, NULL, &outPath );
-        
-    if ( result == NFD_OKAY ) {
-        puts("Success!");
-        puts(outPath);
-        free(outPath);
-    }
-    else if ( result == NFD_CANCEL ) {
-        puts("User pressed cancel.");
-    }
-    else {
-        printf("Error: %s\n", NFD_GetError() );
-    }
-        
-    osg::DisplaySettings::instance()->setGLContextVersion("3.3");
-    osg::DisplaySettings::instance()->setGLContextProfileMask(0x1); 
-    std::cout<< osg::DisplaySettings::instance()->getGLContextVersion();
     osgViewer::Viewer viewer;
     osg::ref_ptr<osgGA::FirstPersonManipulator> manipulator = new osgGA::FirstPersonManipulator();
     manipulator->setHomePosition(osg::Vec3d(0,40,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));

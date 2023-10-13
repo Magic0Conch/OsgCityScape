@@ -178,6 +178,7 @@ namespace CSEditor {
         highlightArea->addChild(geodeCylinder);
         geodeCircle->setUpdateCallback(new Render::UpdateUniformCallback(materialCircle.get()));
         geodeCylinder->setUpdateCallback(new Render::UpdateUniformCallback(materialCylinder.get()));
+        
         osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc;
         osg::ref_ptr<osg::Depth> depth = new osg::Depth;
         depth->setWriteMask(false);

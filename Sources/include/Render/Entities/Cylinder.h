@@ -12,8 +12,6 @@
 
 namespace CSEditor::Render {
 class Cylinder:public BaseGeometry{
-private:
-    osg::ref_ptr<osg::DrawElementsUInt> indices;
 public:
     float radius;
     float height;    
@@ -52,7 +50,6 @@ public:
                 (*vertices)[i + segments + 1]  = osg::Vec3(x, height, z);
                 (*texCoords)[i + segments + 1] = osg::Vec2(u, height);
             }
-            osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, 0);
             indices->resize(segments*6);
             for (int i = 0, ti = 0; i < segments; i++, ti += 6)
             {

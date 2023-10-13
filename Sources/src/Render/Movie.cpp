@@ -18,9 +18,9 @@
 
 using namespace CSEditor::Resources;
 
-Movie::Movie(const std::string& moviePath):
-m_moviePath(moviePath),m_frame(new osg::Texture2D),
-m_screenQuad(Render::BaseGeometryFactory::createBaseGeometry(Render:: BaseGeometryType::QUAD)){    
+Movie::Movie(const std::string& moviePath)
+:m_moviePath(moviePath),m_frame(new osg::Texture2D),
+m_screenQuad(Render::BaseGeometryFactory::createBaseGeometry(Render:: BaseGeometryType::QUAD)){
     m_frame->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     m_frame->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
     m_frame->setResizeNonPowerOfTwoHint(false);
