@@ -4,19 +4,19 @@
 #include "osg/Geometry"
 namespace CSEditor::Render {
 class BaseGeometry:public osg::Geometry{
+public:
+    BaseGeometry(int segments);
+    void setSegments(float rhs);
 private:
-    virtual void updateMesh() = 0;
+    virtual void update() = 0;
     class UpdateBaseGeometryCallback:public osg::NodeCallback{
     public:
         virtual void operator()(osg::Node* node,osg::NodeVisitor* nv);
     };
 protected:
-    bool isDirty = true;
-    osg::ref_ptr<osg::DrawElementsUInt> indices;
-    BaseGeometry(int segments);
-public:
-    int segments;
-    void setSegments(float rhs);
+    bool m_isDirty = true;
+    int m_segments;
+    osg::ref_ptr<osg::DrawElementsUInt> m_indices;
 };
 }
 

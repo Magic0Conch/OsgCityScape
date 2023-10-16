@@ -15,13 +15,13 @@ namespace CSEditor::Render {
 
 class Circle:public BaseGeometry{
 public:
-    float radius;
-public:
     Circle(float radius=1.0f,int segment=32);
 
     void setRadius(float rhs);
 
-    void updateMesh() override;
+    void update() override;
+private:
+    float m_radius;
     
 };
 }

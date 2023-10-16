@@ -4,18 +4,18 @@
 using namespace CSEditor::Render;
 void BaseGeometry::UpdateBaseGeometryCallback::operator()(osg::Node* node,osg::NodeVisitor* nv){
     auto geom = dynamic_cast<BaseGeometry*>(node);
-    geom->updateMesh();
+    geom->update();
     traverse(node, nv);
 }
-BaseGeometry::BaseGeometry(int segments):segments(segments){
+BaseGeometry::BaseGeometry(int segments):m_segments(segments){
     setUpdateCallback(new UpdateBaseGeometryCallback);
-    indices = new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, 0);            
-    addPrimitiveSet(indices);
+    m_indices = new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, 0);            
+    addPrimitiveSet(m_indices);
 }
 void BaseGeometry::setSegments(float rhs){
-    if(segments!=rhs){
-        segments = rhs;
-        isDirty = true;
+    if(m_segments!=rhs){
+        m_segments = rhs;
+        m_isDirty = true;
     }
 }
 

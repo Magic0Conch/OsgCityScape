@@ -1,5 +1,5 @@
 #include "Render/Frontend/Movie.h"
-#include "Resources/Loaders/ShaderUtils.h"
+#include "Resources/Loaders/ShaderLoader.h"
 #include <osg/FrameBufferObject>
 #include <osg/Image>
 #include <osg/ImageSequence>
@@ -44,7 +44,8 @@ void Movie::setStateSetAttribute(){
     auto stateSet = m_screenQuad->getOrCreateStateSet();
     stateSet->setTextureAttributeAndModes(0,m_frame);
     stateSet->addUniform(new osg::Uniform("_MainTex",0));
-    ShaderUtils::setShaderProgram(stateSet, m_vertPath, m_fragPath);
+    auto program = ShaderLoader::create(m_vertPath, m_fragPath);
+    stateSet->setAttribute(program.get(),osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 }
 
 osg::ref_ptr<osg::Geometry> Movie::getScreenQuadGeometry() const{

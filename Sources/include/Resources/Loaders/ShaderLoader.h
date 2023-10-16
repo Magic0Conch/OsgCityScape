@@ -8,9 +8,9 @@
 #include <osg/Program>
 
 namespace CSEditor::Resources {
-class ShaderUtils{
-public:
-    static void setShaderProgram(osg::ref_ptr<osg::StateSet> stateSet,const std::string& vert,const std::string& frag);
+class ShaderLoader{
+public:    
+    static osg::ref_ptr<osg::Program> create(const std::string& vertFilePath,const std::string& fragFilePath);
 };
 }
 #endif

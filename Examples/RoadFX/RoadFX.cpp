@@ -6,7 +6,6 @@
 #include "Render/Entities/Road.h"
 #include "Render/Effects/Bloom.h"
 #include "GUI/Core/UIManager.h"
-#include "Resources/Loaders/ShaderUtils.h"
 #include "imgui.h"
 #include "osg/Camera"
 #include "osg/Depth"
@@ -24,7 +23,7 @@
 #include <iostream>
 #include <osgViewer/Viewer>
 #include "GUI/Helper/ImGuiInitOperation.h"
-#include<Windows.h>
+#include <Windows.h>
 #include <stdio.h>
 #include <nfd.h>
 
@@ -144,7 +143,8 @@ auto setupScene(){
     roadGeode->addDrawable(roadGeometry);
 
     //Bind shader file and set uniform parameters
-    auto materialRoadFX= std::make_unique<Material>(roadGeode,"resources/shaders/triangle.vert", "resources/shaders/roadFX.frag");
+    auto materialRoadFX= std::make_unique<Material>("resources/shaders/triangle.vert", "resources/shaders/roadFX.frag");
+    materialRoadFX->bind(roadGeode);
     materialRoadFX->addUniform("_BackColor",&backColor);
     materialRoadFX->addUniform("_FlashFrequency",&flashFrequency);
     materialRoadFX->addUniform("_OuterWidth",&outerWidth);

@@ -15,30 +15,31 @@
 #include "osg/Geometry"
 #include "osg/Node"
 #include "osg/Object"
+#include "osg/Program"
 #include "osg/Shader"
+#include "osg/StateSet"
 #include "osg/Vec2"
 #include "osg/Vec3"
 #include "osg/Vec4"
-#include "Resources/Loaders/ShaderUtils.h"
+#include "Resources/Loaders/ShaderLoader.h"
 namespace CSEditor::Resources{
-class Material:public osg::Node{
+class Material:public osg::Referenced{
 public:
     using Attribute = std::variant<int*,bool*,float*,double*,osg::Vec2*,osg::Vec3*,osg::Vec4*>;
 protected:
-    osg::ref_ptr<osg::Geode> m_sourceGeode = nullptr;
     std::vector<std::pair<std::shared_ptr<std::string>, std::shared_ptr<Attribute>>> m_attributeList;
-    
-    std::string m_vertShaderPath;
-    std::string m_fragShaderPath;
+    osg::ref_ptr<osg::Program> m_shaderProgram;
+    osg::ref_ptr<osg::StateSet> m_stateSet;
 public:
-    Material(osg::Geode* source);
-    Material(osg::Geode* source,const std::string& vertPath,const std::string& fragPath);
-    Material(const std::string& vertPath,const std::string& fragPath);    
-    Material() = default;    
+    Material() = default;
+    Material(const std::string& vertPath,const std::string& fragPath);
+    Material(const osg::ref_ptr<osg::Program> shaderProgram);
+
     void addUniform(osg::Uniform* uniform);
     
+    std::vector<std::pair<std::shared_ptr<std::string>, std::shared_ptr<Attribute>>>getAttributeList() const;
+    osg::ref_ptr<osg::StateSet> getStateSet() const;
 
-    std::vector<std::pair<std::shared_ptr<std::string>, std::shared_ptr<Attribute>>>getAttributeList();
 
     template<class T>
     void addUniform(const std::string& name,T* val,bool updatePerFrame = true);
@@ -49,6 +50,7 @@ public:
     template<class T>
     void setUniform(const std::string& name,const T& val);
 
+    void bind(osg::ref_ptr<osg::Geode> geode);
 };
 }
 

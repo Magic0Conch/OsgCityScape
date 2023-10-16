@@ -5,15 +5,7 @@
 #include <memory>
 namespace CSEditor::Render {
 class Bloom:public RenderPipelinePostProcess{
-private:
-    int m_width,m_height;
-    int m_blurIterations;
-    float m_blurSpeed;
-    float* m_luminanceThreshold;
-    int m_downSample = 2;
-    osg::ref_ptr<GaussianBlur> m_gaussianBlurPipeline;
-    osg::ref_ptr<RenderTexture> m_sourceTexture,m_destinationTexture;
-    void generateRenderPasses();
+
 public:
     Bloom() = delete;
 
@@ -24,7 +16,16 @@ public:
     osg::ref_ptr<RenderTexture> getDestinationTexture() const;
 
     osg::ref_ptr<GaussianBlur> getGaussianPipeline() const;
-
+private:
+    void generateRenderPasses();
+private:
+    int m_width,m_height;
+    int m_blurIterations;
+    float m_blurSpeed;
+    float* m_luminanceThreshold;
+    int m_downSample = 2;
+    osg::ref_ptr<GaussianBlur> m_gaussianBlurPipeline;
+    osg::ref_ptr<RenderTexture> m_sourceTexture,m_destinationTexture;
 };
 
 }

@@ -1,4 +1,5 @@
 #include "Render/LowRender/RTTCamera.h"
+#include "Resources/Material.h"
 #include "osg/Geometry"
 #include <osg/Camera>
 #include <osg/Geode>
@@ -56,12 +57,12 @@ void RTTCamera::initializeRTTCameraParameters(){
 
 //set m_sourceTexture as sampler texture.
 void RTTCamera::setDefaultUniformParameters(){
-    ShaderUtils::setShaderProgram(m_sourceGeode->getOrCreateStateSet(),m_vertShaderPath, m_fragShaderPath);
+    bind(m_sourceGeode);
     if(m_sourceTexture){
-        m_sourceGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0,m_sourceTexture.get(),
+        m_stateSet->setTextureAttributeAndModes(0,m_sourceTexture.get(),
         osg::StateAttribute::ON| osg::StateAttribute::OVERRIDE);
     }
-    m_sourceGeode->getOrCreateStateSet()->addUniform(new osg::Uniform("_MainTex",0));
+    m_stateSet->addUniform(new osg::Uniform("_MainTex",0));
     
 }
 

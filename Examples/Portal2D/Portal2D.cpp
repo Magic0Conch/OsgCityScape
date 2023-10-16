@@ -3,9 +3,8 @@
 
 #include "GUI/Core/UIManager.h"
 #include "GUI/Helper/ImGuiInitOperation.h"
-#include "Render/LowRender/RenderPipelinePostProcess.h"
+#include "Render/LowRender/RenderPipeline.h"
 #include "Render/Effects/GaussianBlur.h"
-#include "Resources/Loaders/ShaderUtils.h"
 #include "osg/ref_ptr"
 
 

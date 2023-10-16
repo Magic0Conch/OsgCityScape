@@ -1,9 +1,10 @@
 #include "Render/Entities/Road.h"
+#include "osg/Vec3f"
 
 using namespace CSEditor::Render;
 
 
-bool Road::IsInferiorAngle(osg::Vec3f point0,osg::Vec3f point1,osg::Vec3f point2)
+inline bool IsInferiorAngle(osg::Vec3f point0,osg::Vec3f point1,osg::Vec3f point2,osg::Vec3f planeNormal)
 {
     auto lastToCurrentDirection = point1 - point0;
     lastToCurrentDirection.normalize();
@@ -12,36 +13,44 @@ bool Road::IsInferiorAngle(osg::Vec3f point0,osg::Vec3f point1,osg::Vec3f point2
     bool isInferiorAngle = ((-lastToCurrentDirection^currentToNextDirection)*planeNormal) > 0;
     return isInferiorAngle;
 }
-bool Road::isLeftSide(osg::Vec3f origin, osg::Vec3f target, osg::Vec3f checkPoint)
+inline bool isLeftSide(osg::Vec3f origin, osg::Vec3f target, osg::Vec3f checkPoint,osg::Vec3f planeNormal)
 {
     osg::Vec3f direction = target - origin;
     osg::Vec3f checkDirection = checkPoint - origin;
     return (checkDirection^direction)*planeNormal>0;
 }
 Road::Road(std::unique_ptr<std::vector<osg::Vec3f>> pathKeyPoints,osg::Vec3f planeNormal,float pathWidth,float innerRadius,int segment):
-m_pathKeyPoints(std::move(pathKeyPoints)),planeNormal(planeNormal),m_pathWidth(pathWidth),m_innerRadius(innerRadius),BaseGeometry(segment){}
+m_pathKeyPoints(std::move(pathKeyPoints)),m_planeNormal(planeNormal),m_pathWidth(pathWidth),m_innerRadius(innerRadius),BaseGeometry(segment){}
 
 void Road::setPathWidth(float rhs){
     if(rhs!=m_pathWidth){
         m_pathWidth = rhs;
-        isDirty = true; 
+        m_isDirty = true; 
     }
 }
 
 void Road::setInnerRadius(float rhs){
     if(rhs!=m_innerRadius){
         m_innerRadius = rhs;
-        isDirty = true; 
+        m_isDirty = true; 
     }
 }
 
-void Road::updateMesh(){
-    if(isDirty){
+void Road::setPlaneNormal(const osg::Vec3f& planeNormal){
+    m_planeNormal = planeNormal;
+}
+
+osg::Vec3f Road::getPlaneNormal() const{
+    return m_planeNormal;
+}
+
+void Road::update(){
+    if(m_isDirty){
         if(m_pathKeyPoints->size() < 2) return;
-        int vertexCountPerCorner = 2 + segments*2;
+        int vertexCountPerCorner = 2 + m_segments*2;
         int vertexSize = 4 + (m_pathKeyPoints->size()-2)*vertexCountPerCorner;
         //路径上的2个 + 拐弯处的segment
-        int trianglesCountPerCycle = (2 + segments*2);
+        int trianglesCountPerCycle = (2 + m_segments*2);
         //总三角形数需要加上开头的2个
         int trianglesCountTotal = 2 + trianglesCountPerCycle*(m_pathKeyPoints->size()-2);
         osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array();
@@ -52,9 +61,9 @@ void Road::updateMesh(){
         indices->resize(trianglesCountTotal*3);
 
         float accumulatePathLength = 0;
-        auto normal = planeNormal^((*m_pathKeyPoints)[1] - (*m_pathKeyPoints)[0]);
+        auto normal = m_planeNormal^((*m_pathKeyPoints)[1] - (*m_pathKeyPoints)[0]);
         normal.normalize();
-        bool isInferiorAngle = isLeftSide((*m_pathKeyPoints)[0], (*m_pathKeyPoints)[1], (*m_pathKeyPoints)[0] + normal * m_pathWidth);
+        bool isInferiorAngle = isLeftSide((*m_pathKeyPoints)[0], (*m_pathKeyPoints)[1], (*m_pathKeyPoints)[0] + normal * m_pathWidth,m_planeNormal);
         normal = isInferiorAngle? normal : -normal;
         (*vertices)[0] = (*m_pathKeyPoints)[0] + normal * m_pathWidth;
         (*vertices)[1] = (*m_pathKeyPoints)[0] - normal * m_pathWidth;
@@ -68,10 +77,10 @@ void Road::updateMesh(){
             osg::Vec3f currentToNextDirection = (*m_pathKeyPoints)[i + 1] - (*m_pathKeyPoints)[i];
             currentToNextDirection.normalize();
 
-            isInferiorAngle = IsInferiorAngle((*m_pathKeyPoints)[i-1], (*m_pathKeyPoints)[i], (*m_pathKeyPoints)[i+1]);
-            osg::Vec3f normalBeforeInner = isInferiorAngle? -planeNormal^lastToCurrentDirection: planeNormal^lastToCurrentDirection;                
+            isInferiorAngle = IsInferiorAngle((*m_pathKeyPoints)[i-1], (*m_pathKeyPoints)[i], (*m_pathKeyPoints)[i+1],m_planeNormal);
+            osg::Vec3f normalBeforeInner = isInferiorAngle? -m_planeNormal^lastToCurrentDirection: m_planeNormal^lastToCurrentDirection;                
             normalBeforeInner.normalize();
-            osg::Vec3f normalAfterInner = isInferiorAngle? -planeNormal^currentToNextDirection: planeNormal^currentToNextDirection;                
+            osg::Vec3f normalAfterInner = isInferiorAngle? -m_planeNormal^currentToNextDirection: m_planeNormal^currentToNextDirection;                
             normalAfterInner.normalize();
 
             osg::Vec3f innerBeforePoint = (*m_pathKeyPoints)[i] + normalBeforeInner * m_pathWidth;
@@ -89,14 +98,14 @@ void Road::updateMesh(){
             float cornerAngle = osg::PI - theta;
 
 
-            osg::Quat q ((isInferiorAngle?1:-1) * cornerAngle / 2,planeNormal); 
+            osg::Quat q ((isInferiorAngle?1:-1) * cornerAngle / 2,m_planeNormal); 
             //Matrix4x4 rotateMatrix = Matrix4x4.Rotate(q);
             osg::Vec3f leftBorderRadialDirection = q*-h;
             
             
-            for(int j = 0; j <= segments; j++)
+            for(int j = 0; j <= m_segments; j++)
             {
-                q = osg::Quat((isInferiorAngle ? -1 : 1) * cornerAngle / segments * j, planeNormal);                    
+                q = osg::Quat((isInferiorAngle ? -1 : 1) * cornerAngle / m_segments * j, m_planeNormal);                    
                 osg::Vec3f currentRadialDirection = q * leftBorderRadialDirection;
                 
                 osg::Vec3f innerPoint = cornerCenter + currentRadialDirection * m_innerRadius;
@@ -115,8 +124,8 @@ void Road::updateMesh(){
             ////剪掉多加的一段
             //accumulatePathLength -= (innerRadius + pathWidth) * cornerAngle / segment;
         }
-        normal = (planeNormal^ ((*m_pathKeyPoints)[m_pathKeyPoints->size() - 1] - (*m_pathKeyPoints)[m_pathKeyPoints->size() - 2]));
-        isInferiorAngle = isLeftSide((*m_pathKeyPoints)[m_pathKeyPoints->size() - 2], (*m_pathKeyPoints)[m_pathKeyPoints->size() - 1], (*m_pathKeyPoints)[m_pathKeyPoints->size() - 1] + normal * m_pathWidth);
+        normal = (m_planeNormal^ ((*m_pathKeyPoints)[m_pathKeyPoints->size() - 1] - (*m_pathKeyPoints)[m_pathKeyPoints->size() - 2]));
+        isInferiorAngle = isLeftSide((*m_pathKeyPoints)[m_pathKeyPoints->size() - 2], (*m_pathKeyPoints)[m_pathKeyPoints->size() - 1], (*m_pathKeyPoints)[m_pathKeyPoints->size() - 1] + normal * m_pathWidth,m_planeNormal);
         normal = isInferiorAngle? normal : -normal;
         normal.normalize();
         (*vertices)[(m_pathKeyPoints->size() - 2) * vertexCountPerCorner + 2] = (*m_pathKeyPoints)[m_pathKeyPoints->size() - 1] + normal * m_pathWidth;
@@ -142,6 +151,6 @@ void Road::updateMesh(){
         setVertexAttribArray(0,getVertexArray());
         setVertexAttribArray(1,getTexCoordArray(0));
         setPrimitiveSet(0,indices);
-        isDirty = false;
+        m_isDirty = false;
     }
 }

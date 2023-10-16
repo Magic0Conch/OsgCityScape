@@ -3,36 +3,36 @@
 using namespace CSEditor::Render;
 
 
-Circle::Circle(float radius,int segment):radius(radius),BaseGeometry(segment){}
+Circle::Circle(float radius,int segment):m_radius(radius),BaseGeometry(segment){}
 
 void Circle::setRadius(float rhs){
-    if(rhs!=radius){
-        radius = rhs;       
-        isDirty = true; 
+    if(rhs!=m_radius){
+        m_radius = rhs;       
+        m_isDirty = true; 
     }
 }
 
-void Circle::updateMesh(){
-    if(isDirty){
+void Circle::update(){
+    if(m_isDirty){
         osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array();
-        vertices->resizeArray(segments+1);
+        vertices->resizeArray(m_segments+1);
         osg::ref_ptr<osg::Vec2Array> texCoords = new osg::Vec2Array();
-        texCoords->resizeArray(segments+1);
+        texCoords->resizeArray(m_segments+1);
         osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, 0);
-        indices->resize(segments*3);
+        indices->resize(m_segments*3);
         osg::Vec3 center = osg::Vec3(0,0,0);
         (*vertices)[0] = center;
         float angle = 0.0f;
-        float angleStep = 2.0f * M_PI / segments;
+        float angleStep = 2.0f * M_PI / m_segments;
 
-        for (int i = 1; i<=segments; i++) {
-            float x = sin(angle) * radius + center.x();
+        for (int i = 1; i<=m_segments; i++) {
+            float x = sin(angle) * m_radius + center.x();
             float y = center.y();
-            float z = cos(angle) * radius + center.z();
+            float z = cos(angle) * m_radius + center.z();
 
             (*vertices)[i] = osg::Vec3(x, y, z);
             (*texCoords)[i] = osg::Vec2(1,1);
-            if (i < segments)
+            if (i < m_segments)
             {
                 (*indices)[(i - 1) * 3] = 0;
                 (*indices)[(i - 1) * 3 + 1] = i;
@@ -51,6 +51,6 @@ void Circle::updateMesh(){
         setVertexAttribArray(0,getVertexArray());
         setVertexAttribArray(1,getTexCoordArray(0));
         setPrimitiveSet(0,indices);
-        isDirty = false;
+        m_isDirty = false;
     }
 }

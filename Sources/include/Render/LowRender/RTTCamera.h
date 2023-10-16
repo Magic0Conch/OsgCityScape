@@ -14,7 +14,7 @@
 #include <osg/Uniform>
 #include <osg/Vec4f>
 #include <osg/ref_ptr>
-#include "Render/Frontend/Material.h"
+#include "Resources/Material.h"
 #include "Resources/RenderTexture.h"
 #include "osg/Geometry"
 #include "osg/StateSet"
@@ -28,6 +28,7 @@ private:
     osg::ref_ptr<RenderTexture> m_sourceTexture = nullptr;
     osg::ref_ptr<RenderTexture> m_destinationTexture = nullptr;
     osg::ref_ptr<osg::Camera> m_camera;
+    osg::ref_ptr<osg::Geode> m_sourceGeode;
     void initializeRTTCameraParameters();
     void setDefaultUniformParameters();
 

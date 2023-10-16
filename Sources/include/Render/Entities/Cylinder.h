@@ -13,16 +13,16 @@
 namespace CSEditor::Render {
 class Cylinder:public BaseGeometry{
 public:
-    float radius;
-    float height;    
-public:
     Cylinder(float radius=1.0f,float height = 2.0f,int segment=32);
 
     void setRadius(float rhs);
 
     void setHeight(float rhs);
 
-    void updateMesh() override;
+    void update() override;
+private:
+    float m_radius;
+    float m_height;    
 };
 }
 

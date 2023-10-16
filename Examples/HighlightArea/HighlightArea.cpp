@@ -142,7 +142,8 @@ namespace CSEditor {
         osg::ref_ptr<osg::Geode> geodeCircle = new osg::Geode;
         geodeCircle->addDrawable(circle);
 
-        std::unique_ptr<Render::Material> materialCircle= std::make_unique<Render::Material>(geodeCircle,"resources/shaders/highlightCircle.vert", "resources/shaders/highlightCircle.frag");
+        auto materialCircle= std::make_unique<Render::Material>("resources/shaders/highlightCircle.vert", "resources/shaders/highlightCircle.frag");
+        materialCircle->bind(geodeCircle);
 
         materialCircle->addUniform("_OutlineRatio",&bottomOuterWidth);
         materialCircle->addUniform("_InnerColor",&bottomInnerTintColor);
@@ -157,7 +158,8 @@ namespace CSEditor {
         geometryCylinder = new Render::Cylinder();
         osg::ref_ptr<osg::Geode> geodeCylinder = new osg::Geode();
         geodeCylinder->addDrawable(geometryCylinder);
-        std::unique_ptr<Render::Material> materialCylinder= std::make_unique<Render::Material>(geodeCylinder,"resources/shaders/highlightCylinder.vert", "resources/shaders/highlightCylinder.frag");
+        std::unique_ptr<Render::Material> materialCylinder= std::make_unique<Render::Material>("resources/shaders/highlightCylinder.vert", "resources/shaders/highlightCylinder.frag");
+        materialCylinder->bind(geodeCylinder);
 
         materialCylinder->addUniform("_Color",&wallTintColor);
         materialCylinder->addUniform("_PatternColor",&wallPatternColor);
@@ -185,14 +187,15 @@ namespace CSEditor {
         depth->setRange(0.0f, 0.0f);
         blend->setFunction(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE_MINUS_SRC_ALPHA);
 
-        geodeCircle->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-        geodeCylinder->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-        geodeCircle->getStateSet()->setAttributeAndModes(blend.get(),osg::StateAttribute::ON);
-        geodeCircle->getStateSet()->setAttributeAndModes(depth.get(),osg::StateAttribute::ON);
-        geodeCylinder->getStateSet()->setAttributeAndModes(blend.get(),osg::StateAttribute::ON);
-        geodeCylinder->getStateSet()->setAttributeAndModes(depth.get(),osg::StateAttribute::ON);
-        geodeCircle->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
-        geodeCylinder->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
+        materialCircle->getStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+        materialCircle->getStateSet()->setAttributeAndModes(blend.get(),osg::StateAttribute::ON);
+        materialCircle->getStateSet()->setAttributeAndModes(depth.get(),osg::StateAttribute::ON);
+        materialCircle->getStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
+
+        materialCylinder->getStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+        materialCylinder->getStateSet()->setAttributeAndModes(blend.get(),osg::StateAttribute::ON);
+        materialCylinder->getStateSet()->setAttributeAndModes(depth.get(),osg::StateAttribute::ON);
+        materialCylinder->getStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
         
         //render geode to a screen texture
         osg::ref_ptr<Render::RenderTexture> screenTexture = new Render::RenderTexture(resolution.x(),resolution.y());
