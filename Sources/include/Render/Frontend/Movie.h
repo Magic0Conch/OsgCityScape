@@ -35,6 +35,7 @@ private:
     void setStateSetAttribute();
     mutable int m_currentFrameIndex = 0;
 }; 
+
 class MovieCallback:public osg::NodeCallback{
 public:
     MovieCallback(Movie* const movie);

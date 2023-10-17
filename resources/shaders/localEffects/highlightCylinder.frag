@@ -98,7 +98,7 @@ void main()
         backColor.a *= radialDistance(vs_out.localPos.xz);                
     }
     vec4 patternColor = vec4(pattern.x * _PatternColor);
-    patternColor.a = clamp(pattern.y,0,1);
+    patternColor.a = clamp(pattern.y*patternColor.a,0,1);
     
 
     float brightness = sin(osg_FrameTime*_FlashFrequency)+1.5;
