@@ -75,17 +75,14 @@ int main( int argc, char** argv )
         // return( 1 );
     }
 
-
     configureShaders( root->getOrCreateStateSet() );
-// osg::setNotifyLevel(osg::NotifySeverity::ALWAYS);
     const int width( 800 ), height( 450 );
-    // const std::string version( "3.3" );
     osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
     traits->x = 20; traits->y = 30;
     traits->width = width; traits->height = height;
     traits->windowDecoration = true;
     traits->doubleBuffer = true;
-    // traits->glContextVersion = version;
+    traits->samples = 4;
     traits->readDISPLAY();
     traits->setUndefinedScreenDetailsToDefaultScreen();
     traits->glContextProfileMask = 0x1;// 0x1;// 
@@ -115,60 +112,3 @@ int main( int argc, char** argv )
 
     return( viewer.run() );
 }
-
-/*
-
-Building OSG for OpenGL 3.x
-
-OSG currently support OpenGL 3.x on Windows. This comment block describes the
-necessary configuration steps.
-
-Get the draft gl3.h header file from OpenGL.org and put it in a folder called
-�GL3� somewhere on your hard drive. OSG includes this header as <GL3/gl3.h>. Get
-gl3.h from here:
-http://www.opengl.org/registry/
-
-Open the cmake-gui and load OSG's top-level CmakeLists.txt. You'll need to make
-several changes.
-
- * Add the path to <GL3/gl3.h> to the CMake compiler flags, CMAKE_CXX_FLAGS and
-   CMAKE_CXX_FLAGS_DEBUG (for release and debug builds; others if you use other
-   build configurations). The text to add should look something like this:
-     /I �C:\GLHeader�
-   The folder GLHeader should contain a subfolder GL3, which in turn contains
-   gl3.h.
-
- * Enable the following CMake variable:
-     OSG_GL3_AVAILABLE
-
- * Disable the following CMake variables:
-     OSG_GL1_AVAILABLE
-     OSG_GL2_AVAILABLE
-     OSG_GLES1_AVAILABLE
-     OSG_GLES2_AVAILABLE
-     OSG_GL_DISPLAYLISTS_AVAILABLE
-     OSG_GL_FIXED_FUNCTION_AVAILABLE
-     OSG_GL_MATRICES_AVAILABLE
-     OSG_GL_VERTEX_ARRAY_FUNCS_AVAILABLE
-     OSG_GL_VERTEX_FUNCS_AVAILABLE
-
-Create your project files in cmake-gui as usual, and build OSG as usual.
-
-If you have an external project that will depend on OSG built for OpenGL 3.x,
-you'll need to ensure your external project also uses the compiler include
-directives to find <GL3/gl3.h>.
-
-To berify your application is using a pure OpenGL 3.x context, set
-OSG_NOTIFY_LEVEL=INFO in the environment and check the console output. Context
-creation displays output such as the following:
-    GL3: Attempting to create OpenGL3 context.
-    GL3: version: 3.1
-    GL3: context flags: 0
-    GL3: profile: 0
-    GL3: context created successfully.
-
-When your app begins rendering, it displays information about the actual context
-it is using:
-    glVersion=3.1, isGlslSupported=YES, glslLanguageVersion=1.4
-
-*/

@@ -75,9 +75,9 @@ void main()
     vec4 patternColor = _PatternColor * pattern.x * pattern.y;
     vec4 outerColor = vec4(0.0, 0.0, 0.0, 0.0);
     float t = (uv.x + outerWidthScale) / outerWidthScale;
-    outerColor = (uv.x < 0.0) ? mix(_OuterColor, _OuterColor * _OuterGradientLowerBound, t) : outerColor;
+    outerColor = (uv.x < 0.0) ? mix(_OuterColor, mix(_BackColor,_OuterColor,_OuterGradientLowerBound), t) : outerColor;
     t = (uv.x - 1.0) / outerWidthScale;
-    outerColor = (uv.x > 1.0) ? mix(_OuterColor, _OuterColor * _OuterGradientLowerBound, 1-t) : outerColor;
+    outerColor = (uv.x > 1.0) ? mix(_OuterColor, mix(_BackColor,_OuterColor,_OuterGradientLowerBound), 1-t) : outerColor;
 
     float brightness = sin(osg_FrameTime * _FlashFrequency) + 1.5;
     patternColor.rgb *= brightness;

@@ -13,6 +13,7 @@
 #include "osg/GLExtensions"
 #include "osg/Geode"
 #include "osg/Geometry"
+#include "osg/Multisample"
 #include "osg/StateAttribute"
 #include "osg/Transform"
 #include "osg/Vec3f"
@@ -169,50 +170,98 @@ auto setupScene(){
     roadGeode->getStateSet()->setAttributeAndModes(blend.get(),osg::StateAttribute::ON);
     roadGeode->getStateSet()->setAttributeAndModes(depth.get(),osg::StateAttribute::ON);
     roadGeode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
-    
-    //post process
-    //render geode to a screen texture
-    osg::ref_ptr<RenderTexture> screenTexture = new RenderTexture(resolution.x(),resolution.y());
-    osg::ref_ptr<RTTCamera> screenRenderPass = new RTTCamera(screenTexture);
-    screenRenderPass->addChildToRTTCamera(roadGeode);
-    roadFXPipeline->addRenderPass(screenRenderPass);
-    //bloom:render screen texture
-    bloomPipeline = new Bloom(screenTexture,nullptr,blurIterations,blurSpeed,&luminanceThreshold);
-    roadFXPipeline->addRenderPipeline(bloomPipeline);
-    roadFXPipeline->getDestinationQuadGeode()->setUpdateCallback(new BloomUniformCallback(roadFXPipeline));
-    // bloomPipeline->enableUpdateUniformPerFrame();
+    roadGeode->getStateSet()->setMode(GL_LINE_SMOOTH, osg::StateAttribute::ON);
+
+    // //post process
+    // //render geode to a screen texture
+    // osg::ref_ptr<RenderTexture> screenTexture = new RenderTexture(resolution.x(),resolution.y());
+    // osg::ref_ptr<RTTCamera> screenRenderPass = new RTTCamera(screenTexture);
+    // screenRenderPass->addChildToRTTCamera(roadGeode);
+    // roadFXPipeline->addRenderPass(screenRenderPass);
+    // //bloom:render screen texture
+    // bloomPipeline = new Bloom(screenTexture,nullptr,blurIterations,blurSpeed,&luminanceThreshold);
+    // roadFXPipeline->addRenderPipeline(bloomPipeline);
+    // roadFXPipeline->getDestinationQuadGeode()->setUpdateCallback(new BloomUniformCallback(roadFXPipeline));
+    // // bloomPipeline->enableUpdateUniformPerFrame();
     osg::ref_ptr<osg::Group> scene = new osg::Group;
+    scene->addChild(roadGeode);
     
-    //display quad
-    scene->addChild(roadFXPipeline->getDestinationQuadGeode());
+    // //display quad
+    // scene->addChild(roadFXPipeline->getDestinationQuadGeode());
     
-    //off-screen rendering
-    roadFXPipeline->addRenderPassesToOsgGroup(*scene);
+    // //off-screen rendering
+    // roadFXPipeline->addRenderPassesToOsgGroup(*scene);
     return scene;
 }
 
+// osg::ref_ptr< osg::GraphicsContext > setupGraphicsContext(){
+//     osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
+//     traits->x = 20; traits->y = 30;
+//     traits->width = resolution.x(); traits->height = resolution.y();
+//     traits->windowDecoration = true;
+//     traits->doubleBuffer = true;
+//     traits->samples = 8;
+//     traits->sampleBuffers = 1;
+//     osg::ref_ptr< osg::GraphicsContext > gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
+//     if( !gc.valid() )
+//     {
+//         osg::notify( osg::FATAL ) << "Cannot set trait!" << std::endl;
+//         return nullptr;
+//     }
+    
+//     return gc;
+// }
 
-int main(){
-    using namespace CSEditor;
-    osgViewer::Viewer viewer;
-    osg::ref_ptr<osgGA::FirstPersonManipulator> manipulator = new osgGA::FirstPersonManipulator();
-    manipulator->setHomePosition(osg::Vec3d(0,40,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
-    viewer.setCameraManipulator(manipulator);
-    viewer.setUpViewInWindow(100, 100,resolution.x(),resolution.y());
-    viewer.addEventHandler(new osgViewer::StatsHandler());
-    viewer.addEventHandler(new PanelProperties);
+// int main(){
+//     using namespace CSEditor;
+//     osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
+//     traits->x = 20; traits->y = 30;
+//     traits->width = resolution.x(); traits->height = resolution.y();
+//     traits->windowDecoration = true;
+//     traits->doubleBuffer = true;
+//     traits->samples = 4;
+//     traits->readDISPLAY();
+//     traits->setUndefinedScreenDetailsToDefaultScreen();
+//     traits->glContextProfileMask = 0x1;// 0x1;// 
+//     osg::ref_ptr< osg::GraphicsContext > gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
+//     if( !gc.valid() )
+//     {
+//         // osg::notify( osg::FATAL ) << "Unable to create OpenGL v" << version << " context." << std::endl;
+//         return( 1 );
+//     }
+//     gc->getState()->resetVertexAttributeAlias(false);
+//     osgViewer::Viewer viewer;
 
-    viewer.setRealizeOperation(new ImGuiInitOperation);
+//     // Create a Camera that uses the above OpenGL context.
+//     osg::Camera* cam = viewer.getCamera();
+//     cam->setGraphicsContext( gc.get() );
+//     cam->setProjectionMatrix( osg::Matrix::perspective( 30., (double)resolution.x()/(double)resolution.y(), 1., 100. ) );
+//     cam->setViewport( new osg::Viewport( 0, 0, resolution.x(), resolution.y() ) );    
+//     osg::ref_ptr<osgGA::FirstPersonManipulator> manipulator = new osgGA::FirstPersonManipulator();
+//     // auto gc = setupGraphicsContext();
+//     // viewer.getCamera()->setGraphicsContext(gc);
+//     manipulator->setHomePosition(osg::Vec3d(0,40,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
+//     viewer.setCameraManipulator(manipulator);
+//     viewer.setUpViewInWindow(100, 100,resolution.x(),resolution.y());
+//     viewer.addEventHandler(new osgViewer::StatsHandler());
+//     // viewer.addEventHandler(new PanelProperties);
 
-    auto scene = setupScene();
-    viewer.setSceneData(scene.get());
-    viewer.realize();
-    while (!viewer.done())
-    {
-        viewer.frame();
-    }
-    return 0;                
-}
+//     // viewer.setRealizeOperation(new ImGuiInitOperation);
+//     // viewer.getCamera()->getGraphicsContext()->getState()->resetVertexAttributeAlias(false);
+//     // viewer.getCamera()->getGraphicsContext()->getState()->setUseModelViewAndProjectionUniforms(true);
+//     // viewer.getCamera()->getGraphicsContext()->getState()->setUseVertexAttributeAliasing(true);
+
+//     // auto scene = setupScene();
+//     // viewer.setSceneData(scene.get());
+//     // viewer.realize();
+//     gc->getState()->setCheckForGLErrors(osg::State::CheckForGLErrors::ONCE_PER_ATTRIBUTE);
+
+//     // while (!viewer.done())
+//     // {
+//     //     viewer.frame();
+//     // }
+//     return viewer.run();                
+// }
 
 // if(ImGui::Button("set position")){
 //     auto camViewMat = cam->getViewMatrix();
@@ -224,3 +273,37 @@ int main(){
 // }
 // cam = viewer.getCamera();
 // cam->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+
+int main( int argc, char** argv )
+{
+    using namespace CSEditor;
+    osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
+    traits->x = 20; traits->y = 30;
+    traits->width = resolution.x(); traits->height = resolution.y();
+    traits->windowDecoration = true;
+    traits->doubleBuffer = true;
+    traits->samples = 4;
+    traits->readDISPLAY();
+    traits->setUndefinedScreenDetailsToDefaultScreen();
+    traits->glContextProfileMask = 0x1;// 0x1;// 
+    osg::ref_ptr< osg::GraphicsContext > gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
+    if( !gc.valid() )
+    {
+        // osg::notify( osg::FATAL ) << "Unable to create OpenGL v" << version << " context." << std::endl;
+        return( 1 );
+    }
+    gc->getState()->resetVertexAttributeAlias(false);
+    osgViewer::Viewer viewer;
+    viewer.addEventHandler(new osgViewer::StatsHandler());
+    osg::ref_ptr<osgGA::FirstPersonManipulator> manipulator = new osgGA::FirstPersonManipulator();
+    manipulator->setHomePosition(osg::Vec3d(0,40,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
+    viewer.setCameraManipulator(manipulator);
+    viewer.setSceneData(setupScene());
+    osg::Camera* cam = viewer.getCamera();
+    cam->setGraphicsContext( gc.get() );
+    cam->setProjectionMatrix( osg::Matrix::perspective( 30., (double)resolution.x()/(double)resolution.y(), 1., 100. ) );
+    cam->setViewport( new osg::Viewport( 0, 0, resolution.x(), resolution.y() ) );
+    gc->getState()->setCheckForGLErrors(osg::State::CheckForGLErrors::ONCE_PER_ATTRIBUTE);
+
+    return( viewer.run() );
+}
