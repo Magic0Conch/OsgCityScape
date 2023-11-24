@@ -126,6 +126,28 @@ public:
     }
 };
 
+
+osg::ref_ptr< osg::GraphicsContext > setupGC(){
+    osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
+    // traits->x = 20; traits->y = 30;
+    // traits->width = resolution.x(); traits->height = resolution.y();
+    // traits->windowDecoration = true;
+    // traits->doubleBuffer = true;
+    traits->samples = 4;
+    traits->readDISPLAY();
+    traits->setUndefinedScreenDetailsToDefaultScreen();
+    traits->glContextProfileMask = 0x1;// 0x1;// 
+    osg::ref_ptr< osg::GraphicsContext > gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
+    if( !gc.valid() )
+    {
+        osg::notify( osg::FATAL ) << "Unable to create OpenGL v" << " context." << std::endl;
+        return nullptr;
+    }
+    gc->getState()->resetVertexAttributeAlias(false);
+    gc->getState()->setCheckForGLErrors(osg::State::CheckForGLErrors::ONCE_PER_ATTRIBUTE);
+    return gc;
+}
+
 auto setupScene(){
     roadFXPipeline.reset(new RenderPipelinePostProcess());
     //set roadGeometry init parameters.
@@ -172,45 +194,32 @@ auto setupScene(){
     roadGeode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
     roadGeode->getStateSet()->setMode(GL_LINE_SMOOTH, osg::StateAttribute::ON);
 
-    // //post process
-    // //render geode to a screen texture
-    // osg::ref_ptr<RenderTexture> screenTexture = new RenderTexture(resolution.x(),resolution.y());
-    // osg::ref_ptr<RTTCamera> screenRenderPass = new RTTCamera(screenTexture);
-    // screenRenderPass->addChildToRTTCamera(roadGeode);
-    // roadFXPipeline->addRenderPass(screenRenderPass);
-    // //bloom:render screen texture
-    // bloomPipeline = new Bloom(screenTexture,nullptr,blurIterations,blurSpeed,&luminanceThreshold);
-    // roadFXPipeline->addRenderPipeline(bloomPipeline);
-    // roadFXPipeline->getDestinationQuadGeode()->setUpdateCallback(new BloomUniformCallback(roadFXPipeline));
-    // // bloomPipeline->enableUpdateUniformPerFrame();
+    //post process
+    //render geode to a screen texture
+    osg::ref_ptr<RenderTexture> screenTexture = new RenderTexture(resolution.x(),resolution.y());
+    osg::ref_ptr<RTTCamera> screenRenderPass = new RTTCamera(screenTexture);
+    auto gc = setupGC();
+    std::cout<<screenRenderPass->getRTTCamera()->isRenderToTextureCamera();
+    screenRenderPass->getRTTCamera()->setGraphicsContext(gc);
+    screenRenderPass->addChildToRTTCamera(roadGeode);
+    
+    roadFXPipeline->addRenderPass(screenRenderPass);
+    //bloom:render screen texture
+    bloomPipeline = new Bloom(screenTexture,nullptr,blurIterations,blurSpeed,&luminanceThreshold);
+    roadFXPipeline->addRenderPipeline(bloomPipeline);
+    roadFXPipeline->getDestinationQuadGeode()->setUpdateCallback(new BloomUniformCallback(roadFXPipeline));
+    // bloomPipeline->enableUpdateUniformPerFrame();
     osg::ref_ptr<osg::Group> scene = new osg::Group;
-    scene->addChild(roadGeode);
+    // scene->addChild(roadGeode);
     
-    // //display quad
-    // scene->addChild(roadFXPipeline->getDestinationQuadGeode());
+    //display quad
+    scene->addChild(roadFXPipeline->getDestinationQuadGeode());
     
-    // //off-screen rendering
-    // roadFXPipeline->addRenderPassesToOsgGroup(*scene);
+    //off-screen rendering
+    roadFXPipeline->addRenderPassesToOsgGroup(*scene);
     return scene;
 }
 
-// osg::ref_ptr< osg::GraphicsContext > setupGraphicsContext(){
-//     osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
-//     traits->x = 20; traits->y = 30;
-//     traits->width = resolution.x(); traits->height = resolution.y();
-//     traits->windowDecoration = true;
-//     traits->doubleBuffer = true;
-//     traits->samples = 8;
-//     traits->sampleBuffers = 1;
-//     osg::ref_ptr< osg::GraphicsContext > gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
-//     if( !gc.valid() )
-//     {
-//         osg::notify( osg::FATAL ) << "Cannot set trait!" << std::endl;
-//         return nullptr;
-//     }
-    
-//     return gc;
-// }
 
 // int main(){
 //     using namespace CSEditor;
@@ -277,22 +286,8 @@ auto setupScene(){
 int main( int argc, char** argv )
 {
     using namespace CSEditor;
-    osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
-    traits->x = 20; traits->y = 30;
-    traits->width = resolution.x(); traits->height = resolution.y();
-    traits->windowDecoration = true;
-    traits->doubleBuffer = true;
-    traits->samples = 4;
-    traits->readDISPLAY();
-    traits->setUndefinedScreenDetailsToDefaultScreen();
-    traits->glContextProfileMask = 0x1;// 0x1;// 
-    osg::ref_ptr< osg::GraphicsContext > gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
-    if( !gc.valid() )
-    {
-        // osg::notify( osg::FATAL ) << "Unable to create OpenGL v" << version << " context." << std::endl;
-        return( 1 );
-    }
-    gc->getState()->resetVertexAttributeAlias(false);
+
+    
     osgViewer::Viewer viewer;
     viewer.addEventHandler(new osgViewer::StatsHandler());
     osg::ref_ptr<osgGA::FirstPersonManipulator> manipulator = new osgGA::FirstPersonManipulator();
@@ -300,10 +295,20 @@ int main( int argc, char** argv )
     viewer.setCameraManipulator(manipulator);
     viewer.setSceneData(setupScene());
     osg::Camera* cam = viewer.getCamera();
+    // auto gc = setupGC();
+    osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
+    traits->x = 20; traits->y = 30;
+    traits->width = resolution.x(); traits->height = resolution.y();
+    traits->windowDecoration = true;
+    traits->doubleBuffer = true;
+    // traits->samples = 4;
+    traits->readDISPLAY();
+    traits->setUndefinedScreenDetailsToDefaultScreen();
+    traits->glContextProfileMask = 0x1;// 0x1;// 
+    osg::ref_ptr< osg::GraphicsContext > gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
     cam->setGraphicsContext( gc.get() );
     cam->setProjectionMatrix( osg::Matrix::perspective( 30., (double)resolution.x()/(double)resolution.y(), 1., 100. ) );
     cam->setViewport( new osg::Viewport( 0, 0, resolution.x(), resolution.y() ) );
-    gc->getState()->setCheckForGLErrors(osg::State::CheckForGLErrors::ONCE_PER_ATTRIBUTE);
 
     return( viewer.run() );
 }

@@ -41,6 +41,42 @@ m_destinationTexture(destination),Material(vertPath,fragPath){
     }    
 }
 
+
+
+        // glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // //use multi sample fbo first
+        // glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        // glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // glEnable(GL_DEPTH_TEST);
+
+        // shader->use();
+        // shader->setValue("model", glm::mat4(1.0f));
+        
+        // glBindVertexArray(cubeVAO);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // //copy multisample fbo to normal fbo(shader can't read from multisample fbo)
+        // glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+        // glBindFramebuffer(GL_DRAW_FRAMEBUFFER, intermediateFBO);
+        // glBlitFramebuffer(0, 0, EngineWindow::getInstance().viewportWidth, EngineWindow::getInstance().viewportHeight, 0, 0, EngineWindow::getInstance().viewportWidth, EngineWindow::getInstance().viewportHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        // glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // glDisable(GL_DEPTH_TEST);
+        
+        // // draw Screen quad
+        // screenShader->use();
+        // glBindVertexArray(quadVAO);
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_2D, screenTexture); // use the now resolved color attachment as the quad's texture
+        // glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+        // glBindVertexArray(0);
+
 void RTTCamera::initializeRTTCameraParameters(){
     m_camera->setClearColor(osg::Vec4f(0,0,0,0));
     m_camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
