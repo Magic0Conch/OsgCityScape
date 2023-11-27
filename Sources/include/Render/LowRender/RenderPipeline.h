@@ -8,6 +8,7 @@
 #include <vector>
 #include <osg/ref_ptr>
 #include "RTTCamera.h"
+#include "Render/LowRender/RTTCamera.h"
 #include "osg/Node"
 #include "osg/Object"
 #include "osg/Referenced"
@@ -18,11 +19,12 @@
 namespace CSEditor::Render{
 class RenderPipeline:public osg::Referenced{
 public:
-    virtual void addRenderPass(const osg::ref_ptr<Material> pass);
+    // virtual void addRenderPass(const osg::ref_ptr<Material> pass);
+    virtual void addRenderPass(const osg::ref_ptr<RTTCamera> pass);
     virtual void addRenderPipeline(const osg::ref_ptr<RenderPipeline> rhs);
-    std::vector<osg::ref_ptr<Material>> getRenderPasses() const;
+    std::vector<osg::ref_ptr<RTTCamera>> getRenderPasses() const;
 protected:
-    std::vector<osg::ref_ptr<Material>> m_renderPasses;
+    std::vector<osg::ref_ptr<RTTCamera>> m_renderPasses;
 };
 
 class RenderPipelinePostProcess:public RenderPipeline{

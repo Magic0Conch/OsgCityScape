@@ -1,4 +1,6 @@
 #include "Render/Effects/GaussianBlur.h"
+#include "Render/LowRender/RTTCamera.h"
+#include "osg/ref_ptr"
 using namespace CSEditor::Render;
 void GaussianBlur::generateRenderPasses(){
     osg::ref_ptr<RenderTexture> buffer0 = new RenderTexture(m_width,m_height);
@@ -9,14 +11,14 @@ void GaussianBlur::generateRenderPasses(){
         //vertical pass
         osg::ref_ptr<RTTCamera> verticalPass = new RTTCamera(buffer0,buffer1,
         "resources/shaders/gaussianBlurVertical.vert", "resources/shaders/gaussianBlur.frag");
-        verticalPass->addUniform("_BlurSize",1.f+i*m_blurSpeed);
-        verticalPass->addUniform(texelSize);
+        verticalPass->getMaterial()->addUniform("_BlurSize",1.f+i*m_blurSpeed);
+        verticalPass->getMaterial()->addUniform(texelSize);
         addRenderPass(verticalPass);
         //horizontal pass
         osg::ref_ptr<RTTCamera> horizontalPass = new RTTCamera(buffer1,buffer0,
         "resources/shaders/gaussianBlurHorizontal.vert", "resources/shaders/gaussianBlur.frag");
-        horizontalPass->addUniform("_BlurSize",1.f+i*m_blurSpeed);
-        horizontalPass->addUniform(texelSize);
+        horizontalPass->getMaterial()->addUniform("_BlurSize",1.f+i*m_blurSpeed);
+        horizontalPass->getMaterial()->addUniform(texelSize);
         addRenderPass(horizontalPass);
     }
     addRenderPass(new RTTCamera(buffer0,m_destinationTexture,"resources/shaders/screen.vert", "resources/shaders/screen.frag"));

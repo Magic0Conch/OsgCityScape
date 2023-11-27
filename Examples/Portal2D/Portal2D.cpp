@@ -85,8 +85,8 @@ public:
         const auto& x = portal2DPipeline->getRenderPasses();
         const auto& renderPasses = gaussianBlurPipeline->getRenderPasses();
         for (int i = 0; i<blurIterations; i++) {
-            renderPasses[i*2+1]->setUniform("_BlurSize", 1.f+i*blurSpeed);
-            renderPasses[i*2+2]->setUniform("_BlurSize", 1.f+i*blurSpeed);
+            renderPasses[i*2+1]->getMaterial()->setUniform("_BlurSize", 1.f+i*blurSpeed);
+            renderPasses[i*2+2]->getMaterial()->setUniform("_BlurSize", 1.f+i*blurSpeed);
         }
     }
 };
@@ -111,21 +111,22 @@ auto setupScene(){
     //Pass 3:wave pass
     const auto wavePass = new RTTCamera(buffer1,buffer0,
     "resources/shaders/portal2D.vert","resources/shaders/portal2D.frag");
-    wavePass->addUniform("_EmitCenterUVX", &emitCenterUVX);
-    wavePass->addUniform("_EffectOuterWidth", &effectOuterWidth);
-    wavePass->addUniform("_EffectInnerWidth", &effectInnerWidth);
+    auto waveMaterial = wavePass->getMaterial();
+    waveMaterial->addUniform("_EmitCenterUVX", &emitCenterUVX);
+    waveMaterial->addUniform("_EffectOuterWidth", &effectOuterWidth);
+    waveMaterial->addUniform("_EffectInnerWidth", &effectInnerWidth);
     wavePass->getDestinationQuadStateSet()->setTextureAttributeAndModes(1,static_cast<RenderTexture*>(movie->getFrame().get()),
     osg::StateAttribute::ON| osg::StateAttribute::OVERRIDE);        
-    wavePass->addUniform("_OriginalTexture",1);
-    wavePass->addUniform("_EmitCenterUVY",&emitCenterUVY);
-    wavePass->addUniform("_EffectOuterHeight",&effectOuterHeight);
-    wavePass->addUniform("_WaveColor",&waveColor);
-    wavePass->addUniform("_Amplitude", &amplitude);
-    wavePass->addUniform("_Frequency", &frequency);
-    wavePass->addUniform("_WaveWidth", &waveWidth);
-    wavePass->addUniform("_WaveSpeed", &waveSpeed);
-    wavePass->addUniform("_SeamWidth", &seamWidth);
-    wavePass->addUniform("_IsHorizontal", &isHorizontal);        
+    waveMaterial->addUniform("_OriginalTexture",1);
+    waveMaterial->addUniform("_EmitCenterUVY",&emitCenterUVY);
+    waveMaterial->addUniform("_EffectOuterHeight",&effectOuterHeight);
+    waveMaterial->addUniform("_WaveColor",&waveColor);
+    waveMaterial->addUniform("_Amplitude", &amplitude);
+    waveMaterial->addUniform("_Frequency", &frequency);
+    waveMaterial->addUniform("_WaveWidth", &waveWidth);
+    waveMaterial->addUniform("_WaveSpeed", &waveSpeed);
+    waveMaterial->addUniform("_SeamWidth", &seamWidth);
+    waveMaterial->addUniform("_IsHorizontal", &isHorizontal);        
     portal2DPipeline->addRenderPass(wavePass);
     
     //composite a scene root
