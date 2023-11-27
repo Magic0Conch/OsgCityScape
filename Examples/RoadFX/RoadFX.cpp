@@ -6,6 +6,7 @@
 #include "Render/Entities/Road.h"
 #include "Render/Effects/Bloom.h"
 #include "GUI/Core/UIManager.h"
+#include "Render/LowRender/RTTCamera.h"
 #include "imgui.h"
 #include "osg/Camera"
 #include "osg/Depth"
@@ -120,8 +121,8 @@ public:
     virtual void setUniforms() override{
         const auto& renderPasses = bloomPipeline->getGaussianPipeline()->getRenderPasses();
         for (int i = 0; i<blurIterations; i++) {
-            renderPasses[i*2+1]->setUniform("_BlurSize", 1.f+i*blurSpeed);
-            renderPasses[i*2+2]->setUniform("_BlurSize", 1.f+i*blurSpeed);
+            renderPasses[i*2+1]->getMaterial()->setUniform("_BlurSize", 1.f+i*blurSpeed);
+            renderPasses[i*2+2]->getMaterial()->setUniform("_BlurSize", 1.f+i*blurSpeed);
         }
     }
 };
@@ -129,13 +130,10 @@ public:
 
 osg::ref_ptr< osg::GraphicsContext > setupGC(){
     osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
-    // traits->x = 20; traits->y = 30;
-    // traits->width = resolution.x(); traits->height = resolution.y();
-    // traits->windowDecoration = true;
-    // traits->doubleBuffer = true;
-    traits->samples = 4;
-    traits->readDISPLAY();
-    traits->setUndefinedScreenDetailsToDefaultScreen();
+    traits->x = 20; traits->y = 30;
+    traits->width = resolution.x(); traits->height = resolution.y();
+    traits->windowDecoration = true;
+    traits->doubleBuffer = true;
     traits->glContextProfileMask = 0x1;// 0x1;// 
     osg::ref_ptr< osg::GraphicsContext > gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
     if( !gc.valid() )
@@ -184,6 +182,7 @@ auto setupScene(){
     //Adjust render state(depth write off,blend on)
     osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc;
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+
     depth->setWriteMask(false);
     depth->setRange(0.0f, 0.0f);
     blend->setFunction(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE_MINUS_SRC_ALPHA);
@@ -198,10 +197,9 @@ auto setupScene(){
     //render geode to a screen texture
     osg::ref_ptr<RenderTexture> screenTexture = new RenderTexture(resolution.x(),resolution.y());
     osg::ref_ptr<RTTCamera> screenRenderPass = new RTTCamera(screenTexture);
-    auto gc = setupGC();
-    std::cout<<screenRenderPass->getRTTCamera()->isRenderToTextureCamera();
-    screenRenderPass->getRTTCamera()->setGraphicsContext(gc);
+    
     screenRenderPass->addChildToRTTCamera(roadGeode);
+    screenRenderPass->setMutisample(true);
     
     roadFXPipeline->addRenderPass(screenRenderPass);
     //bloom:render screen texture
@@ -221,57 +219,6 @@ auto setupScene(){
 }
 
 
-// int main(){
-//     using namespace CSEditor;
-//     osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
-//     traits->x = 20; traits->y = 30;
-//     traits->width = resolution.x(); traits->height = resolution.y();
-//     traits->windowDecoration = true;
-//     traits->doubleBuffer = true;
-//     traits->samples = 4;
-//     traits->readDISPLAY();
-//     traits->setUndefinedScreenDetailsToDefaultScreen();
-//     traits->glContextProfileMask = 0x1;// 0x1;// 
-//     osg::ref_ptr< osg::GraphicsContext > gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
-//     if( !gc.valid() )
-//     {
-//         // osg::notify( osg::FATAL ) << "Unable to create OpenGL v" << version << " context." << std::endl;
-//         return( 1 );
-//     }
-//     gc->getState()->resetVertexAttributeAlias(false);
-//     osgViewer::Viewer viewer;
-
-//     // Create a Camera that uses the above OpenGL context.
-//     osg::Camera* cam = viewer.getCamera();
-//     cam->setGraphicsContext( gc.get() );
-//     cam->setProjectionMatrix( osg::Matrix::perspective( 30., (double)resolution.x()/(double)resolution.y(), 1., 100. ) );
-//     cam->setViewport( new osg::Viewport( 0, 0, resolution.x(), resolution.y() ) );    
-//     osg::ref_ptr<osgGA::FirstPersonManipulator> manipulator = new osgGA::FirstPersonManipulator();
-//     // auto gc = setupGraphicsContext();
-//     // viewer.getCamera()->setGraphicsContext(gc);
-//     manipulator->setHomePosition(osg::Vec3d(0,40,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
-//     viewer.setCameraManipulator(manipulator);
-//     viewer.setUpViewInWindow(100, 100,resolution.x(),resolution.y());
-//     viewer.addEventHandler(new osgViewer::StatsHandler());
-//     // viewer.addEventHandler(new PanelProperties);
-
-//     // viewer.setRealizeOperation(new ImGuiInitOperation);
-//     // viewer.getCamera()->getGraphicsContext()->getState()->resetVertexAttributeAlias(false);
-//     // viewer.getCamera()->getGraphicsContext()->getState()->setUseModelViewAndProjectionUniforms(true);
-//     // viewer.getCamera()->getGraphicsContext()->getState()->setUseVertexAttributeAliasing(true);
-
-//     // auto scene = setupScene();
-//     // viewer.setSceneData(scene.get());
-//     // viewer.realize();
-//     gc->getState()->setCheckForGLErrors(osg::State::CheckForGLErrors::ONCE_PER_ATTRIBUTE);
-
-//     // while (!viewer.done())
-//     // {
-//     //     viewer.frame();
-//     // }
-//     return viewer.run();                
-// }
-
 // if(ImGui::Button("set position")){
 //     auto camViewMat = cam->getViewMatrix();
 //     auto camPos = camViewMat.getTrans();
@@ -286,7 +233,6 @@ auto setupScene(){
 int main( int argc, char** argv )
 {
     using namespace CSEditor;
-
     
     osgViewer::Viewer viewer;
     viewer.addEventHandler(new osgViewer::StatsHandler());
@@ -294,18 +240,11 @@ int main( int argc, char** argv )
     manipulator->setHomePosition(osg::Vec3d(0,40,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
     viewer.setCameraManipulator(manipulator);
     viewer.setSceneData(setupScene());
+    viewer.addEventHandler(new PanelProperties);
+    viewer.setRealizeOperation(new ImGuiInitOperation);
     osg::Camera* cam = viewer.getCamera();
-    // auto gc = setupGC();
-    osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
-    traits->x = 20; traits->y = 30;
-    traits->width = resolution.x(); traits->height = resolution.y();
-    traits->windowDecoration = true;
-    traits->doubleBuffer = true;
-    // traits->samples = 4;
-    traits->readDISPLAY();
-    traits->setUndefinedScreenDetailsToDefaultScreen();
-    traits->glContextProfileMask = 0x1;// 0x1;// 
-    osg::ref_ptr< osg::GraphicsContext > gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
+
+    auto gc = setupGC();
     cam->setGraphicsContext( gc.get() );
     cam->setProjectionMatrix( osg::Matrix::perspective( 30., (double)resolution.x()/(double)resolution.y(), 1., 100. ) );
     cam->setViewport( new osg::Viewport( 0, 0, resolution.x(), resolution.y() ) );

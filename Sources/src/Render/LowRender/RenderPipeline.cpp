@@ -1,18 +1,24 @@
 #include "Render/LowRender/RenderPipeline.h"
+#include "Render/LowRender/RTTCamera.h"
 #include <memory>
 #include <variant>
 
 using namespace CSEditor::Render;
 
-void RenderPipeline::addRenderPass(const osg::ref_ptr<Material> pass){
+// void RenderPipeline::addRenderPass(const osg::ref_ptr<Material> pass){
+//     m_renderPasses.emplace_back(pass);
+// }
+
+void RenderPipeline::addRenderPass(const osg::ref_ptr<RTTCamera> pass){
     m_renderPasses.emplace_back(pass);
 }
+
 void RenderPipeline::addRenderPipeline(const osg::ref_ptr<RenderPipeline> rhs){
     for (auto& pass : rhs->getRenderPasses()) {
         m_renderPasses.emplace_back(pass);
     }
 }
-std::vector<osg::ref_ptr<Material>> RenderPipeline::getRenderPasses() const{
+std::vector<osg::ref_ptr<RTTCamera>> RenderPipeline::getRenderPasses() const{
     return m_renderPasses;
 }
 void RenderPipelinePostProcess::addRenderPassesToOsgGroup(osg::Group& group) const{
@@ -32,7 +38,7 @@ osg::ref_ptr<osg::Geode> RenderPipelinePostProcess::getDestinationQuadGeode() co
     return rttCamera->getDestinationQuadGeode();
 }
 
-void UpdateUniformCallback::setAttribute(const std::string& pname,const RTTCamera::Attribute pval,Material& pass){
+void UpdateUniformCallback::setAttribute(const std::string& pname,const Resources::Material::Attribute pval,Material& pass){
     if(std::holds_alternative<int*>(pval)){
         pass.setUniform(pname, *std::get<int*>(pval));
     }
@@ -63,11 +69,11 @@ void UpdateUniformCallback::updateAttributeList(){
     if(std::holds_alternative<RenderPipelinePostProcess>(*m_rp)){
         auto rp = std::get<RenderPipelinePostProcess>(*m_rp);
         for(const auto& pass:rp.getRenderPasses()){
-            for(const auto& attributePair:pass->getAttributeList()){
+            for(const auto& attributePair:pass->getMaterial()->getAttributeList()){
                 const auto& pname = *attributePair.first;
                 const auto& pval = *attributePair.second;
                 // int,bool,float,double,osg::Vec2,osg::Vec3,osg::Vec4
-                setAttribute(pname, pval, *pass);
+                setAttribute(pname, pval, *pass->getMaterial());
             }
         }
     }

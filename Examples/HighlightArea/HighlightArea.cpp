@@ -130,8 +130,8 @@ namespace CSEditor {
         virtual void setUniforms() override{
             const auto& renderPasses = bloomPipeline->getGaussianPipeline()->getRenderPasses();
             for (int i = 0; i<blurIterations; i++) {
-                renderPasses[i*2+1]->setUniform("_BlurSize", 1.f+i*blurSpeed);
-                renderPasses[i*2+2]->setUniform("_BlurSize", 1.f+i*blurSpeed);
+                renderPasses[i*2+1]->getMaterial()->setUniform("_BlurSize", 1.f+i*blurSpeed);
+                renderPasses[i*2+2]->getMaterial()->setUniform("_BlurSize", 1.f+i*blurSpeed);
             }
         }
     };

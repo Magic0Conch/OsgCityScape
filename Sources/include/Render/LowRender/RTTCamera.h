@@ -23,29 +23,25 @@
 #include "osg/Vec4"
 namespace CSEditor::Render{
 using namespace Resources;
-class RTTCamera:public Render::Material{
-private:
-    osg::ref_ptr<RenderTexture> m_sourceTexture = nullptr;
-    osg::ref_ptr<RenderTexture> m_destinationTexture = nullptr;
-    osg::ref_ptr<osg::Camera> m_camera;
-    osg::ref_ptr<osg::Geode> m_sourceGeode;
-    void initializeRTTCameraParameters();
-    void setDefaultUniformParameters();
+class RTTCamera:public osg::Referenced{
 
 public:
+    /*constructor*/
     RTTCamera(RenderTexture* source,RenderTexture* destination,const std::string& vertPath,const std::string& fragPath);
     RTTCamera(osg::Group* source,RenderTexture* destination,const std::string& vertPath,const std::string& fragPath);
-    RTTCamera(RenderTexture* destination):m_destinationTexture(destination){
-        m_camera = new osg::Camera();
-        initializeRTTCameraParameters();
-    }
+    RTTCamera(RenderTexture* destination);
+    RTTCamera(RenderTexture* destination,osg::ref_ptr<Material> material);
+
+    /*setter and getter*/
     osg::ref_ptr<RenderTexture> getDestinationTexture() const;
     osg::ref_ptr<osg::Geode> getDestinationQuadGeode() const;
     osg::ref_ptr<osg::Camera> getRTTCamera() const;
+    osg::ref_ptr<Render::Material> getMaterial() const;
     void addChildToRTTCamera(osg::Group* rhs);
     osg::ref_ptr<osg::StateSet> getDestinationQuadStateSet() const;
+    void setMutisample(bool flag);
 
-    // void renderToImage(RenderTexture* source,RenderTexture* destination){
+    // void renderToImage(RenderTexture* source,RenderTexture* destination,Material* material=nullptr){
     //     m_camera->setViewport(0, 0, destination->getTextureWidth(), destination->getTextureHeight());
     //     m_camera->attach(osg::Camera::COLOR_BUFFER0, destination);
     //     ShaderUtils::setShaderProgram(m_sourceGeode->getOrCreateStateSet(),m_vertShaderPath, m_fragShaderPath);
@@ -58,6 +54,16 @@ public:
     //     m_sourceGeode->getOrCreateStateSet()->addUniform(new osg::Uniform("_MainTex",0));
     //     m_camera->addChild(m_sourceGeode);
     // }
+private:
+    osg::ref_ptr<Render::Material> m_material;
+    osg::ref_ptr<RenderTexture> m_sourceTexture = nullptr;
+    osg::ref_ptr<RenderTexture> m_destinationTexture = nullptr;
+    osg::ref_ptr<osg::Camera> m_camera;
+    osg::ref_ptr<osg::Geode> m_sourceGeode;
+    bool m_mutisample = false;
+    void initializeRTTCameraParameters();
+    void setDefaultUniformParameters();
+
 };
 }
 
