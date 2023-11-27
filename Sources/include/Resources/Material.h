@@ -26,6 +26,7 @@ namespace CSEditor::Resources{
 class Material:public osg::Referenced{
 public:
     using Attribute = std::variant<int*,bool*,float*,double*,osg::Vec2*,osg::Vec3*,osg::Vec4*>;
+    using AttributeList = std::vector<std::pair<std::shared_ptr<std::string>, std::shared_ptr<Attribute>>>;
 protected:
     std::vector<std::pair<std::shared_ptr<std::string>, std::shared_ptr<Attribute>>> m_attributeList;
     osg::ref_ptr<osg::Program> m_shaderProgram;
@@ -35,9 +36,25 @@ public:
     Material(const std::string& vertPath,const std::string& fragPath);
     Material(const osg::ref_ptr<osg::Program> shaderProgram);
 
+    Material(Material&& rhs);
+
+    Material(const Material& rhs);
+
     void addUniform(osg::Uniform* uniform);
     
-    std::vector<std::pair<std::shared_ptr<std::string>, std::shared_ptr<Attribute>>>getAttributeList() const;
+    
+    std::vector<std::pair<std::shared_ptr<std::string>, std::shared_ptr<Attribute>>> getAttributeList() const;
+
+    void setAttributeList(const AttributeList&);
+
+    void setAttributeList(AttributeList &&);
+
+    void setShaderProgram(osg::ref_ptr<osg::Program> program);
+
+    void setStateset(osg::ref_ptr<osg::StateSet> stateset);
+    
+    osg::ref_ptr<osg::Program> getShaderProgram() const;
+
     osg::ref_ptr<osg::StateSet> getStateSet() const;
 
 

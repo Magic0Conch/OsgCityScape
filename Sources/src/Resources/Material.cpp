@@ -27,3 +27,35 @@ osg::ref_ptr<osg::StateSet> Material::getStateSet() const{
 void Material::bind(osg::ref_ptr<osg::Geode> geode){
     geode->setStateSet(m_stateSet);
 }
+
+
+
+Material::Material(Material&& rhs){
+    setAttributeList(rhs.getAttributeList());
+    setShaderProgram(rhs.getShaderProgram());
+    setStateset(rhs.getStateSet());
+}
+
+Material::Material(const Material& rhs){
+    setAttributeList(rhs.getAttributeList());
+    setShaderProgram(rhs.getShaderProgram());
+    setStateset(rhs.getStateSet());
+}
+
+void Material::setAttributeList(const AttributeList& attributeList){
+    m_attributeList = attributeList;
+}
+void Material::setAttributeList(AttributeList&& attributeList){
+    m_attributeList = attributeList;
+}
+void Material::setShaderProgram(osg::ref_ptr<osg::Program> program){
+    m_shaderProgram = program;
+}
+
+void Material::setStateset(osg::ref_ptr<osg::StateSet> stateset){
+    m_stateSet = stateset;
+}
+
+osg::ref_ptr<osg::Program> Material::getShaderProgram() const{
+    return m_shaderProgram;
+}
