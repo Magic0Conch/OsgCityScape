@@ -69,10 +69,14 @@ void UpdateUniformCallback::updateAttributeList(){
     if(std::holds_alternative<RenderPipelinePostProcess>(*m_rp)){
         auto rp = std::get<RenderPipelinePostProcess>(*m_rp);
         for(const auto& pass:rp.getRenderPasses()){
+<<<<<<< HEAD
             auto material = pass->getMaterial();
             if(material==nullptr)
                 continue;
             for(const auto& attributePair:material->getAttributeList()){
+=======
+            for(const auto& attributePair:pass->getMaterial()->getAttributeList()){
+>>>>>>> 3361d4c15acd29bf12dd0d167a9b56a77c44a42a
                 const auto& pname = *attributePair.first;
                 const auto& pval = *attributePair.second;
                 // int,bool,float,double,osg::Vec2,osg::Vec3,osg::Vec4
