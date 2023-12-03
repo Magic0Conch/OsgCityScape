@@ -3,7 +3,7 @@
 #include <atomic>
 #include <limits>
 
-namespace CSEditor::Core{
+namespace CSEditor::ECS{
     using GObjectID = std::size_t;
 
     constexpr GObjectID k_invalid_gobject_id = std::numeric_limits<std::size_t>::max();

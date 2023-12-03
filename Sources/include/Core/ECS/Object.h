@@ -9,7 +9,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace CSEditor::Core{
+namespace CSEditor::ECS{
     /// GObject : Game Object base class
     class GObject : public std::enable_shared_from_this<GObject>
     {

@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include "ObjectIDAllocator.h"
 
-namespace CSEditor::Core{
+namespace CSEditor::ECS{
 
 class GObject;
 class ObjectInstanceRes;
@@ -37,7 +37,7 @@ public:
 protected:
     void clear();
 
-    bool        m_is_loaded {false};
+    bool m_is_loaded {false};
     std::string m_level_res_url;
 
     // all game objects in this level, key: object id, value: object instance

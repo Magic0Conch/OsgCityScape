@@ -1,8 +1,8 @@
-#include "Core/Dialog/NfdDialog.h"
+#include "Windowing/Dialog/NfdDialog.h"
 #include "nfd.h"
 #include <spdlog/spdlog.h>
 #include <iostream>
-using namespace CSEditor::Core;
+using namespace CSEditor::Dialog;
 
 std::string NfdDialog::OpenFileDlg(){
     nfdchar_t* outPath = NULL;

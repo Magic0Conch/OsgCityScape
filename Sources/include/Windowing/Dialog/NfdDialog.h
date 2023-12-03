@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-namespace CSEditor::Core{
+namespace CSEditor::Dialog{
 
 class NfdDialog{
 public:

@@ -21,3 +21,14 @@ target_link_libraries(${TEST_NAME}
 
 install (TARGETS ${TEST_NAME}
     DESTINATION lib)
+
+
+add_executable(osgcityscape main.cpp)
+target_link_libraries(osgcityscape
+PRIVATE
+osgcityscape_base
+
+)
+set_target_properties(osgcityscape PROPERTIES
+RUNTIME_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}
+)

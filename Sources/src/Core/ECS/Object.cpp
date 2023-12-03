@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Component.h"
-#include "Core/SceneSystem/ObjectIDAllocator.h"
-#include "ObjectIDAllocator.h"
+#include "Core/ECS/Components/Component.h"
+#include "Core/ECS/ObjectIDAllocator.h"
 // #include "runtime/resource/res_type/common/object.h"
 
 #include <memory>
@@ -10,7 +9,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace CSEditor::Core{
+namespace CSEditor::ECS{
     /// GObject : Game Object base class
     class GObject : public std::enable_shared_from_this<GObject>
     {
