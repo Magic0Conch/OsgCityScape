@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-namespace CSEditor::Core{
+namespace CSEditor::ECS{
 
 class WorldManager{
 public:

@@ -2,9 +2,9 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include "ObjectIDAllocator.h"
+#include "Core/ECS/ObjectIDAllocator.h"
 
-namespace CSEditor::Core{
+namespace CSEditor::ECS{
 
 class GObject;
 class ObjectInstanceRes;
