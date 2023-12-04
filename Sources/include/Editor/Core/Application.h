@@ -7,6 +7,7 @@ public:
     void run();
 private:
     Editor m_editor;
+    RuntimeContext m_rtcontext;
 };
 
 }
