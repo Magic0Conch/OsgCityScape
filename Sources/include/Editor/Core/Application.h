@@ -1,3 +1,4 @@
+#pragma once
 #include "Editor.h"
 namespace CSEditor::Core{
 class Application{
@@ -7,10 +8,13 @@ public:
     void run();
 private:
     Editor m_editor;
-    RuntimeContext m_rtcontext;
 };
 
 }
+
+// namespace CSEditor::Core {
+// extern RuntimeContext g_runtimeContext;
+// }
 
 /*
 

@@ -1,23 +1,24 @@
 #include "Editor/Core/RuntimeContext.h"
 #include "Windowing/Settings/WindowSettings.h"
 #include "Windowing/Window.h"
+#include "osg/ref_ptr"
 #include <memory>
-using namespace CSEditor::Core;
+namespace CSEditor::Core{
 
-
+RuntimeContext g_runtimeContext;
 RuntimeContext::RuntimeContext(){
-    m_viewer = new osgViewer::Viewer();
-    
+    viewer = new osgViewer::Viewer();
+    // osgViewer::GraphicsWindow
+    //cam->setGraphicsContext(gc.get());
+
+    //setup window
     Settings::WindowSettings windowSettings;
-    m_window = std::make_unique<Windowing::Window>(windowSettings);
+    window = std::make_unique<Windowing::Window>(windowSettings);
     
-    osg::ref_ptr<osgViewer::GraphicsWindow> m_graphicsWindow;
-    osg::ref_ptr<osg::Viewport> m_viewport;
+}
+
+RuntimeContext::~RuntimeContext(){    
 
 }
 
-RuntimeContext::~RuntimeContext(){
-    
-
 }
-

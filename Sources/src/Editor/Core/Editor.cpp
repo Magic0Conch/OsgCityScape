@@ -39,13 +39,13 @@ osg::ref_ptr<osg::GraphicsContext> setupGC(){
     return gc;
 }
 
-Editor::Editor(RuntimeContext& rtcontext):m_rtcontext(rtcontext){
+Editor::Editor(){
     setUpUI();
-    osg::Camera* cam = m_viewer.getCamera();
-    auto gc = setupGC();
+    // osg::Camera* cam = m_viewer.getCamera();
+    // auto gc = setupGC();
     // osgViewer::GraphicsWindow
-    cam->setGraphicsContext(gc.get());
-    cam->setViewport(new osg::Viewport( 0, 0, 540, 360));
+    // cam->setGraphicsContext(gc.get());
+    // cam->setViewport(new osg::Viewport( 0, 0, 540, 360));
     // m_viewer.setUpViewOnSingleScreen(0);
 
 }

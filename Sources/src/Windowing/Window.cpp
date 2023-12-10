@@ -1,9 +1,12 @@
 #include "Windowing/Window.h"
 #include "Windowing/Settings/WindowSettings.h"
+#include "osg/Viewport"
 #include "spdlog/spdlog.h"
 #include <osgViewer/Viewer>
-
+#include "Editor/Core/RuntimeContext.h"
 using namespace CSEditor::Windowing;
+
+extern CSEditor::Core::RuntimeContext g_runtimeContext;
 
 Window::Window(const Settings::WindowSettings& windowSettings):
     m_title(windowSettings.title),
@@ -13,6 +16,9 @@ Window::Window(const Settings::WindowSettings& windowSettings):
     m_samples(windowSettings.samples),
     m_position(0,0)
 {
+    osgViewer::Viewer::Windows windows;
+    g_runtimeContext.viewer->getWindows(windows);
+    m_graphicsWindow = windows.front();
     createWindow(windowSettings);
 }
 Window::~Window(){
@@ -50,11 +56,16 @@ void Window::createWindow(const Settings::WindowSettings& windowSettings){
     gc->getState()->resetVertexAttributeAlias(false);
     gc->getState()->setCheckForGLErrors(osg::State::CheckForGLErrors::ONCE_PER_ATTRIBUTE);
     
+    auto mainCamera = g_runtimeContext.viewer->getCamera();
+    mainCamera->setViewport(new osg::Viewport( m_position.first, m_position.second, windowSettings.width, windowSettings.height));
+    m_viewport = mainCamera->getViewport();
+    mainCamera->setGraphicsContext(gc);
+    g_runtimeContext.viewer->realize();
 }
 
 void Window::setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow){
     m_graphicsWindow = graphicsWindow;
 }
-void Window::setViewport(osg::ref_ptr<osgViewer::GraphicsWindow> viewport){
+void Window::setViewport(osg::ref_ptr<osg::Viewport> viewport){
     m_viewport = viewport;
 }

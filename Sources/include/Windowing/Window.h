@@ -1,12 +1,13 @@
 #pragma once
+
 #include "Settings/WindowSettings.h"
 #include "osgViewer/View"
 #include "osg/ref_ptr"
 #include <memory>
 #include <stdint.h>
 #include <osg/GraphicsContext>
-
 namespace CSEditor::Windowing {
+
 class Window{
 public:
     Window(const Settings::WindowSettings& windowSettings);
@@ -17,7 +18,7 @@ public:
     void setTitle(const std::string& title);
     std::string getTitle() const;
     void setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow);
-    void setViewport(osg::ref_ptr<osgViewer::GraphicsWindow> viewport);
+    void setViewport(osg::ref_ptr<osg::Viewport> viewport);
 
 private:
     std::string m_title;
