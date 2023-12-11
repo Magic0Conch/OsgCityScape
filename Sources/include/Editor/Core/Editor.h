@@ -1,5 +1,5 @@
 #pragma once
-#include <osgViewer/Viewer>
+#include "RuntimeContext.h"
 
 namespace CSEditor::Core {
 class Editor{
@@ -13,7 +13,5 @@ public:
     void logicTick(float deltaTime);
     void renderTick(float deltaTime);
     void setUpUI();
-private:
-    osgViewer::Viewer m_viewer;
 };
 }

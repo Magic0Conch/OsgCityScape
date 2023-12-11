@@ -1,4 +1,3 @@
-#pragma once
 #include "Core/ECS/Level.h"
 #include <functional>
 #include <memory>

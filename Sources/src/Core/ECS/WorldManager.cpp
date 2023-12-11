@@ -1,11 +1,13 @@
-#pragma once
 #include "Core/ECS/WorldManager.h"
 #include <memory>
 #include <string>
 #include <unordered_map>
 namespace CSEditor::ECS{
 
-WorldManager::~WorldManager() { clear(); }
+WorldManager::~WorldManager() { 
+    clear(); 
+    initialize();
+}
 
 void WorldManager::initialize()
 {

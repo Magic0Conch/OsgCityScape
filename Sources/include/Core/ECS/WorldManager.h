@@ -19,8 +19,8 @@ public:
     std::weak_ptr<Level> getCurrentActiveLevel() const { return m_current_active_level; }
 
 private:
-    bool loadWorld(const std::string& world_url);
     bool loadLevel(const std::string& level_url);
+    bool loadWorld(const std::string& world_url);
 
     bool m_is_world_loaded {false};
     std::string m_current_world_url;

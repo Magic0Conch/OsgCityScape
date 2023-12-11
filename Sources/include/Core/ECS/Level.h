@@ -15,7 +15,7 @@ using LevelObjectsMap = std::unordered_map<GObjectID, std::shared_ptr<GObject>>;
 class Level
 {
 public:
-    virtual ~Level(){};
+    virtual ~Level();
 
     bool load(const std::string& level_res_url);
     void unload();
@@ -24,9 +24,9 @@ public:
 
     void tick(float delta_time);
 
-    const std::string& getLevelResUrl() const { return m_level_res_url; }
+    const std::string& getLevelResUrl() const;
 
-    const LevelObjectsMap& getAllGObjects() const { return m_gobjects; }
+    const LevelObjectsMap& getAllGObjects() const;
 
     std::weak_ptr<GObject>   getGObjectByID(GObjectID go_id) const;
     
