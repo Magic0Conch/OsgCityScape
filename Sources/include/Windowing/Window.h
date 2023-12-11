@@ -8,10 +8,10 @@
 #include <osg/GraphicsContext>
 namespace CSEditor::Windowing {
 
-class Window{
+class WindowSystem{
 public:
-    Window(const Settings::WindowSettings& windowSettings);
-    ~Window();
+    WindowSystem(const Settings::WindowSettings& windowSettings);
+    ~WindowSystem();
     void setSize(uint16_t width,uint16_t height);
     void setPosition(uint16_t x,uint16_t y);
     void show() const;
@@ -32,6 +32,7 @@ private:
 
     osg::ref_ptr<osgViewer::GraphicsWindow> m_graphicsWindow = nullptr;
     osg::ref_ptr<osg::Viewport> m_viewport = nullptr;
+    osg::GraphicsContext::ScreenSettings m_screenSettings;
     
 };
 }

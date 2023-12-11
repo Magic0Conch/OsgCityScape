@@ -6,9 +6,9 @@
 #include "Editor/Core/RuntimeContext.h"
 using namespace CSEditor::Windowing;
 
-extern CSEditor::Core::RuntimeContext g_runtimeContext;
+// extern CSEditor::Core::RuntimeContext g_runtimeContext;
 
-Window::Window(const Settings::WindowSettings& windowSettings):
+WindowSystem::WindowSystem(const Settings::WindowSettings& windowSettings):
     m_title(windowSettings.title),
     m_size(windowSettings.width,windowSettings.height),
     m_fullscreen(windowSettings.fullscreen),    
@@ -16,34 +16,36 @@ Window::Window(const Settings::WindowSettings& windowSettings):
     m_samples(windowSettings.samples),
     m_position(0,0)
 {
-    osgViewer::Viewer::Windows windows;
-    g_runtimeContext.viewer->getWindows(windows);
-    m_graphicsWindow = windows.front();
     createWindow(windowSettings);
 }
-Window::~Window(){
+WindowSystem::~WindowSystem(){
     
 }
-void Window::setSize(uint16_t width,uint16_t height){
+void WindowSystem::setSize(uint16_t width,uint16_t height){
     m_size = {width,height};
     m_viewport->setViewport(m_position.first,m_position.second, width, height);
 }
-void Window::setPosition(uint16_t x,uint16_t y){
+void WindowSystem::setPosition(uint16_t x,uint16_t y){
     m_position = {x,y};
     m_viewport->setViewport(x, y, m_size.first,m_size.second);
 }
-void Window::show() const{
+void WindowSystem::show() const{
 
 }
-void Window::setTitle(const std::string& p_title){
+void WindowSystem::setTitle(const std::string& p_title){
     m_title = p_title;
     m_graphicsWindow->setWindowName(m_title);
 }
-std::string Window::getTitle() const{
+std::string WindowSystem::getTitle() const{
     return m_title;
 }
 
-void Window::createWindow(const Settings::WindowSettings& windowSettings){        
+void WindowSystem::createWindow(const Settings::WindowSettings& windowSettings){     
+    //monitor
+    osg::GraphicsContext::getWindowingSystemInterface()->getScreenSettings(0, m_screenSettings);
+    int x = m_screenSettings.width/2 - windowSettings.width/2;
+    int y = m_screenSettings.height/2 - windowSettings.height/2;
+    //window   
     osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits();
     traits->windowName = windowSettings.title;
     traits->width = windowSettings.width; traits->height = windowSettings.height;    
@@ -51,21 +53,30 @@ void Window::createWindow(const Settings::WindowSettings& windowSettings){
     traits->samples = windowSettings.samples;    
     traits->doubleBuffer = true;
     traits->glContextProfileMask = 0x1;// 0x1;// 
+    traits->x = x,traits->y = y;
     
     osg::ref_ptr<osg::GraphicsContext> gc = osg::GraphicsContext::createGraphicsContext(traits.get());    
     gc->getState()->resetVertexAttributeAlias(false);
     gc->getState()->setCheckForGLErrors(osg::State::CheckForGLErrors::ONCE_PER_ATTRIBUTE);
     
-    auto mainCamera = g_runtimeContext.viewer->getCamera();
+    if(m_fullscreen){
+        Core::g_runtimeContext.viewer->setUpViewOnSingleScreen(0);
+    }
+
+    auto mainCamera = CSEditor::Core::g_runtimeContext.viewer->getCamera();
     mainCamera->setViewport(new osg::Viewport( m_position.first, m_position.second, windowSettings.width, windowSettings.height));
     m_viewport = mainCamera->getViewport();
     mainCamera->setGraphicsContext(gc);
-    g_runtimeContext.viewer->realize();
+    CSEditor::Core::g_runtimeContext.viewer->realize();
+    
+    osgViewer::Viewer::Windows windows;
+    CSEditor::Core::g_runtimeContext.viewer->getWindows(windows);
+    m_graphicsWindow = windows.front();
 }
 
-void Window::setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow){
+void WindowSystem::setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow){
     m_graphicsWindow = graphicsWindow;
 }
-void Window::setViewport(osg::ref_ptr<osg::Viewport> viewport){
+void WindowSystem::setViewport(osg::ref_ptr<osg::Viewport> viewport){
     m_viewport = viewport;
 }

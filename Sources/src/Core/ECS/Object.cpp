@@ -1,4 +1,3 @@
-#pragma once
 
 #include "Core/ECS/Components/Component.h"
 #include "Core/ECS/ObjectIDAllocator.h"
