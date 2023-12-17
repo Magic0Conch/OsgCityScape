@@ -3,9 +3,7 @@
 #include "Editor/Core/RuntimeContext.h"
 
 using namespace CSEditor::Core;
-// namespace CSEditor {
-//     RuntimeContext g_runtimeContext;
-// }
+
 Application::Application(){
 
 }

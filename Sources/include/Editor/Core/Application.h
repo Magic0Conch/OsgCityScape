@@ -13,14 +13,3 @@ private:
 };
 
 }
-
-// namespace CSEditor::Core {
-// extern RuntimeContext g_runtimeContext;
-// }
-
-/*
-
-
-
-
-*/

@@ -17,6 +17,7 @@ target_link_libraries(${TEST_NAME}
       ${OSG_LIB}
       nativefiledialog
       spdlog
+      json11
 )
 
 install (TARGETS ${TEST_NAME}
