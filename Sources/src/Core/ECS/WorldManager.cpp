@@ -1,18 +1,23 @@
 #include "Core/ECS/WorldManager.h"
+#include "spdlog/spdlog.h"
+#include "Resources/ResourceManagement/ConfigManager.h"
+#include "Editor/Core/RuntimeContext.h"
 #include <memory>
 #include <string>
 #include <unordered_map>
 namespace CSEditor::ECS{
 
-WorldManager::~WorldManager() { 
+WorldManager::WorldManager(){
     clear(); 
     initialize();
 }
 
-void WorldManager::initialize()
-{
+WorldManager::~WorldManager() { 
+}
+
+void WorldManager::initialize(){
     m_is_world_loaded   = false;
-    m_current_world_url = "g_runtime_global_context.m_config_manager->getDefaultWorldUrl()"; //todo
+    m_current_world_url = Core::g_runtimeContext.configManager->getDefaultWorldUrl().string();
 }
 
 void WorldManager::clear()
@@ -49,7 +54,7 @@ void WorldManager::tick(float delta_time)
 
 bool WorldManager::loadWorld(const std::string& world_url)
 {
-    // LOG_INFO("loading world: {}", world_url); //TODO
+    spdlog::info("Loading world from " + world_url + ".");
     // WorldRes   world_res;
     // const bool is_world_load_success = g_runtime_global_context.m_asset_manager->loadAsset(world_url, world_res);
     // if (!is_world_load_success)

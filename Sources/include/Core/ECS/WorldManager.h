@@ -8,6 +8,7 @@ namespace CSEditor::ECS{
 class WorldManager{
 public:
     virtual ~WorldManager();
+    WorldManager();
 
     void initialize();
     void clear();
