@@ -4,6 +4,7 @@
 #include "Editor/Core/RuntimeContext.h"
 #include <memory>
 #include <string>
+#include <typeinfo>
 #include <unordered_map>
 namespace CSEditor::ECS{
 
@@ -18,6 +19,7 @@ WorldManager::~WorldManager() {
 void WorldManager::initialize(){
     m_is_world_loaded   = false;
     m_current_world_url = Core::g_runtimeContext.configManager->getDefaultWorldUrl().string();
+    loadWorld(m_current_world_url);
 }
 
 void WorldManager::clear()
@@ -55,30 +57,35 @@ void WorldManager::tick(float delta_time)
 bool WorldManager::loadWorld(const std::string& world_url)
 {
     spdlog::info("Loading world from " + world_url + ".");
-    // WorldRes   world_res;
-    // const bool is_world_load_success = g_runtime_global_context.m_asset_manager->loadAsset(world_url, world_res);
-    // if (!is_world_load_success)
-    {
+    ECS::World world;
+    const auto isWorldLoadSuccess = Core::g_runtimeContext.assetManager->loadAsset(world_url,world);
+    if(!isWorldLoadSuccess){
         return false;
     }
+    m_currentWorldResource = std::make_shared<World>(world);
 
-    // m_current_world_resource = std::make_shared<WorldRes>(world_res);
-
-    const bool is_level_load_success = loadLevel("world_res.m_default_level_url"); //todo
-    if (!is_level_load_success)
-    {
+    const bool isLevelLoadSuccess = loadLevel(world.default_level_url);
+    if(!isLevelLoadSuccess){
         return false;
     }
+    
+    // // m_current_world_resource = std::make_shared<WorldRes>(world_res);
 
-    // set the default level to be active level
-    auto iter = m_loaded_levels.find("world_res.m_default_level_url");
-    // ASSERT(iter != m_loaded_levels.end());
+    // const bool is_level_load_success = loadLevel("world_res.m_default_level_url"); //todo
+    // if (!is_level_load_success)
+    // {
+    //     return false;
+    // }
 
-    m_current_active_level = iter->second;
+    // // set the default level to be active level
+    // auto iter = m_loaded_levels.find("world_res.m_default_level_url");
+    // // ASSERT(iter != m_loaded_levels.end());
 
-    m_is_world_loaded = true;
+    // m_current_active_level = iter->second;
 
-    // LOG_INFO("world load succeed!"); //TODO
+    // m_is_world_loaded = true;
+
+    spdlog::info("world load succeed!");
     return true;
 }
 

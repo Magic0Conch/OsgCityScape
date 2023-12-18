@@ -1,5 +1,6 @@
 #pragma once
 #include "Level.h"
+#include "Core/ECS/Common/World.h"
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -31,7 +32,7 @@ private:
     std::unordered_map<std::string, std::shared_ptr<Level>> m_loaded_levels;
     // active level, currently we just support one active level
     std::weak_ptr<Level> m_current_active_level;
-
+    std::shared_ptr<World> m_currentWorldResource;
 };
 
 }
