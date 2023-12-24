@@ -11,11 +11,11 @@ class ObjectInstanceRes;
 
 using LevelObjectsMap = std::unordered_map<GObjectID, std::shared_ptr<GObject>>;
 
-/// The main class to manage all game objects
-class Level
+class LevelManager
 {
 public:
-    virtual ~Level();
+
+    virtual ~LevelManager();
 
     bool load(const std::string& level_res_url);
     void unload();
@@ -40,7 +40,6 @@ protected:
     bool m_is_loaded {false};
     std::string m_level_res_url;
 
-    // all game objects in this level, key: object id, value: object instance
     LevelObjectsMap m_gobjects;
 };
 

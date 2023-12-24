@@ -27,7 +27,7 @@ void WorldManager::clear()
     // unload all loaded levels
     for (auto level_pair : m_loaded_levels)
     {
-        level_pair.second->unload();
+        // level_pair.second->unload();
     }
     m_loaded_levels.clear();
 
@@ -50,7 +50,7 @@ void WorldManager::tick(float delta_time)
     std::shared_ptr<Level> active_level = m_current_active_level.lock();
     if (active_level)
     {
-        active_level->tick(delta_time);
+        // active_level->tick(delta_time);
     }
 }
 
@@ -64,12 +64,12 @@ bool WorldManager::loadWorld(const std::string& world_url)
     }
     m_currentWorldResource = std::make_shared<World>(world);
 
-    const bool isLevelLoadSuccess = loadLevel(world.default_level_url);
+    const bool isLevelLoadSuccess = loadLevel(world.getDefaultLevelUrl());
     if(!isLevelLoadSuccess){
         return false;
     }
     
-    // // m_current_world_resource = std::make_shared<WorldRes>(world_res);
+    // m_current_world_resource = std::make_shared<WorldRes>(world_res);
 
     // const bool is_level_load_success = loadLevel("world_res.m_default_level_url"); //todo
     // if (!is_level_load_success)
@@ -85,7 +85,7 @@ bool WorldManager::loadWorld(const std::string& world_url)
 
     // m_is_world_loaded = true;
 
-    spdlog::info("world load succeed!");
+    spdlog::info("World load succeed!");
     return true;
 }
 
@@ -95,8 +95,8 @@ bool WorldManager::loadLevel(const std::string& level_url)
     // set current level temporary
     m_current_active_level       = level;
 
-    const bool is_level_load_success = level->load(level_url);
-    if (is_level_load_success == false)
+    // const bool is_level_load_success = level->load(level_url);
+    // if (is_level_load_success == false)
     {
         return false;
     }
@@ -115,22 +115,22 @@ void WorldManager::reloadCurrentLevel()
         return;
     }
 
-    const std::string level_url = active_level->getLevelResUrl();
-    active_level->unload();
-    m_loaded_levels.erase(level_url);
+    // const std::string level_url = active_level->getLevelResUrl();
+    // active_level->unload();
+    // m_loaded_levels.erase(level_url);
 
-    const bool is_load_success = loadLevel(level_url);
-    if (!is_load_success)
+    // const bool is_load_success = loadLevel(level_url);
+    // if (!is_load_success)
     {
         // LOG_ERROR("load level failed {}", level_url);
         return;
     }
 
     // update the active level instance
-    auto iter = m_loaded_levels.find(level_url);
+    // auto iter = m_loaded_levels.find(level_url);
     // ASSERT(iter != m_loaded_levels.end());
 
-    m_current_active_level = iter->second;
+    // m_current_active_level = iter->second;
 
     // LOG_INFO("reload current evel succeed");
 }
@@ -145,7 +145,7 @@ void WorldManager::saveCurrentLevel()
         return;
     }
 
-    active_level->save();
+    // active_level->save();
 }
 
 
