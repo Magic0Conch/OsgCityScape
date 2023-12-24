@@ -1,17 +1,19 @@
+#include <assert.h>
 #include <atomic>
 #include <limits>
+#include "Core/ECS/ObjectIDAllocator.h"
+#include "spdlog/spdlog.h"
+using namespace CSEditor::ECS;
 
-namespace CSEditor::ECS{
-    using GObjectID = std::size_t;
+std::atomic<ObjectID> ObjectIDAllocator::ObjectIDAllocator::m_nextID {0};
 
-    constexpr GObjectID k_invalid_gobject_id = std::numeric_limits<std::size_t>::max();
+ObjectID ObjectIDAllocator::alloc(){
+    std::atomic<ObjectID> newObjectID = m_nextID.load();
+    ++m_nextID;
+    if (m_nextID >= invalidObjectID){
+        spdlog::error("Object id overflow!");
+        assert(0);
+    }
 
-    class ObjectIDAllocator
-    {
-    public:
-        static GObjectID alloc();
-
-    private:
-        static std::atomic<GObjectID> m_next_id;
-    };
-} // namespace Piccolo
+    return newObjectID;
+}

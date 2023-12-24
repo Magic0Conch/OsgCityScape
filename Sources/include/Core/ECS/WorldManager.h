@@ -1,6 +1,6 @@
 #pragma once
-#include "Level.h"
-#include "Core/ECS/Common/World.h"
+#include "Resources/ResourceType/Common/World.h"
+#include "Resources/ResourceType/Common/Level.h"
 #include <memory>
 #include <string>
 #include <unordered_map>
