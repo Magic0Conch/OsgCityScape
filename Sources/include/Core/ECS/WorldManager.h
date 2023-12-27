@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/ECS/Level.h"
 #include "Resources/ResourceType/Common/World.h"
 #include "Resources/ResourceType/Common/Level.h"
 #include <memory>
@@ -18,21 +19,21 @@ public:
     void saveCurrentLevel();
 
     void tick(float delta_time);
-    std::weak_ptr<Level> getCurrentActiveLevel() const { return m_current_active_level; }
+    std::weak_ptr<ECS::Level> getCurrentActiveLevel() const { return m_currentActiveLevel; }
 
 private:
     bool loadLevel(const std::string& level_url);
     bool loadWorld(const std::string& world_url);
 
-    bool m_is_world_loaded {false};
-    std::string m_current_world_url;
+    bool m_isWorldLoaded {false};
+    std::string m_currentWorldUrl;
     // std::shared_ptr<WorldRes> m_current_world_resource;
 
     // all loaded levels, key: level url, vaule: level instance
-    std::unordered_map<std::string, std::shared_ptr<Level>> m_loaded_levels;
+    std::unordered_map<std::string, std::shared_ptr<ECS::Level>> m_loadedLevels;
     // active level, currently we just support one active level
-    std::weak_ptr<Level> m_current_active_level;
-    std::shared_ptr<World> m_currentWorldResource;
+    std::weak_ptr<ECS::Level> m_currentActiveLevel;
+    std::shared_ptr<ResourceType::World> m_currentWorldResource;
 };
 
 }

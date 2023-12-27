@@ -26,7 +26,7 @@ namespace CSEditor::ECS{
         void setName(std::string name);
         const std::string& getName() const;
         const std::string& getDefinitionUrl() const;
-        void setDefinitionUrl(const std::string& definitionUrl);        
+        void setDefinitionUrl(const std::string& definitionUrl);
 
     protected:
         ObjectID m_id ;

@@ -1,7 +1,8 @@
 #pragma once
 #include "json11.hpp"
+#include "Serializer.h"
 
-using Json = json11::Json;
+
 namespace CSEditor::Helpers{
 class ISerializable{
 public:
