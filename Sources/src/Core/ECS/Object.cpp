@@ -12,7 +12,7 @@ void Object::tick(float delta_time){
 }
 
 bool Object::load(const ResourceType::ObjectInstance& object_instance_res){
-
+    return true;
 }
 
 void Object::save(ResourceType::ObjectInstance& out_object_instance_res){
@@ -32,7 +32,7 @@ const std::string& Object::getName() const {
 }
 
 bool Object::hasComponent(const std::string& compenent_type_name) const{
-
+    return true;
 }
 
 std::vector<Component> Object::getComponents() { 

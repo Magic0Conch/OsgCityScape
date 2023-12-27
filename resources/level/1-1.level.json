@@ -4,7 +4,6 @@
     "y": 0,
     "z": -15
   },
-  "character_name": "Player",
   "objects": [
     {
       "name": "Wall_1",
@@ -39,7 +38,7 @@
       "name": "Wall_2",
       "instanced_components": [
         {
-          "$context": {
+          "context": {
             "transform": {
               "position": {
                 "x": -7.9951,
@@ -59,26 +58,13 @@
               }
             }
           },
-          "$typeName": "TransformComponent"
+          "typeName": "TransformComponent"
         }
       ],
       "definition": "asset/objects/environment/wall/wall.object.json"
     },
     {
       "name": "Fence",
-      "transform": {
-        "rotation": {},
-        "scale": {
-          "x": 1,
-          "y": 1,
-          "z": 1
-        },
-        "position": {
-          "x": 0,
-          "y": 0,
-          "z": 0
-        }
-      },
       "definition": "asset/objects/environment/fence/fence.object.json",
       "instanced_components": [
         {
