@@ -14,14 +14,14 @@ public:
     
     std::string getName() const;
     std::string getDefinitionUrl() const;
-    std::vector<ECS::Component> getInstancedComponents() const;
-    void addInstanceComponent(ECS::Component& component);
+    std::vector<std::shared_ptr<ECS::Component>>getInstancedComponents() const;
+    void addInstanceComponent(std::shared_ptr<ECS::Component> component);
     void setName(const std::string& name);
     void setDefinitionUrl(const std::string& definitionUrl);
-    void setInstancedComponents(const std::vector<ECS::Component>& instancedComponents);
+    void setInstancedComponents(const std::vector<std::shared_ptr<ECS::Component>>& instancedComponents);
 private:
     std::string m_name;
     std::string m_definitionUrl;
-    std::vector<ECS::Component> m_instancedComponents;
+    std::vector<std::shared_ptr<ECS::Component>> m_instancedComponents;
 };
 }

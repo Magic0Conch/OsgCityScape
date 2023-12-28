@@ -9,7 +9,7 @@
       "name": "Wall_1",
       "instanced_components": [
         {
-          "$context": {
+          "context": {
             "transform": {
               "position": {
                 "x": 1.94597,
@@ -29,7 +29,7 @@
               }
             }
           },
-          "$typeName": "TransformComponent"
+          "typeName": "TransformComponent"
         }
       ],
       "definition": "asset/objects/environment/wall/wall.object.json"
@@ -68,7 +68,7 @@
       "definition": "asset/objects/environment/fence/fence.object.json",
       "instanced_components": [
         {
-          "$context": {
+          "context": {
             "transform": {
               "rotation": {},
               "scale": {
@@ -83,7 +83,7 @@
               }
             }
           },
-          "$typeName": "TransformComponent"
+          "typeName": "TransformComponent"
         }
       ]
     }

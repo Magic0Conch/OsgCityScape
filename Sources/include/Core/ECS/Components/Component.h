@@ -16,12 +16,11 @@ protected:
     // bool m_is_scale_dirty {false};
 
 public: 
-
     Component() = default;
     virtual ~Component() {}
 
-    virtual void serialize(Json& jsonObject) override;
-    virtual void deserialize(Json& jsonObject) override;
+    virtual void serialize(Json& jsonObject);
+    virtual void deserialize(Json& jsonObject);
     // Instantiating the component after definition loaded
     // virtual void postLoadResource(std::weak_ptr<GObject> parent_object) { m_parent_object = parent_object; }
 

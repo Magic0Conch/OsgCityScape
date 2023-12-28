@@ -1,5 +1,7 @@
 #include "Resources/ResourceType/Common/Object.h"
 #include "Core/ECS/Components/Component.h"
+#include "Core/ECS/Components/ComponentFactory.h"
+#include <memory>
 
 using namespace CSEditor::ResourceType;
 
@@ -17,9 +19,11 @@ void ObjectInstance::deserialize(Json& jsonBody){
     setDefinitionUrl(definition);
     auto componentsInstanceJson = jsonBody["instanced_components"].array_items();
     for (auto& componentJson:componentsInstanceJson) {
-        ECS::Component componentInstance;
-        componentInstance.deserialize(componentJson);
-        addInstanceComponent(componentInstance);
+        const auto& typeName = componentJson["typeName"].string_value();
+        auto componentPtr = ECS::ComponentFactory::createComponent(typeName);
+        auto contextJson = componentJson["context"];
+        componentPtr->deserialize(contextJson);
+        addInstanceComponent(componentPtr);
     } 
 }
 
@@ -31,11 +35,11 @@ std::string ObjectInstance::getDefinitionUrl() const {
     return m_definitionUrl;
 }
 
-std::vector<CSEditor::ECS::Component> ObjectInstance::getInstancedComponents() const {
+std::vector<std::shared_ptr<CSEditor::ECS::Component>> ObjectInstance::getInstancedComponents() const {
     return m_instancedComponents;
 }
 
-void ObjectInstance::addInstanceComponent(ECS::Component& component){
+void ObjectInstance::addInstanceComponent(std::shared_ptr<ECS::Component> component){
     m_instancedComponents.emplace_back(component);
 }
 
@@ -47,6 +51,6 @@ void ObjectInstance::setDefinitionUrl(const std::string& definitionUrl) {
     m_definitionUrl = definitionUrl;
 }
 
-void ObjectInstance::setInstancedComponents(const std::vector<ECS::Component>& instancedComponents) {
+void ObjectInstance::setInstancedComponents(const std::vector<std::shared_ptr<ECS::Component>>& instancedComponents) {
     m_instancedComponents = instancedComponents;
 }
