@@ -17,7 +17,7 @@ void Transform::deserialize(Json& jsonObject){
     osg::Vec3f scale;
     Serializer::deserializeVector3f(positionJson, position);
     Serializer::deserializeVector4f(rotationJson, rotation);
-    Serializer::deserializeVector3f(scaleJson, position);
+    Serializer::deserializeVector3f(scaleJson, scale);
     setPosition(position);
     setRotation(rotation);
     setScale(scale);

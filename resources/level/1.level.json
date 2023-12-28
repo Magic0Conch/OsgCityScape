@@ -9,8 +9,7 @@
         "name": "Wall_1",
         "instanced_components": [
           {
-            "$context": {
-              "transform": {
+            "context": {
                 "position": {
                   "x": 1.94597,
                   "y": -0.38554,
@@ -27,9 +26,8 @@
                   "y": 0.999993,
                   "z": 1
                 }
-              }
             },
-            "$typeName": "TransformComponent"
+            "typeName": "Transform"
           }
         ],
         "definition": "asset/objects/environment/wall/wall.object.json"
@@ -38,8 +36,7 @@
         "name": "Wall_2",
         "instanced_components": [
           {
-            "$context": {
-              "transform": {
+            "context": {
                 "position": {
                   "x": -7.9951,
                   "y": -0.38554,
@@ -56,9 +53,8 @@
                   "y": 0.999918,
                   "z": 1
                 }
-              }
             },
-            "$typeName": "TransformComponent"
+            "typeName": "Transform"
           }
         ],
         "definition": "asset/objects/environment/wall/wall.object.json"
