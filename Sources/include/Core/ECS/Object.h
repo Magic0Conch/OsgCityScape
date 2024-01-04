@@ -19,7 +19,7 @@ namespace CSEditor::ECS{
         void save(ResourceType::ObjectInstance& outObjectInstance);
 
         bool hasComponent(const std::string& compenentTypename) const;
-        std::vector<Component> getComponents();
+        std::vector<std::shared_ptr<Component>> getComponents();
         
         //getter and setter
         ObjectID getID() const;
@@ -32,6 +32,6 @@ namespace CSEditor::ECS{
         ObjectID m_id ;
         std::string m_name;
         std::string m_definitionUrl;
-        std::vector<Component> m_components;
+        std::vector<std::shared_ptr<Component>> m_components;
     };
 } 

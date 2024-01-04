@@ -43,15 +43,13 @@ void WorldManager::clear()
 
 void WorldManager::tick(float delta_time)
 {
-    if (!m_isWorldLoaded)
-    {
+    if (!m_isWorldLoaded){
         loadWorld(m_currentWorldUrl);
     }
 
     // tick the active level
     std::shared_ptr<ECS::Level> activeLevel = m_currentActiveLevel.lock();
-    if (activeLevel)
-    {
+    if (activeLevel){
         // active_level->tick(delta_time);
     }
 }
@@ -59,53 +57,43 @@ void WorldManager::tick(float delta_time)
 bool WorldManager::loadWorld(const std::string& world_url)
 {
     spdlog::info("Loading world from " + world_url + ".");
-    ResourceType::World world;
-    const auto isWorldLoadSuccess = Core::g_runtimeContext.assetManager->loadAsset(world_url,world);
+    ResourceType::World worldRes;
+    const auto isWorldLoadSuccess = Core::g_runtimeContext.assetManager->loadAsset(world_url,worldRes);
     if(!isWorldLoadSuccess){
         return false;
     }
-    m_currentWorldResource = std::make_shared<ResourceType::World>(world);
+    m_currentWorldResource = std::make_shared<ResourceType::World>(worldRes);
 
-    const bool isLevelLoadSuccess = loadLevel(world.getDefaultLevelUrl());
+    const bool isLevelLoadSuccess = loadLevel(worldRes.getDefaultLevelUrl());
     if(!isLevelLoadSuccess){
         return false;
     }
-    
-    // const bool is_level_load_success = loadLevel("world_res.m_default_level_url"); //todo
-    // if (!is_level_load_success)
-    // {
-    //     return false;
-    // }
+    // set the default level to be active level
+    auto iter = m_loadedLevels.find(worldRes.getDefaultLevelUrl());
+    assert(iter != m_loadedLevels.end());
+    m_currentActiveLevel = iter->second;
 
-    // // set the default level to be active level
-    // auto iter = m_loaded_levels.find("world_res.m_default_level_url");
-    // // ASSERT(iter != m_loaded_levels.end());
-
-    // m_current_active_level = iter->second;
-
-    // m_is_world_loaded = true;
-
+    m_isWorldLoaded = true;
     spdlog::info("World load succeed!");
     return true;
 }
 
 bool WorldManager::loadLevel(const std::string& levelUrl)
 {
-    std::shared_ptr<ECS::Level> level = std::make_shared<ECS::Level>();
-    
-    m_currentActiveLevel = level;
+    // std::shared_ptr<ECS::Level> level = std::make_shared<ECS::Level>();
+    Level level;
+    m_currentActiveLevel = std::make_shared<Level>(level);
 
-    const bool isLevelLoadSuccess = level->load(levelUrl);
+    const bool isLevelLoadSuccess = level.load(levelUrl);
     if (!isLevelLoadSuccess){
         return false;
     }
 
-    m_loadedLevels.emplace(levelUrl, level);
+    m_loadedLevels[levelUrl] = m_currentActiveLevel.lock();
     return true;
 }
 
-void WorldManager::reloadCurrentLevel()
-{
+void WorldManager::reloadCurrentLevel(){
     auto active_level = m_currentActiveLevel.lock();
     if (active_level == nullptr)
     {

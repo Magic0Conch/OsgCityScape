@@ -5,13 +5,14 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+// #include "Core/ECS/Object.h"
 #include "Core/Helpers/ISerializer.h"
+// #include "Core/ECS/Object.h"
 namespace CSEditor::ECS{
-class Component:public Helpers::ISerializable
-{
-
+class Object;
+class Component:public Helpers::ISerializable{
 protected:
-    // std::weak_ptr<GObject> m_parent_object;
+    std::weak_ptr<Object> m_parentObject;
     // bool m_is_dirty {false};
     // bool m_is_scale_dirty {false};
 
@@ -22,7 +23,7 @@ public:
     virtual void serialize(Json& jsonObject);
     virtual void deserialize(Json& jsonObject);
     // Instantiating the component after definition loaded
-    // virtual void postLoadResource(std::weak_ptr<GObject> parent_object) { m_parent_object = parent_object; }
+    virtual void postLoadResource(std::weak_ptr<Object> parentObject);
 
     virtual void tick(float delta_time) {};
 
@@ -30,6 +31,6 @@ public:
 
     // void setDirtyFlag(bool is_dirty) { m_is_dirty = is_dirty; }
 
-    bool m_tick_in_editor_mode {false};
+    bool m_tickInEditorMode {false};
 };
 }

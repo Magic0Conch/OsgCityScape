@@ -3,11 +3,12 @@
 #include <string>
 #include <unordered_map>
 #include "ObjectIDAllocator.h"
-
+#include "Core/ECS/Level.h"
+#include "Resources/ResourceType/Common/Object.h"
+#include "Object.h"
 namespace CSEditor::ECS{
 
 class GObject;
-class ObjectInstanceRes;
 
 // using LevelObjectsMap = std::unordered_map<GObjectID, std::shared_ptr<GObject>>;
 
@@ -26,6 +27,10 @@ public:
 
     const std::string& getLevelResUrl() const;
 
+    void buildSceneGraph();
+
+    ObjectID createObject(const ResourceType::ObjectInstance& objectInstance);
+
     // const LevelObjectsMap& getAllGObjects() const;
 
     // std::weak_ptr<GObject>   getGObjectByID(GObjectID go_id) const;
@@ -40,7 +45,7 @@ protected:
     bool m_isLoaded {false};
     std::string m_levelResourceUrl;
 
-    // LevelObjectsMap m_gobjects;
+    std::unordered_map<ObjectID, std::shared_ptr<Object>> m_gobjects;
 };
 
 }
