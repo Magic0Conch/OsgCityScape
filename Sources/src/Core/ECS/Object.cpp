@@ -1,4 +1,5 @@
 #include "Core/ECS/Object.h"
+#include "Editor/Core/RuntimeContext.h"
 
 using namespace CSEditor::ECS;
 
@@ -11,7 +12,16 @@ void Object::tick(float delta_time){
 
 }
 
-bool Object::load(const ResourceType::ObjectInstance& object_instance_res){
+bool Object::load(const ResourceType::ObjectInstance& objectInstanceRes){
+    m_components.clear();
+    setName(objectInstanceRes.getName());
+    m_components = objectInstanceRes.getInstancedComponents();
+    for (auto component : m_components){
+        if (component){
+            component->postLoadResource(weak_from_this());
+        }
+    }
+    setDefinitionUrl(objectInstanceRes.getDefinitionUrl());
     return true;
 }
 
@@ -35,7 +45,10 @@ bool Object::hasComponent(const std::string& compenent_type_name) const{
     return true;
 }
 
-std::vector<Component> Object::getComponents() { 
+std::vector<std::shared_ptr<Component>> Object::getComponents() { 
     return m_components; 
 }
 
+void Object::setDefinitionUrl(const std::string& definitionUrl){
+    m_definitionUrl = definitionUrl;
+}

@@ -32,7 +32,7 @@
           "typeName": "TransformComponent"
         }
       ],
-      "definition": "asset/objects/environment/wall/wall.object.json"
+      "definition": "asset/objects/environment/wall/barricada.obj"
     },
     {
       "name": "Wall_2",
@@ -61,11 +61,11 @@
           "typeName": "TransformComponent"
         }
       ],
-      "definition": "asset/objects/environment/wall/wall.object.json"
+      "definition": "asset/objects/environment/wall/barricada.obj"
     },
     {
       "name": "Fence",
-      "definition": "asset/objects/environment/fence/fence.object.json",
+      "definition": "asset/objects/environment/fence/fence.obj",
       "instanced_components": [
         {
           "context": {
