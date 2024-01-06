@@ -1,0 +1,35 @@
+#include <imgui.h>
+#include "Editor/Core/RuntimeContext.h"
+#include "GUI/Core/Panel.h"
+
+namespace CSEditor::GUI {
+class Hierachy : public Panel{
+protected:
+    virtual void drawImpl() override{
+        const auto main_viewport = ImGui::GetMainViewport();
+        ImGuiWindowFlags window_flags = 0;
+        ImGui::SetNextWindowPos(ImVec2(main_viewport->GetWorkCenter()),ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(550,680),ImGuiCond_FirstUseEver);
+        bool p_open = true;
+        if(ImGui::Begin("Properties",&p_open,window_flags)){
+            if (ImGui::TreeNode("Transform Properties")){
+
+                ImGui::TreePop();
+            }
+
+            if(ImGui::TreeNode("Wave Properties")){
+
+                ImGui::TreePop();
+            }
+            if(ImGui::TreeNode("Blur Properties")){
+                // ImGui::SliderInt("blurIterations", &blurIterations,0,32);
+                ImGui::TreePop();
+            }
+        }
+        ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
+        ImGui::PopItemWidth();
+        ImGui::End();
+        ImGui::ShowDemoWindow();
+    }
+};
+}

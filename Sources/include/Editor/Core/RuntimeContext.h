@@ -1,4 +1,5 @@
 #pragma once
+#include "GUI/Core/UIManager.h"
 #include "Resources/ResourceManagement/AssetManager.h"
 #include <osgViewer/Viewer>
 #include <osg/GraphicsContext>
@@ -27,6 +28,7 @@ public:
     std::unique_ptr<CSEditor::ECS::WorldManager> worldManager;
     std::unique_ptr<Resources::ConfigManager> configManager;
     std::unique_ptr<Resources::AssetManager> assetManager;
+    std::unique_ptr<GUI::UIManager> uiManager;
 };
 
 extern RuntimeContext g_runtimeContext;

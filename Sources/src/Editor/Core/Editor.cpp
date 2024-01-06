@@ -21,6 +21,11 @@
 #include <osgUtil/Optimizer>
 #include <osgUtil/IntersectionVisitor>
 #include <osgUtil/Statistics>
+#include <imgui.h>
+#include "GUI/Panels/Hierachy.h"
+#include "GUI/Panels/Inspector.h"
+#include "GUI/Helper/ImGuiInitOperation.h"
+
 using namespace CSEditor::Core;
 
 Editor::Editor(){
@@ -68,5 +73,12 @@ void Editor::renderTick(float frameTime){
 }
 
 void Editor::setUpUI(){
+    g_runtimeContext.viewer->addEventHandler(new osgViewer::StatsHandler());
+    g_runtimeContext.viewer->addEventHandler(new GUI::Hierachy);
+    // g_runtimeContext.viewer->addEventHandler(new GUI::Inspector);
+    g_runtimeContext.viewer->setRealizeOperation(new GUI::ImGuiInitOperation);
+    // g_runtimeContext.viewer->run();
+    CSEditor::Core::g_runtimeContext.viewer->realize();
 
+    
 }

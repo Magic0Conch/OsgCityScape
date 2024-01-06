@@ -67,7 +67,6 @@ void WindowSystem::createWindow(const Settings::WindowSettings& windowSettings){
     mainCamera->setViewport(new osg::Viewport( m_position.first, m_position.second, windowSettings.width, windowSettings.height));
     m_viewport = mainCamera->getViewport();
     mainCamera->setGraphicsContext(gc);
-    CSEditor::Core::g_runtimeContext.viewer->realize();
     
     osgViewer::Viewer::Windows windows;
     CSEditor::Core::g_runtimeContext.viewer->getWindows(windows);

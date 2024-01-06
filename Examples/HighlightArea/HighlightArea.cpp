@@ -15,7 +15,7 @@
 #include "osg/Depth"
 #include <iostream>
 #include <osgViewer/Viewer>
-#include "GUI/Core/UIManager.h"
+#include "GUI/Core/Panel.h"
 #include <osg/BlendFunc>
 #include <osg/CullFace>
 #include <osgViewer/GraphicsWindow>
@@ -60,10 +60,10 @@ float luminanceThreshold = 0.4f;
 namespace CSEditor {
     osg::ref_ptr<Render::Circle> circle;
     osg::ref_ptr<Render::Cylinder> geometryCylinder;
-    class PanelProperties : public GUI::UIManager
+    class PanelProperties : public GUI::Panel
     {
     protected:
-        virtual void drawUi() override{
+        virtual void drawImpl() override{
             const auto main_viewport = ImGui::GetMainViewport();
             ImGuiWindowFlags window_flags = 0;
             ImGui::SetNextWindowPos(ImVec2(main_viewport->GetWorkCenter()),ImGuiCond_FirstUseEver);

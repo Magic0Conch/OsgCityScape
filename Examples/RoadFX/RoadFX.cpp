@@ -5,7 +5,7 @@
 #include <windows.h>
 #include "Render/Entities/Road.h"
 #include "Render/Effects/Bloom.h"
-#include "GUI/Core/UIManager.h"
+#include "GUI/Core/Panel.h"
 #include "Render/LowRender/RTTCamera.h"
 #include "imgui.h"
 #include "osg/Camera"
@@ -56,10 +56,10 @@ int downSample = 2;
 float luminanceThreshold = 0.4f;
 osg::ref_ptr<Road> roadGeometry;
 osg::Camera* cam;
-class PanelProperties : public UIManager
+class PanelProperties : public Panel
 {
 protected:
-    virtual void drawUi() override{
+    virtual void drawImpl() override{
         const auto main_viewport = ImGui::GetMainViewport();
         ImGuiWindowFlags window_flags = 0;
         ImGui::SetNextWindowPos(ImVec2(main_viewport->GetWorkCenter()),ImGuiCond_FirstUseEver);

@@ -26,7 +26,9 @@ RuntimeContext::RuntimeContext(){
     windowSystem = std::make_unique<Windowing::WindowSystem>(windowSettings);
 
     assetManager = std::make_unique<Resources::AssetManager>();
+    uiManager = std::make_unique<GUI::UIManager>();
     
+
 }
 
 RuntimeContext::~RuntimeContext(){    
