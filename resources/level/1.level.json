@@ -28,9 +28,15 @@
                 }
             },
             "typeName": "Transform"
+          },
+          {
+            "context": {
+                "modelPath":"objects/environment/wall/barricada.obj"
+            },
+            "typeName": "Mesh"
           }
         ],
-        "definition": "asset/objects/environment/wall/wall.object.json"
+        "definition": "objects/environment/wall/barricada.obj"
       },
       {
         "name": "Wall_2",
@@ -55,9 +61,50 @@
                 }
             },
             "typeName": "Transform"
+          },
+          {
+            "context": {
+                "modelPath":"objects/environment/wall/barricada.obj"
+            },
+            "typeName": "Mesh"
           }
         ],
-        "definition": "asset/objects/environment/wall/wall.object.json"
+        "definition": "objects/environment/wall/barricada.obj"
+      },
+      {
+        "name": "Fence",
+        "definition": "objects/environment/fence/fence.obj",
+        "instanced_components": [
+          {
+            "context": {
+              "transform": {
+                "rotation": {
+                  "x": 0,
+                  "y": 0,
+                  "z": -0.707683,
+                  "w": 0.70653
+                },
+                "scale": {
+                  "x": 1,
+                  "y": 1,
+                  "z": 1
+                },
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "z": 0
+                }
+              }
+            },
+            "typeName": "Transform"
+          },
+          {
+            "context": {
+                "modelPath":"objects/environment/fence/fence.obj"
+            },
+            "typeName": "Mesh"
+          }
+        ]
       }
     ]
   }

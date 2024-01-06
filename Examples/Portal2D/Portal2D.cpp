@@ -1,7 +1,7 @@
 #include <windows.h>
 #include "Render/Frontend/Movie.h"
 
-#include "GUI/Core/UIManager.h"
+#include "GUI/Core/Panel.h"
 #include "GUI/Helper/ImGuiInitOperation.h"
 #include "Render/LowRender/RenderPipeline.h"
 #include "Render/Effects/GaussianBlur.h"
@@ -33,10 +33,10 @@ bool isHorizontal = false;
 
 using namespace CSEditor::Render;
 using namespace CSEditor::GUI;
-class PanelProperties : public UIManager
+class PanelProperties : public Panel
 {
 protected:
-    virtual void drawUi() override{
+    virtual void drawImpl() override{
         const auto main_viewport = ImGui::GetMainViewport();
         ImGuiWindowFlags window_flags = 0;
         ImGui::SetNextWindowPos(ImVec2(main_viewport->GetWorkCenter()),ImGuiCond_FirstUseEver);

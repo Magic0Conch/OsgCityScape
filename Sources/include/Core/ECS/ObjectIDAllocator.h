@@ -4,7 +4,7 @@
 
 namespace CSEditor::ECS{
 using ObjectID = std::size_t;
-constexpr ObjectID invalidObjectID = std::numeric_limits<std::size_t>::max();
+// constexpr ObjectID invalidObjectID = std::numeric_limits<std::size_t>::max();
 
 class ObjectIDAllocator
 {
