@@ -1,9 +1,17 @@
 #include "Core/ECS/Components/Transform.h"
+#include "Core/ECS/Object.h"
 #include "Core/Helpers/Serializer.h"
+#include "osg/Quat"
 #include "osg/Vec3f"
+#include <memory>
 
 using namespace CSEditor::ECS;
 using namespace CSEditor::Helpers;
+
+Transform::Transform(){
+    m_node = new osg::PositionAttitudeTransform();
+}
+
 void Transform::serialize(Json& jsonObject){
 
 }
@@ -35,11 +43,26 @@ osg::Vec3f Transform::getScale() const {
 }
 void Transform::setPosition(const osg::Vec3f& position) {
     m_position = position;
+    m_node->setPosition(m_position);
 }
 
 void Transform::setRotation(const osg::Vec4f& rotation) {
     m_rotation = rotation;
+    m_node->setAttitude(osg::Quat(m_rotation));
+
 }
 void Transform::setScale(const osg::Vec3f& scale) {
     m_scale = scale;
+    m_node->setScale(m_scale);
+}
+
+osg::ref_ptr<osg::PositionAttitudeTransform> Transform::getNode(){
+    return m_node;
+}
+void Transform::setNode(osg::ref_ptr<osg::PositionAttitudeTransform> node){
+    m_node = node;
+}
+
+void Transform::loadResource(std::shared_ptr<Object> parentObject){
+    m_parentObject = parentObject;
 }

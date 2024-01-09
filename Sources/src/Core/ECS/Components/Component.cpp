@@ -1,4 +1,6 @@
 #include "Core/ECS/Components/Component.h"
+#include <memory>
+#include <string>
 using namespace CSEditor::ECS;
 
 void Component::serialize(Json& jsonObject){
@@ -9,6 +11,19 @@ void Component::deserialize(Json& jsonObject){
 
 }
 
-void Component::postLoadResource(std::weak_ptr<Object> parentObject){
+void Component::loadResource(std::shared_ptr<Object> parentObject){
     m_parentObject = parentObject;
+    
+}
+
+void Component::onComponentAdded(){
+
+}
+
+std::string Component::returnTypeName(){
+    return m_typename;
+}
+
+void Component::setTypeName(std::string typeName){
+    m_typename = typeName;
 }

@@ -3,6 +3,7 @@
 #include "Resources/ResourceManagement/AssetManager.h"
 #include "Resources/ResourceManagement/ConfigManager.h"
 #include "Windowing/Settings/WindowSettings.h"
+#include "GUI/Panels/Hierachy.h"
 #include "Windowing/Window.h"
 #include "osg/ref_ptr"
 #include <memory>
@@ -26,8 +27,8 @@ RuntimeContext::RuntimeContext(){
     windowSystem = std::make_unique<Windowing::WindowSystem>(windowSettings);
 
     assetManager = std::make_unique<Resources::AssetManager>();
-    uiManager = std::make_unique<GUI::UIManager>();
-    
+    uiManager = new GUI::UIManager;
+    // GUI::Hierachy hie;
 
 }
 

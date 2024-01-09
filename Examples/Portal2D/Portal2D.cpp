@@ -1,10 +1,12 @@
 #include <windows.h>
+#include "GUI/Core/UIManager.h"
 #include "Render/Frontend/Movie.h"
 
 #include "GUI/Core/Panel.h"
 #include "GUI/Helper/ImGuiInitOperation.h"
 #include "Render/LowRender/RenderPipeline.h"
 #include "Render/Effects/GaussianBlur.h"
+#include "GUI/Core/UImanager.h"
 #include "osg/ref_ptr"
 
 
@@ -143,7 +145,7 @@ int main(){
     osgViewer::Viewer viewer;
     viewer.setUpViewInWindow(100, 100,width, height);
     viewer.addEventHandler(new osgViewer::StatsHandler());
-    viewer.addEventHandler(new PanelProperties);
+    viewer.addEventHandler(new UIManager());
     viewer.setRealizeOperation(new ImGuiInitOperation);
     auto scene = setupScene();
     scene->setUpdateCallback(new Portal2DUpdateUniformCallback(portal2DPipeline));

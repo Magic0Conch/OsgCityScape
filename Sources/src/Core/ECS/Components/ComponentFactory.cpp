@@ -1,5 +1,7 @@
 #include "Core/ECS/Components/ComponentFactory.h"
+#include "Core/ECS/Components/Component.h"
 #include "Core/ECS/Components/Mesh.h"
+#include <memory>
 
 using namespace  CSEditor::ECS;
 
@@ -10,9 +12,10 @@ std::shared_ptr<Component> ComponentFactory::createComponent(const std::string& 
     };
 
     const auto it = creators.find(type);
+    std::shared_ptr<Component> component;
     if (it != creators.end()) {
-        return it->second();
+        component = it->second();
     }
-
-    return nullptr;
+    component->setTypeName(type);
+    return component;
 }

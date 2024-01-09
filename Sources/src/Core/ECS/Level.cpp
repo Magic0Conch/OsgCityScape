@@ -8,6 +8,7 @@
 #include "Editor/Core/RuntimeContext.h"
 #include "Resources/ResourceType/Common/Level.h"
 #include "Core/ECS/Level.h"
+#include "osgGA/TrackballManipulator"
 
 
 using namespace CSEditor::ECS;
@@ -19,13 +20,27 @@ Level::~Level(){
 }
 
 bool Level::load(const std::string& levelResourceUrl){
+    //setup scene root
+    auto objectId = ObjectIDAllocator::alloc();
+    Transform* transform = new Transform();
+    m_sceneObject = std::make_shared<Object>(objectId,*transform,-1);
+    m_objects[objectId] = m_sceneObject;
+    auto viewer = Core::g_runtimeContext.viewer;
+    viewer->setSceneData(transform->getNode().get());
+    osg::ref_ptr<osgGA::TrackballManipulator> manipulator = new osgGA::TrackballManipulator();
+    manipulator->setHomePosition(osg::Vec3d(0,10,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
+    viewer->setCameraManipulator(manipulator);
+
+    //load level resource
     spdlog::info("Loading level: {}", levelResourceUrl);
     m_levelResourceUrl = levelResourceUrl;
     ResourceType::Level levelResource;
-    const bool isLoadedSuccess = Core::g_runtimeContext.assetManager->loadAsset(levelResourceUrl, levelResource);
+    Core::g_runtimeContext.assetManager->loadAsset(levelResourceUrl, levelResource);
     auto objects = levelResource.getObjects();
     for (const ResourceType::ObjectInstance& objectInstanceRes:objects) {
-        createObject(objectInstanceRes);
+        auto curObjectId = createObject(objectInstanceRes);
+        auto thisTransform = m_objects[curObjectId]->getTransformComponent().getNode();
+        transform->getNode()->addChild(thisTransform);
     }
     m_isLoaded = true;
     return true;
@@ -33,17 +48,21 @@ bool Level::load(const std::string& levelResourceUrl){
 
 ObjectID Level::createObject(const ResourceType::ObjectInstance& objectInstance){
     auto objectId = ObjectIDAllocator::alloc();
-    std::shared_ptr<ECS::Object> object = std::make_shared<ECS::Object>(objectId);
+    Transform* transform = new Transform();
+    std::shared_ptr<ECS::Object> object = std::make_shared<ECS::Object>(objectId,*transform,m_sceneObject->getID());
     bool isLoaded = object->load(objectInstance);
     if(isLoaded){
-        m_gobjects[objectId] = object;
+        m_objects[objectId] = object;
     }
     return objectId;
 }
 
 
 void Level::buildSceneGraph(){
-    osg::ref_ptr<osg::Group> root = new osg::Group;
+
+    for (auto&[objectId,objectPtr] :m_objects) {
+        
+    }
     // auto objects = levelResource.getObjects();
 
 

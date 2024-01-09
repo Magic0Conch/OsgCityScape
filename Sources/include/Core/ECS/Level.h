@@ -2,10 +2,13 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include "Core/ECS/Object.h"
 #include "ObjectIDAllocator.h"
 #include "Core/ECS/Level.h"
 #include "Resources/ResourceType/Common/Object.h"
 #include "Object.h"
+#include "osg/Group"
+#include "osg/ref_ptr"
 namespace CSEditor::ECS{
 
 class GObject;
@@ -16,6 +19,7 @@ class Level
 {
 public:
 
+    // Level();
     virtual ~Level();
 
     bool load(const std::string& levelResourceUrl);
@@ -45,7 +49,8 @@ protected:
     bool m_isLoaded {false};
     std::string m_levelResourceUrl;
 
-    std::unordered_map<ObjectID, std::shared_ptr<Object>> m_gobjects;
+    std::unordered_map<ObjectID, std::shared_ptr<Object>> m_objects;    
+    std::shared_ptr<Object> m_sceneObject;
 };
 
 }
