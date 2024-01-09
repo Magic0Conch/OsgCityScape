@@ -6,6 +6,8 @@
 #include <memory>
 #include <stdint.h>
 #include <osg/GraphicsContext>
+#include "Resources/RenderTexture.h"
+
 namespace CSEditor::Windowing {
 
 class WindowSystem{
@@ -19,7 +21,8 @@ public:
     std::string getTitle() const;
     void setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow);
     void setViewport(osg::ref_ptr<osg::Viewport> viewport);
-
+    osg::ref_ptr<Resources::RenderTexture> getScreenTexture();
+    
 private:
     std::string m_title;
     std::pair<uint16_t, uint16_t> m_size;
@@ -33,6 +36,7 @@ private:
     osg::ref_ptr<osgViewer::GraphicsWindow> m_graphicsWindow = nullptr;
     osg::ref_ptr<osg::Viewport> m_viewport = nullptr;
     osg::GraphicsContext::ScreenSettings m_screenSettings;
+    osg::ref_ptr<Resources::RenderTexture> m_screenTexture;
     
 };
 }

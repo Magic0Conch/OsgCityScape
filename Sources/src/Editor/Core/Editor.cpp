@@ -24,6 +24,10 @@
 #include <imgui.h>
 #include "GUI/Panels/Hierachy.h"
 #include "GUI/Panels/Inspector.h"
+#include "GUI/Panels/Console.h"
+#include "GUI/Panels/Project.h"
+#include "GUI/Panels/Scene.h"
+#include "GUI/Panels/MainMenuBar.h"
 #include "GUI/Helper/ImGuiInitOperation.h"
 
 using namespace CSEditor::Core;
@@ -74,11 +78,13 @@ void Editor::renderTick(float frameTime){
 
 void Editor::setUpUI(){
     g_runtimeContext.viewer->addEventHandler(new osgViewer::StatsHandler());
-    g_runtimeContext.viewer->addEventHandler(new GUI::Hierachy);
-    // g_runtimeContext.viewer->addEventHandler(new GUI::Inspector);
+    g_runtimeContext.viewer->addEventHandler(Core::g_runtimeContext.uiManager.get());
+    g_runtimeContext.uiManager->createPanel<GUI::Hierachy>("Hierachy");
+    g_runtimeContext.uiManager->createPanel<GUI::Inspector>("Inspector");
+    g_runtimeContext.uiManager->createPanel<GUI::Console>("Console");
+    g_runtimeContext.uiManager->createPanel<GUI::Project>("Project");
+    g_runtimeContext.uiManager->createPanel<GUI::Scene>("Scene");
+    g_runtimeContext.uiManager->createPanel<GUI::MainMenuBar>("MainMenuBar");
     g_runtimeContext.viewer->setRealizeOperation(new GUI::ImGuiInitOperation);
-    // g_runtimeContext.viewer->run();
     CSEditor::Core::g_runtimeContext.viewer->realize();
-
-    
 }

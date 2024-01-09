@@ -1,5 +1,6 @@
 #include <memory>
 #include <windows.h>
+#include "GUI/Core/UIManager.h"
 #include "Render/Entities/Circle.h"
 #include "Render/Entities/Cylinder.h"
 #include "Render/Effects/Bloom.h"
@@ -225,7 +226,7 @@ int main(){
     osgViewer::Viewer viewer;
     viewer.setUpViewInWindow(100, 100,resolution.x(),resolution.y());
     viewer.addEventHandler(new osgViewer::StatsHandler());
-    viewer.addEventHandler(new PanelProperties);
+    viewer.addEventHandler(new GUI::UIManager);
     viewer.setRealizeOperation(new GUI::ImGuiInitOperation);
     auto scene = setupScene();
     

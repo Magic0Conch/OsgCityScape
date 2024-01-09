@@ -1,7 +1,9 @@
 #include "Core/ECS/Components/Mesh.h"
+#include "Core/ECS/Object.h"
 #include "Editor/Core/RuntimeContext.h"
 #include "osgDB/ReadFile"
 #include "Resources/ResourceManagement/ConfigManager.h"
+#include <memory>
 #include <string>
 
 using namespace CSEditor::ECS;
@@ -17,3 +19,11 @@ void Mesh::deserialize(Json &jsonObject){
     meshNode = osgDB::readNodeFile(absoluteModelPathString);
 }
 
+void Mesh::loadResource(std::shared_ptr<Object> parentObject){
+    m_parentObject = parentObject;
+    auto transformNode = parentObject->getTransformComponent().getNode();
+    transformNode->addChild(meshNode);
+    // osg::ref_ptr<osg::Geode> geodeNode = new osg::Geode;
+    // geodeNode->addDrawable(meshNode);
+
+}

@@ -1,9 +1,12 @@
 #include "Windowing/Window.h"
 #include "Windowing/Settings/WindowSettings.h"
-#include "osg/Viewport"
 #include "spdlog/spdlog.h"
-#include <osgViewer/Viewer>
 #include "Editor/Core/RuntimeContext.h"
+#include <osg/Camera>
+#include <osg/Texture2D>
+#include <osgDB/ReadFile>
+#include <osgGA/TrackballManipulator>
+#include <osgViewer/Viewer>
 using namespace CSEditor::Windowing;
 
 // extern CSEditor::Core::RuntimeContext g_runtimeContext;
@@ -67,7 +70,10 @@ void WindowSystem::createWindow(const Settings::WindowSettings& windowSettings){
     mainCamera->setViewport(new osg::Viewport( m_position.first, m_position.second, windowSettings.width, windowSettings.height));
     m_viewport = mainCamera->getViewport();
     mainCamera->setGraphicsContext(gc);
-    
+    mainCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+    m_screenTexture = new Resources::RenderTexture(windowSettings.width,windowSettings.height);
+    mainCamera->attach( osg::Camera::COLOR_BUFFER, m_screenTexture.get());
+    m_screenTexture->getTextureTarget();
     osgViewer::Viewer::Windows windows;
     CSEditor::Core::g_runtimeContext.viewer->getWindows(windows);
     m_graphicsWindow = windows.front();
@@ -78,4 +84,8 @@ void WindowSystem::setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> gra
 }
 void WindowSystem::setViewport(osg::ref_ptr<osg::Viewport> viewport){
     m_viewport = viewport;
+}
+
+osg::ref_ptr<CSEditor::Resources::RenderTexture> WindowSystem::getScreenTexture(){
+    return m_screenTexture;
 }

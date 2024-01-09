@@ -1,4 +1,6 @@
-#include "GUI/Core/UImanager.h"
+#include "GUI/Core/UIManager.h"
+#include "Editor/Core/RuntimeContext.h"
+#include "Windowing/Window.h"
 #include <imgui.h>
 #include<iostream>
 namespace CSEditor::GUI{
@@ -27,6 +29,10 @@ struct UIManager::ImGuiRenderCallback : public osg::Camera::DrawCallback
 
     void operator()(osg::RenderInfo& renderInfo) const override{
         handler_.render(renderInfo);
+        auto contextId = renderInfo.getContextID();
+        auto textureObject = Core::g_runtimeContext.windowSystem->getScreenTexture()->getTextureObject(contextId);
+        auto id = textureObject->id();
+        std::cout<<id<<std::endl;
     }
 
 private:
@@ -35,9 +41,9 @@ private:
 
 
 UIManager::UIManager(): time_(0.0f), mousePressed_{false}, mouseWheel_(0.0f), initialized_(false){
-    
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImGui_ImplOpenGL3_Init();
     initIO();
     
     ApplyStyle();
@@ -49,7 +55,7 @@ UIManager::UIManager(): time_(0.0f), mousePressed_{false}, mouseWheel_(0.0f), in
 }
 
 UIManager::~UIManager(){
-    ImGui_ImplOpenGL3_Shutdown();
+    // ImGui_ImplOpenGL3_Shutdown();
 	ImGui::DestroyContext();
 }
 
@@ -304,7 +310,7 @@ void UIManager::EnableDocking(bool flg){
 }
 
 void UIManager::newFrame(osg::RenderInfo& renderInfo){
-    if (!panels_.size()) return;
+    // if (!panels_.size()) return;
     ImGui_ImplOpenGL3_NewFrame();
     ImGuiIO& io = ImGui::GetIO();
 
@@ -320,6 +326,7 @@ void UIManager::newFrame(osg::RenderInfo& renderInfo){
     }
     io.MouseWheel = mouseWheel_;
     mouseWheel_ = 0.0f;
+	ImGui::NewFrame();
     if (dockspace_on_){
         ImGuiViewport* viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->Pos);
@@ -334,7 +341,6 @@ void UIManager::newFrame(osg::RenderInfo& renderInfo){
         ImGui::End();
         ImGui::PopStyleVar(3);      
     }
-	ImGui::NewFrame();
 }
 
 void UIManager::render(osg::RenderInfo&){

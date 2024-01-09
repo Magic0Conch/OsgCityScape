@@ -3,7 +3,7 @@
 #include "GUI/Core/Panel.h"
 
 namespace CSEditor::GUI {
-class Hierachy : public Panel{
+class Project : public Panel{
 protected:
     virtual void drawImpl() override;
 };

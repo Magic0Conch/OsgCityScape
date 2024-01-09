@@ -3,6 +3,7 @@
 #include <utility>
 #include <vector>
 #include <windows.h>
+#include "GUI/Core/UIManager.h"
 #include "Render/Entities/Road.h"
 #include "Render/Effects/Bloom.h"
 #include "GUI/Core/Panel.h"
@@ -240,7 +241,7 @@ int main( int argc, char** argv )
     manipulator->setHomePosition(osg::Vec3d(0,40,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
     viewer.setCameraManipulator(manipulator);
     viewer.setSceneData(setupScene());
-    viewer.addEventHandler(new PanelProperties);
+    viewer.addEventHandler(new UIManager);
     viewer.setRealizeOperation(new ImGuiInitOperation);
     osg::Camera* cam = viewer.getCamera();
 
