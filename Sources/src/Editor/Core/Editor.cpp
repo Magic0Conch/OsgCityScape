@@ -2,6 +2,7 @@
 #include "Editor/Core/RuntimeContext.h"
 #include "osgViewer/GraphicsWindow"
 #include <iostream>
+#include <memory>
 #include <ostream>
 #include <stdlib.h>
 #include <string.h>
@@ -87,4 +88,6 @@ void Editor::setUpUI(){
     g_runtimeContext.uiManager->createPanel<GUI::MainMenuBar>("MainMenuBar");
     g_runtimeContext.viewer->setRealizeOperation(new GUI::ImGuiInitOperation);
     CSEditor::Core::g_runtimeContext.viewer->realize();
+    g_runtimeContext.logSystem = std::make_unique<Helpers::LogSystem>();
+    g_runtimeContext.logSystem->info("Hello world");
 }

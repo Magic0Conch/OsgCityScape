@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/Helpers/LogSystem.h"
 #include "GUI/Core/UIManager.h"
 #include "Resources/ResourceManagement/AssetManager.h"
 #include <osgViewer/Viewer>
@@ -15,6 +16,10 @@ namespace CSEditor{
     namespace ECS {
         class WorldManager;
     }
+
+    namespace Helpers {
+        class LogSystem;
+    }
 }
 
 namespace CSEditor::Core {
@@ -29,6 +34,7 @@ public:
     std::unique_ptr<Resources::ConfigManager> configManager;
     std::unique_ptr<Resources::AssetManager> assetManager;
     osg::ref_ptr<GUI::UIManager> uiManager;
+    std::unique_ptr<Helpers::LogSystem> logSystem;
 };
 
 extern RuntimeContext g_runtimeContext;

@@ -8,6 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+# add_definitions(OSG_DISABLE_MSVC_WARNINGS)
 endif()
 
 # add_definitions(-DBOOST_THREAD_USE_LIB)
