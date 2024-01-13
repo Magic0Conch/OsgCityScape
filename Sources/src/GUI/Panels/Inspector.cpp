@@ -10,7 +10,7 @@ void Inspector::drawImpl(){
     bool p_open = true;
     if(ImGui::Begin("Inspector",&p_open,window_flags)){
         if (ImGui::TreeNode("Transform Properties")){
-
+            
             ImGui::TreePop();
         }
 
