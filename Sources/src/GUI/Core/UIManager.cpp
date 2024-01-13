@@ -1,6 +1,7 @@
 #include "GUI/Core/UIManager.h"
 #include "Editor/Core/RuntimeContext.h"
 #include "Windowing/Window.h"
+#include "osgGA/GUIEventAdapter"
 #include <imgui.h>
 #include<iostream>
 namespace CSEditor::GUI{
@@ -44,6 +45,8 @@ UIManager::UIManager(): time_(0.0f), mousePressed_{false,false,false}, mouseWhee
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplOpenGL3_Init();
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
     initIO();
     
     ApplyStyle();
@@ -58,6 +61,7 @@ UIManager::~UIManager(){
     // ImGui_ImplOpenGL3_Shutdown();
 	ImGui::DestroyContext();
 }
+
 
 void UIManager::setCameraCallbacks(osg::Camera* camera)
 {
@@ -104,28 +108,27 @@ static int ConvertFromOSGKey(int key)
 
 void UIManager::initIO(){
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
     // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
-    io.KeyMap[ImGuiKey_Tab] = ImGuiKey_Tab;
-    io.KeyMap[ImGuiKey_LeftArrow] = ImGuiKey_LeftArrow;
-    io.KeyMap[ImGuiKey_RightArrow] = ImGuiKey_RightArrow;
-    io.KeyMap[ImGuiKey_UpArrow] = ImGuiKey_UpArrow;
-    io.KeyMap[ImGuiKey_DownArrow] = ImGuiKey_DownArrow;
-    io.KeyMap[ImGuiKey_PageUp] = ImGuiKey_PageUp;
-    io.KeyMap[ImGuiKey_PageDown] = ImGuiKey_PageDown;
-    io.KeyMap[ImGuiKey_Home] = ImGuiKey_Home;
-    io.KeyMap[ImGuiKey_End] = ImGuiKey_End;
-    io.KeyMap[ImGuiKey_Delete] = ImGuiKey_Delete;
-    io.KeyMap[ImGuiKey_Backspace] = ImGuiKey_Backspace;
-    io.KeyMap[ImGuiKey_Enter] = ImGuiKey_Enter;
-    io.KeyMap[ImGuiKey_Escape] = ImGuiKey_Escape;
-    io.KeyMap[ImGuiKey_A] = osgGA::GUIEventAdapter::KeySymbol::KEY_A;
-    io.KeyMap[ImGuiKey_C] = osgGA::GUIEventAdapter::KeySymbol::KEY_C;
-    io.KeyMap[ImGuiKey_V] = osgGA::GUIEventAdapter::KeySymbol::KEY_V;
-    io.KeyMap[ImGuiKey_X] = osgGA::GUIEventAdapter::KeySymbol::KEY_X;
-    io.KeyMap[ImGuiKey_Y] = osgGA::GUIEventAdapter::KeySymbol::KEY_Y;
-    io.KeyMap[ImGuiKey_Z] = osgGA::GUIEventAdapter::KeySymbol::KEY_Z;
-    io.ConfigWindowsMoveFromTitleBarOnly = true; /* Disable moving windows by dragging another thing than the title bar */
+    // io.KeyMap[ImGuiKey_Tab] = ImGuiKey_Tab;
+    // io.KeyMap[ImGuiKey_LeftArrow] = ImGuiKey_LeftArrow;
+    // io.KeyMap[ImGuiKey_RightArrow] = ImGuiKey_RightArrow;
+    // io.KeyMap[ImGuiKey_UpArrow] = ImGuiKey_UpArrow;
+    // io.KeyMap[ImGuiKey_DownArrow] = ImGuiKey_DownArrow;
+    // io.KeyMap[ImGuiKey_PageUp] = ImGuiKey_PageUp;
+    // io.KeyMap[ImGuiKey_PageDown] = ImGuiKey_PageDown;
+    // io.KeyMap[ImGuiKey_Home] = ImGuiKey_Home;
+    // io.KeyMap[ImGuiKey_End] = ImGuiKey_End;
+    // io.KeyMap[ImGuiKey_Delete] = ImGuiKey_Delete;
+    // io.KeyMap[ImGuiKey_Backspace] = 523;
+    // io.KeyMap[ImGuiKey_Enter] = ImGuiKey_Enter;
+    // io.KeyMap[ImGuiKey_Escape] = ImGuiKey_Escape;
+    // io.KeyMap[ImGuiKey_A] = osgGA::GUIEventAdapter::KeySymbol::KEY_A;
+    // io.KeyMap[ImGuiKey_C] = osgGA::GUIEventAdapter::KeySymbol::KEY_C;
+    // io.KeyMap[ImGuiKey_V] = osgGA::GUIEventAdapter::KeySymbol::KEY_V;
+    // io.KeyMap[ImGuiKey_X] = osgGA::GUIEventAdapter::KeySymbol::KEY_X;
+    // io.KeyMap[ImGuiKey_Y] = osgGA::GUIEventAdapter::KeySymbol::KEY_Y;
+    // io.KeyMap[ImGuiKey_Z] = osgGA::GUIEventAdapter::KeySymbol::KEY_Z;
 }
 // void UIManager::SetupIconFont(){
 //     ImGuiIO& io = ImGui::GetIO();
@@ -171,7 +174,7 @@ void  UIManager::ApplyStyle()
 	// case OvUI::Styling::EStyle::IM_LIGHT_STYLE:		ImGui::StyleColorsLight();		break;
 	// }
     //ImGui::StyleColorsDark();
-
+    style->WindowMenuButtonPosition = -1;
 	if (0)
 	{
 		style->WindowPadding = ImVec2(15, 15);
@@ -377,10 +380,9 @@ bool UIManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter
             const int special_key = ConvertFromOSGKey(c);
             if (special_key > 0)
             {
-                assert((special_key >= 0 && special_key < 512) && "ImGui KeysMap is an array of 512");
-
-                io.KeysDown[special_key] = isKeyDown;
-
+                assert((special_key >= 0 && special_key < 645) && "ImGui KeysMap is an array of 645");
+                io.KeysData[special_key].Down = isKeyDown;
+                
                 io.KeyCtrl = ea.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_CTRL;
                 io.KeyShift = ea.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_SHIFT;
                 io.KeyAlt = ea.getModKeyMask() & osgGA::GUIEventAdapter::MODKEY_ALT;

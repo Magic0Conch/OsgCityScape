@@ -5,6 +5,7 @@ using namespace CSEditor::GUI;
 void Project::drawImpl(){
     const auto main_viewport = ImGui::GetMainViewport();
     ImGuiWindowFlags window_flags = 0;
+    window_flags |= ImGuiWindowFlags_NoCollapse;
     ImGui::SetNextWindowPos(ImVec2(main_viewport->GetWorkCenter()),ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(550,680),ImGuiCond_FirstUseEver);
     bool p_open = true;

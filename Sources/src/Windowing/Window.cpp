@@ -77,6 +77,7 @@ void WindowSystem::createWindow(const Settings::WindowSettings& windowSettings){
     osgViewer::Viewer::Windows windows;
     CSEditor::Core::g_runtimeContext.viewer->getWindows(windows);
     m_graphicsWindow = windows.front();
+    osg::setNotifyLevel(osg::FATAL);
 }
 
 void WindowSystem::setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow){

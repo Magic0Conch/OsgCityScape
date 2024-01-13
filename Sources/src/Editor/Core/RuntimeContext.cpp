@@ -29,7 +29,7 @@ RuntimeContext::RuntimeContext(){
     assetManager = std::make_unique<Resources::AssetManager>();
     uiManager = new GUI::UIManager;
     // GUI::Hierachy hie;
-
+    
 }
 
 RuntimeContext::~RuntimeContext(){    
