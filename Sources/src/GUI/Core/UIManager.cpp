@@ -29,10 +29,10 @@ struct UIManager::ImGuiRenderCallback : public osg::Camera::DrawCallback
 
     void operator()(osg::RenderInfo& renderInfo) const override{
         handler_.render(renderInfo);
-        auto contextId = renderInfo.getContextID();
-        auto textureObject = Core::g_runtimeContext.windowSystem->getScreenTexture()->getTextureObject(contextId);
-        auto id = textureObject->id();
-        std::cout<<id<<std::endl;
+        // auto contextId = renderInfo.getContextID();
+        // auto textureObject = Core::g_runtimeContext.windowSystem->getScreenTexture()->getTextureObject(contextId);
+        // auto id = textureObject->id();
+        // std::cout<<id<<std::endl;
     }
 
 private:
@@ -40,7 +40,7 @@ private:
 };
 
 
-UIManager::UIManager(): time_(0.0f), mousePressed_{false}, mouseWheel_(0.0f), initialized_(false){
+UIManager::UIManager(): time_(0.0f), mousePressed_{false,false,false}, mouseWheel_(0.0f), initialized_(false){
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplOpenGL3_Init();
@@ -104,7 +104,7 @@ static int ConvertFromOSGKey(int key)
 
 void UIManager::initIO(){
     ImGuiIO& io = ImGui::GetIO();
-
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     // Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
     io.KeyMap[ImGuiKey_Tab] = ImGuiKey_Tab;
     io.KeyMap[ImGuiKey_LeftArrow] = ImGuiKey_LeftArrow;

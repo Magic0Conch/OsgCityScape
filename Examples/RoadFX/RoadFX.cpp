@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 #include <windows.h>
@@ -69,6 +70,9 @@ protected:
         bool p_open = true;
         if(ImGui::Begin("Path FX",&p_open,window_flags)){
             if (ImGui::TreeNode("Geometry")){
+                // std::string text;
+                // char tt[45];
+                // ImGui::InputText("const char *label", tt, 45);
                 ImGui::SliderInt("Segments",&segments,2,32);
                 if(ImGui::IsItemEdited()){
                     roadGeometry->setSegments(segments);
