@@ -1,12 +1,14 @@
 #pragma once
 #include "Component.h"
 #include "Core/ECS/Components/Component.h"
+#include "Core/ECS/ObjectIDAllocator.h"
 #include "osg/NodeVisitor"
 #include "osg/Vec3f"
 #include "osg/Vec4f"
 #include "osg/ref_ptr"
 #include <string>
 #include <osg/PositionAttitudeTransform>
+#include <vector>
 
 namespace CSEditor::ECS {
 
@@ -27,11 +29,17 @@ public:
     void setRotation(const osg::Vec4f& rotation);
     void setScale(const osg::Vec3f& scale);
     void setNode(osg::ref_ptr<osg::PositionAttitudeTransform> node);
+    void addChild(Transform& childTransform);
+    std::shared_ptr<Object> getObject() const;
+    ObjectID getObjectID() const;
+    const bool isLeaf() const;
+    const std::vector<int>& getChildIndex() const; 
+
 private:
     osg::Vec3f m_position;
     osg::Vec4f m_rotation;
     osg::Vec3f m_scale;
     osg::ref_ptr<osg::PositionAttitudeTransform> m_node;
-    
+    std::vector<int> m_childrenIndex;
 };
 }

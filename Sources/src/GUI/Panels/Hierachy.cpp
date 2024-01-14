@@ -1,6 +1,36 @@
 #include "GUI/Panels/Hierachy.h"
+#include "Editor/Core/RuntimeContext.h"
+#include "Core/ECS/WorldManager.h"
+#include "Core/ECS/Level.h"
+#include "imgui.h"
 
 using namespace CSEditor::GUI;
+
+Hierachy::Hierachy():m_objectsMap(Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->getSceneObjectsMap()){
+}
+
+void Hierachy::drawHierachyNodeRecursively(ECS::ObjectID objectID){
+    const auto& curObject = m_objectsMap[objectID];
+    ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick ;
+    if (curObject->getID() == m_nodeClicked){
+        nodeFlags |= ImGuiTreeNodeFlags_Selected;
+    }
+    if(curObject->isLeaf()){
+        nodeFlags |= ImGuiTreeNodeFlags_Leaf;
+    }
+    bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)objectID, nodeFlags, "%s", &curObject->getName()[0]);
+    if (ImGui::IsItemClicked()){
+        m_nodeClicked = objectID;   
+        UIEveneManager::getInstance().selectHierachyEvent.invoke(m_nodeClicked);
+    }
+    if(nodeOpen){
+        for (const auto& id : curObject->getChildIndex()) {
+            ImGui::SetCursorPosX((ImGui::GetCursorPosX() - ImGui::GetTreeNodeToLabelSpacing())*1.5);
+            drawHierachyNodeRecursively(id);
+        }
+        ImGui::TreePop();
+    }
+}
 
 void Hierachy::drawImpl(){
     const auto main_viewport = ImGui::GetMainViewport();
@@ -10,30 +40,28 @@ void Hierachy::drawImpl(){
     ImGui::SetNextWindowSize(ImVec2(550,680),ImGuiCond_FirstUseEver);
     bool p_open = true;
     if(ImGui::Begin("Hierachy",&p_open,window_flags)){
-        static int node_clicked = -1;
-        for (int i = 0; i < 6; i++)
-        {
-            ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-            if (i == node_clicked)
-                node_flags |= ImGuiTreeNodeFlags_Selected;
-            bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags, "Selectable Node %d", i);
-            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-                node_clicked = i;
-            if (node_open)
-            {
-                ImGui::BulletText("Blah blah\nBlah Blah");
-                ImGui::TreePop();
+        m_filter.Draw("search",-50);
+        // auto& keys = m_objectsMap.
+        if(m_filter.IsActive()){
+            for (const auto&[objectID,object]:m_objectsMap) {
+                ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
+                if(!m_filter.PassFilter(&object->getName()[0]))
+                    continue;
+                if (objectID == m_nodeClicked)
+                    node_flags |= ImGuiTreeNodeFlags_Selected;
+                bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)objectID, node_flags, "%s", &object->getName()[0]);
+                if (node_open)
+                {
+                    ImGui::BulletText("Blah blah\nBlah Blah");
+                    ImGui::TreePop();
+                }
+                if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+                    m_nodeClicked = objectID;                
             }
         }
-        // if (node_clicked != -1)
-        // {
-        //     // Update selection state
-        //     // (process outside of tree loop to avoid visual inconsistencies during the clicking frame)
-        //     // if (ImGui::GetIO().KeyCtrl)
-        //     //     selection_mask ^= (1 << node_clicked);          // CTRL+click to toggle
-        //     // else //if (!(selection_mask & (1 << node_clicked))) // Depending on selection behavior you want, may want to preserve selection when clicking on item that is part of the selection
-        //     //     selection_mask = (1 << node_clicked);           // Click to single-select
-        // }
+        else {
+            drawHierachyNodeRecursively(0);
+        }
     }
     ImGui::End();
     ImGui::ShowDemoWindow();

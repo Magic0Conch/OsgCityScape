@@ -48,7 +48,7 @@ void WorldManager::tick(float delta_time)
     }
 
     // tick the active level
-    std::shared_ptr<ECS::Level> activeLevel = m_currentActiveLevel.lock();
+    std::shared_ptr<ECS::Level> activeLevel = m_currentActiveLevel;
     if (activeLevel){
         // active_level->tick(delta_time);
     }
@@ -81,20 +81,19 @@ bool WorldManager::loadWorld(const std::string& world_url)
 bool WorldManager::loadLevel(const std::string& levelUrl)
 {
     // std::shared_ptr<ECS::Level> level = std::make_shared<ECS::Level>();
-    Level level;
-    m_currentActiveLevel = std::make_shared<Level>(level);
+    m_currentActiveLevel = std::make_shared<Level>();
 
-    const bool isLevelLoadSuccess = level.load(levelUrl);
+    const bool isLevelLoadSuccess = m_currentActiveLevel->load(levelUrl);
     if (!isLevelLoadSuccess){
         return false;
     }
 
-    m_loadedLevels[levelUrl] = m_currentActiveLevel.lock();
+    m_loadedLevels[levelUrl] = m_currentActiveLevel;
     return true;
 }
 
 void WorldManager::reloadCurrentLevel(){
-    auto active_level = m_currentActiveLevel.lock();
+    auto active_level = m_currentActiveLevel;
     if (active_level == nullptr)
     {
         // LOG_WARN("current level is nil");
@@ -123,7 +122,7 @@ void WorldManager::reloadCurrentLevel(){
 
 void WorldManager::saveCurrentLevel()
 {
-    auto active_level = m_currentActiveLevel.lock();
+    auto active_level = m_currentActiveLevel;
 
     if (active_level == nullptr)
     {
@@ -132,6 +131,10 @@ void WorldManager::saveCurrentLevel()
     }
 
     // active_level->save();
+}
+
+std::shared_ptr<ECS::Level> WorldManager::getCurrentActiveLevel() const{
+    return m_currentActiveLevel; 
 }
 
 

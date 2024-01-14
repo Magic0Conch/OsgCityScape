@@ -1,6 +1,7 @@
 #include "Core/ECS/Components/Mesh.h"
 #include "Core/ECS/Object.h"
 #include "Editor/Core/RuntimeContext.h"
+#include "Core/ECS/Components/Mesh.h"
 #include "osgDB/ReadFile"
 #include "Resources/ResourceManagement/ConfigManager.h"
 #include <memory>

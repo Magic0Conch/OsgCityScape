@@ -66,3 +66,24 @@ void Transform::setNode(osg::ref_ptr<osg::PositionAttitudeTransform> node){
 void Transform::loadResource(std::shared_ptr<Object> parentObject){
     m_parentObject = parentObject;
 }
+
+void Transform::addChild(Transform& childTransform){
+    m_childrenIndex.emplace_back(childTransform.getObjectID());
+    getNode()->addChild(childTransform.getNode());
+}
+
+std::shared_ptr<Object> Transform::getObject() const{
+    return m_parentObject.lock();
+}
+
+ObjectID Transform::getObjectID() const{
+    return m_parentObject.lock()->getID();
+}
+
+const bool Transform::isLeaf() const{
+    return m_childrenIndex.empty();
+}
+
+const std::vector<int>& Transform::getChildIndex() const{
+    return m_childrenIndex;
+}

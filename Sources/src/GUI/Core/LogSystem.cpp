@@ -15,13 +15,13 @@ void LogSystem::info(std::string&& msg){
 }
 
 
-void LogSystem::error(std::string& msg){
+void LogSystem::error(std::string&& msg){
     m_console.addLog("[%05d] [%s]  %.1f,'%s'\n",
     ImGui::GetFrameCount(), "error", ImGui::GetTime(), msg.c_str());
     ++m_counter;
 }
 
-void LogSystem::warn(std::string& msg){
+void LogSystem::warn(std::string&& msg){
     m_console.addLog("[%05d] [%s]  %.1f,'%s'\n",
     ImGui::GetFrameCount(), "warn", ImGui::GetTime(), msg.c_str());
     ++m_counter;

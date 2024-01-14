@@ -22,11 +22,14 @@ Level::~Level(){
 bool Level::load(const std::string& levelResourceUrl){
     //setup scene root
     auto objectId = ObjectIDAllocator::alloc();
-    Transform* transform = new Transform();
-    m_sceneObject = std::make_shared<Object>(objectId,*transform,-1);
+    Transform* rootTransform = new Transform();
+    m_sceneObject = std::make_shared<Object>(objectId,-1);
+    m_sceneObject->setTransform(rootTransform);
+    m_sceneObject->setName("Scene");
     m_objects[objectId] = m_sceneObject;
     auto viewer = Core::g_runtimeContext.viewer;
-    viewer->setSceneData(transform->getNode().get());
+    viewer->setSceneData(rootTransform->getNode().get());
+
     osg::ref_ptr<osgGA::TrackballManipulator> manipulator = new osgGA::TrackballManipulator();
     manipulator->setHomePosition(osg::Vec3d(0,10,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
     viewer->setCameraManipulator(manipulator);
@@ -39,8 +42,8 @@ bool Level::load(const std::string& levelResourceUrl){
     auto objects = levelResource.getObjects();
     for (const ResourceType::ObjectInstance& objectInstanceRes:objects) {
         auto curObjectId = createObject(objectInstanceRes);
-        auto thisTransform = m_objects[curObjectId]->getTransformComponent().getNode();
-        transform->getNode()->addChild(thisTransform);
+        auto thisTransform = m_objects[curObjectId]->getTransformComponent();
+        m_sceneObject->addChild(thisTransform);
     }
     m_isLoaded = true;
     return true;
@@ -49,7 +52,8 @@ bool Level::load(const std::string& levelResourceUrl){
 ObjectID Level::createObject(const ResourceType::ObjectInstance& objectInstance){
     auto objectId = ObjectIDAllocator::alloc();
     Transform* transform = new Transform();
-    std::shared_ptr<ECS::Object> object = std::make_shared<ECS::Object>(objectId,*transform,m_sceneObject->getID());
+    std::shared_ptr<ECS::Object> object = std::make_shared<ECS::Object>(objectId,m_sceneObject->getID());
+    object->setTransform(transform);
     bool isLoaded = object->load(objectInstance);
     if(isLoaded){
         m_objects[objectId] = object;
@@ -68,6 +72,19 @@ void Level::buildSceneGraph(){
 
     // Core::g_runtimeContext.viewer.set
 }
+
+std::shared_ptr<Object> Level::getRootObject(){
+    return m_sceneObject;
+}
+
+std::shared_ptr<Object> Level::getSceneObjectById(const ObjectID& objectID){
+    return m_objects[objectID];
+}
+
+std::unordered_map<ObjectID, std::shared_ptr<Object>>& Level::getSceneObjectsMap(){
+    return m_objects;
+}
+
 
 
 // void Level::unload(){
