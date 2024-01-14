@@ -8,8 +8,8 @@ using namespace CSEditor::GUI;
 void Scene::drawImpl(){
     const auto main_viewport = ImGui::GetMainViewport();
     ImGuiWindowFlags window_flags = 0;
-    ImGui::SetNextWindowPos(ImVec2(main_viewport->GetWorkCenter()),ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(550,680),ImGuiCond_FirstUseEver);
+    // ImGui::SetNextWindowPos(ImVec2(main_viewport->GetWorkCenter()),ImGuiCond_FirstUseEver);
+    // ImGui::SetNextWindowSize(ImVec2(550,680),ImGuiCond_FirstUseEver);
     window_flags |= ImGuiWindowFlags_NoScrollbar;
     window_flags |= ImGuiWindowFlags_NoCollapse;
     bool p_open = true;

@@ -31,9 +31,12 @@ void Console::drawImpl(){
     bool p_open = true;
     ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
     ImGui::Begin("Console", &p_open);
-    if (ImGui::SmallButton("[Debug] Add 5 entries"))
+    if (ImGui::SmallButton("[Debug] Log a info"))
     {
-        Core::g_runtimeContext.logSystem->info("!!!fsdfsdfdsf");
+        Core::g_runtimeContext.logSystem->info("info!");
+        Core::g_runtimeContext.logSystem->error("error!");
+        Core::g_runtimeContext.logSystem->info("info!");
+
     }
     ImGui::End();
     if (!ImGui::Begin("Console", &p_open))

@@ -19,7 +19,7 @@ public:
     void saveCurrentLevel();
 
     void tick(float delta_time);
-    std::weak_ptr<ECS::Level> getCurrentActiveLevel() const { return m_currentActiveLevel; }
+    std::shared_ptr<ECS::Level> getCurrentActiveLevel() const;
 
 private:
     bool loadLevel(const std::string& level_url);
@@ -32,7 +32,7 @@ private:
     // all loaded levels, key: level url, vaule: level instance
     std::unordered_map<std::string, std::shared_ptr<ECS::Level>> m_loadedLevels;
     // active level, currently we just support one active level
-    std::weak_ptr<ECS::Level> m_currentActiveLevel;
+    std::shared_ptr<ECS::Level> m_currentActiveLevel;
     std::shared_ptr<ResourceType::World> m_currentWorldResource;
 };
 

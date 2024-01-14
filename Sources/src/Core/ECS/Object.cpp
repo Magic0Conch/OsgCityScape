@@ -1,10 +1,12 @@
 #include "Core/ECS/Object.h"
+#include "Core/ECS/Components/Transform.h"
 #include "Editor/Core/RuntimeContext.h"
+#include <memory>
 #include <utility>
 
 using namespace CSEditor::ECS;
 
-Object::Object(ObjectID id,Transform& transform,ObjectID parentId) : m_id {id} ,m_transform(transform),m_parentId(parentId){}
+Object::Object(ObjectID id,ObjectID parentId) : m_id {id} ,m_parentId(parentId){}
 Object::~Object(){
 
 }
@@ -23,6 +25,10 @@ bool Object::load(const ResourceType::ObjectInstance& objectInstanceRes){
     for (auto component : m_components){
         if (component.second){
             component.second->loadResource(shared_from_this());
+        }
+        if(component.first == "Transform"){
+            auto transformComponent = std::dynamic_pointer_cast<Transform>(component.second);
+            m_transform = transformComponent;
         }
     }
     setDefinitionUrl(objectInstanceRes.getDefinitionUrl());
@@ -58,9 +64,29 @@ void Object::setDefinitionUrl(const std::string& definitionUrl){
 }
 
 Transform& Object::getTransformComponent(){
-    return m_transform;
+    return *m_transform;
 }
 
 const ObjectID Object::getParentId(){
     return m_parentId;
+}
+
+void Object::setTransform(Transform* transform){
+    m_transform.reset(transform);
+}
+
+void Object::addChild(Object& childObject){
+    getTransformComponent().addChild(childObject.getTransformComponent());
+}
+
+void Object::addChild(Transform& childTransform){
+    getTransformComponent().addChild(childTransform);
+}
+
+const bool Object::isLeaf() {
+    return getTransformComponent().isLeaf();
+}
+
+const std::vector<int>& Object::getChildIndex() const{
+    return m_transform->getChildIndex();
 }

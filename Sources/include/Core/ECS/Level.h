@@ -35,9 +35,13 @@ public:
 
     ObjectID createObject(const ResourceType::ObjectInstance& objectInstance);
 
+    std::shared_ptr<Object> getRootObject();
+    std::shared_ptr<Object> getSceneObjectById(const ObjectID& objectID);
+    std::unordered_map<ObjectID, std::shared_ptr<Object>>& getSceneObjectsMap();
+
     // const LevelObjectsMap& getAllGObjects() const;
 
-    // std::weak_ptr<GObject>   getGObjectByID(GObjectID go_id) const;
+    // std::weak_ptr<GObject> getGObjectByID(GObjectID go_id) const;
     
 
     // GObjectID createObject(const ObjectInstanceRes& object_instance_res);

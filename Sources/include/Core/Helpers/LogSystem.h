@@ -12,8 +12,8 @@ class LogSystem{
 public:
     LogSystem();
     void info(std::string&&);
-    void error(std::string&);
-    void warn(std::string&);
+    void error(std::string&&);
+    void warn(std::string&&);
 private:
     GUI::Console& m_console;
     int m_counter;
