@@ -7,8 +7,10 @@
 using namespace CSEditor::ECS;
 
 Object::Object(ObjectID id,ObjectID parentId) : m_id {id} ,m_parentId(parentId){}
-Object::~Object(){
+Object::Object() : m_id (-1) ,m_parentId(-1){
+}
 
+Object::~Object(){
 }
 
 void Object::tick(float delta_time){
@@ -55,7 +57,7 @@ bool Object::hasComponent(const std::string& compenent_type_name) const{
     return true;
 }
 
-std::vector<std::pair<std::string,std::shared_ptr<Component>>> Object::getComponents() { 
+std::vector<std::pair<std::string,std::shared_ptr<Component>>>& Object::getComponents() { 
     return m_components; 
 }
 

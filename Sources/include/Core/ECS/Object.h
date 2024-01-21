@@ -14,6 +14,7 @@
 namespace CSEditor::ECS{
     class Object : public std::enable_shared_from_this<Object>{
     public:
+        Object();
         Object(ObjectID id,ObjectID parentId);
         virtual ~Object();
 
@@ -23,7 +24,7 @@ namespace CSEditor::ECS{
         void save(ResourceType::ObjectInstance& outObjectInstance);
 
         bool hasComponent(const std::string& compenentTypename) const;
-        std::vector<std::pair<std::string,std::shared_ptr<Component>>> getComponents();
+        std::vector<std::pair<std::string,std::shared_ptr<Component>>>& getComponents();
 
         
         template<typename T>
