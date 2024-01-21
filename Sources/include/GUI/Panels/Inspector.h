@@ -16,6 +16,7 @@ private:
     std::vector<float> m_position;
     std::vector<float> m_rotation;
     std::vector<float> m_scale;
-
+    std::string m_meshPath;
+    ECS::Object m_curSceneObject;
 };
 }

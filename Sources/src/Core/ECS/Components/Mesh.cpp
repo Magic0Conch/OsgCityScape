@@ -16,8 +16,8 @@ void Mesh::serialize(Json &jsonObject){
 void Mesh::deserialize(Json &jsonObject){
     const auto modelPath = jsonObject["modelPath"].string_value();
     const auto absoluteModelPath = Core::g_runtimeContext.configManager->getAssetFolder()/modelPath;
-    const auto absoluteModelPathString = absoluteModelPath.string();
-    meshNode = osgDB::readNodeFile(absoluteModelPathString);
+    m_meshPath = absoluteModelPath.string();
+    meshNode = osgDB::readNodeFile(m_meshPath);
 }
 
 void Mesh::loadResource(std::shared_ptr<Object> parentObject){
@@ -27,4 +27,13 @@ void Mesh::loadResource(std::shared_ptr<Object> parentObject){
     // osg::ref_ptr<osg::Geode> geodeNode = new osg::Geode;
     // geodeNode->addDrawable(meshNode);
 
+}
+
+void Mesh::setMeshPath(const std::string& meshPath){
+    m_meshPath = meshPath;
+    meshNode = osgDB::readNodeFile(m_meshPath);
+}
+
+const std::string& Mesh::getMeshPath(){
+    return m_meshPath;
 }
