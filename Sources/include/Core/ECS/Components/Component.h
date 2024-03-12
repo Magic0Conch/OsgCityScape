@@ -19,9 +19,7 @@ protected:
     std::string m_typename;
 public: 
     Component() = default;
-    virtual ~Component() {
-        spdlog::info("~Component");
-    }
+    virtual ~Component() {}
 
     virtual void serialize(Json& jsonObject);
     virtual void deserialize(Json& jsonObject);

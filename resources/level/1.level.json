@@ -64,7 +64,10 @@
           },
           {
             "context": {
-                "modelPath":"objects/environment/wall/barricada.obj"
+                "modelPath":"objects/environment/wall/barricada.obj",
+                "materials":[
+                  "wall.mat"
+                ]
             },
             "typeName": "Mesh"
           }
