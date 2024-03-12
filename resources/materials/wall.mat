@@ -1,0 +1,27 @@
+{
+    "name":"wallMat",
+    "shader":{
+        "vertPath":"a.vert",
+        "fragPath":"b.frag"
+    },
+    "textures":{
+        "albedo":{
+            "path":"wall.jpg"
+        }
+    },
+    "ints":{
+        "a":1
+    },
+    "floats":{
+        "a":1.01
+    },
+    "vec2s":{
+
+    },
+    "vec3s":{
+
+    },
+    "vec4s":{
+        
+    }
+}

@@ -3,6 +3,7 @@
 #include "Core/ECS/Components/Component.h"
 #include "Core/ECS/ObjectIDAllocator.h"
 #include "osg/NodeVisitor"
+#include "osg/StateSet"
 #include "osg/Vec3f"
 #include "osg/Vec4f"
 #include "osg/ref_ptr"
@@ -11,34 +12,23 @@
 
 namespace CSEditor::ECS {
 
-class Transform:public Component{
+class Material:public Component{
 public:
-    Transform();
+    Material();
 
     virtual void serialize(Json& jsonObject) override;
     virtual void deserialize(Json& jsonObject) override;
     virtual void loadResource(std::shared_ptr<Object> parentObject) override;
     
-    osg::Vec3f getPosition() const;
-    osg::Vec4f getRotation() const;
-    osg::Vec3f getScale() const;
-    osg::ref_ptr<osg::PositionAttitudeTransform> getNode();
-
-    void setPosition(const osg::Vec3f& position);
-    void setRotation(const osg::Vec4f& rotation);
-    void setScale(const osg::Vec3f& scale);
+        
     void setNode(osg::ref_ptr<osg::PositionAttitudeTransform> node);
-    void addChild(Transform& childTransform);
     std::shared_ptr<Object> getObject() const;
     ObjectID getObjectID() const;
     const bool isLeaf() const;
     const std::vector<int>& getChildIndex() const; 
 
 private:
-    osg::Vec3f m_position;
-    osg::Vec4f m_rotation;
-    osg::Vec3f m_scale;
-    osg::ref_ptr<osg::PositionAttitudeTransform> m_node;
+    osg::ref_ptr<osg::StateSet> m_stateSet;
     std::vector<int> m_childrenIndex;
 };
 }

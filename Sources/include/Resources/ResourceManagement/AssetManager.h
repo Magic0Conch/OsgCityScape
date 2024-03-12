@@ -25,7 +25,7 @@ namespace CSEditor::Resources
             std::stringstream buffer;
             buffer << assetJsonFile.rdbuf();
             std::string assetJsonText(buffer.str());
-
+            
             std::string errorMessage;
             auto &&assetJson = Json::parse(assetJsonText,errorMessage);
             
