@@ -1,27 +1,45 @@
 {
     "name":"wallMat",
     "shader":{
-        "vertPath":"a.vert",
-        "fragPath":"b.frag"
+        "vertPath":"lighting/blinn_phong.vert",
+        "fragPath":"lighting/blinn_phong.frag"
     },
     "textures":{
-        "albedo":{
+        "diffuse":{
             "path":"wall.jpg"
         }
     },
     "ints":{
-        "a":1
     },
     "floats":{
-        "a":1.01
+        "shininess" : 32.0
     },
     "vec2s":{
-
+        "!!a":{
+            "x": 0.94597,
+            "y": -0.38554
+        }
     },
     "vec3s":{
-
+        "!!ambient":{
+            "x": 1.0,
+            "y": 0.5,
+            "z": 0.31
+        },
+        "!!lightDir" : {
+            "x" : 0.0, 
+            "y":-1.0, 
+            "z":0.0
+        },
+        "!!uniform vec3 viewPos; ":"",
+        "uniform mat4 model;uniform mat4 view;uniform mat4 projection;":4
     },
     "vec4s":{
-        
+        "!!a":{
+            "x": 0.94597,
+            "y": -0.38554,
+            "z": -0.5,
+            "w": 1.0
+        }
     }
 }
