@@ -18,11 +18,13 @@ namespace CSEditor::Resources
         // const std::filesystem::path& getEditorFontPath() const;
 
         const std::filesystem::path& getDefaultWorldUrl() const;
+        const std::filesystem::path& getShaderRoot() const;
         // const std::string& getGlobalRenderingResUrl() const;
 
     private:
         std::filesystem::path m_rootFolder;
         std::filesystem::path m_assetFolder;
         std::filesystem::path m_defaultWorldUrl;
+        std::filesystem::path m_shaderRootPath;
     };
 } 
