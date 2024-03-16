@@ -34,7 +34,7 @@ namespace CSEditor::ECS{
             auto componentType = tmpname.substr(n+2);
             for (auto& i:m_components){
                 if (componentType==i.first){
-                    return i.second;
+                    return std::static_pointer_cast<T>(i.second);
                 }
             }       
             return nullptr;

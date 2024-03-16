@@ -3,7 +3,9 @@
 #include "Core/ECS/Components/Component.h"
 #include "Core/ECS/ObjectIDAllocator.h"
 #include "osg/NodeVisitor"
+#include "osg/Program"
 #include "osg/StateSet"
+#include "osg/Texture2D"
 #include "osg/Vec2f"
 #include "osg/Vec3f"
 #include "osg/Vec4f"
@@ -29,13 +31,19 @@ public:
     void setVertPath(const std::string& vertPath);
     void setFragPath(const std::string& fragPath);
 
-    void setTextures(const std::unordered_map<std::string, std::string>& textures);
+    void setTextures(const std::unordered_map<std::string, osg::ref_ptr<osg::Texture2D>>& textures);
     void setInts(const std::unordered_map<std::string, int>& ints);
     void setFloats(const std::unordered_map<std::string, float>& floats);
 
     // For Vec2f, Vec3f and Vec4f setters we assume you want to add or update individual entries.
-    
-	void addTexture(const std::string &key,const std::string &value);
+    void setTexture(const std::string& name, const osg::ref_ptr<osg::Texture2D>& texture);
+    void setInt(const std::string& name, int value);
+    void setFloat(const std::string& name, float value);
+    void setVec2(const std::string& name, const osg::Vec2f& value);
+    void setVec3(const std::string& name, const osg::Vec3f& value);
+    void setVec4(const std::string& name, const osg::Vec4f& value);
+	
+    void addTexture(const std::string &key,osg::ref_ptr<osg::Texture2D> value);
 	void addInt (const std::string &key,int value);
 	void addFloat (const std:: string &key,float value);
 	
@@ -47,20 +55,25 @@ public:
 	const std::string& getVertPath() const;
 	const std::string& getFragPath() const;
 	
-	const std::unordered_map<std::string,std::string>& getTextures ()const;
+	const std::unordered_map<std::string, osg::ref_ptr<osg::Texture2D>>& getTextures ()const;
 	const std::unordered_map<std::string,int>& getInt ()const;
 	const std::unordered_map<std::string,float >& getFloat ()const;
 
+
+
+
+
 private:
-    osg::ref_ptr<osg::StateSet> m_stateSet;
     std::string m_name;
     std::string m_vertPath;
     std::string m_fragPath;
-    std::unordered_map<std::string, std::string> m_textures;
+    osg::ref_ptr<osg::StateSet> m_stateSet;
+    std::unordered_map<std::string, osg::ref_ptr<osg::Texture2D>> m_textures;
     std::unordered_map<std::string, int> m_ints;
     std::unordered_map<std::string, float> m_floats;
     std::unordered_map<std::string, osg::Vec2f> m_vec2s;
     std::unordered_map<std::string, osg::Vec3f> m_vec3s;
     std::unordered_map<std::string, osg::Vec4f> m_vec4s;
+    osg::ref_ptr<osg::Program> m_program;
 };
 }
