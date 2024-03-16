@@ -37,6 +37,9 @@ void ConfigManager::initialize(const std::filesystem::path& configFilePath){
                 else if (name == "ShaderFolder") {
                     m_shaderRootPath = m_rootFolder / value;
                 }
+                else if (name == "MaterialFolder") {
+                    m_materialRootPath = m_rootFolder / value;
+                }
             }
         }
 }
@@ -52,6 +55,11 @@ const std::filesystem::path& ConfigManager::getDefaultWorldUrl() const{
     return m_defaultWorldUrl;
 }
 
-const std::filesystem::path& ConfigManager::getShaderRoot() const{
+const std::filesystem::path& ConfigManager::getShaderFolder() const{
     return m_shaderRootPath;
 }
+
+const std::filesystem::path& ConfigManager::getMaterialFolder() const{
+    return m_materialRootPath;
+}
+

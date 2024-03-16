@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Helpers/ISerializer.h"
+#include "Core/Helpers/Serializer.h"
 #include "spdlog/spdlog.h"
 #include <filesystem>
 #include <fstream>
@@ -14,9 +15,8 @@ namespace CSEditor::Resources
     class AssetManager
     {
     public:
-        template<class AssetType>
-        bool loadAsset(const std::string& assetUrl,AssetType& outAsset) const{            
-            auto assetPath = getFullPath(assetUrl);
+        Json loadJson(const std::string& jsonUrl) const{
+            auto assetPath = getFullPath(jsonUrl);
             std::ifstream assetJsonFile(assetPath);
             if(!assetJsonFile){
                 spdlog::error("Open file: " + assetPath.generic_string() + " failed!");
@@ -27,12 +27,17 @@ namespace CSEditor::Resources
             std::string assetJsonText(buffer.str());
             
             std::string errorMessage;
-            auto &&assetJson = Json::parse(assetJsonText,errorMessage);
-            
+            auto assetJson = Json::parse(assetJsonText,errorMessage);
             if(!errorMessage.empty()){
-                spdlog::error("Parse json file " + assetUrl + " failed!");
+                spdlog::error("Parse json file " + jsonUrl + " failed!");
                 assert(0);
             }
+            return assetJson;
+        }
+
+        template<class AssetType>
+        bool loadAsset(const std::string& assetUrl,AssetType& outAsset) const{            
+            auto &&assetJson = loadJson(assetUrl);
             outAsset.deserialize(assetJson);
             return true;
         }
@@ -50,6 +55,13 @@ namespace CSEditor::Resources
             std::string&& assetJsonText = assetJson.dump();
             assetJsonFile << assetJsonText;
             assetJsonFile.flush();
+            return true;
+        }
+
+        template<typename ResourceType>
+        bool deserialize(const std::string& resourceUrl,ResourceType& outResource) const{
+            auto &&resourceJson = loadJson(resourceUrl);
+            outResource.deserialize(resourceJson);
             return true;
         }
         

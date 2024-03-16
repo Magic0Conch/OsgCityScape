@@ -3,6 +3,7 @@
 #include "osg/Node"
 #include "osg/ref_ptr"
 #include <string>
+#include <vector>
 
 namespace CSEditor::ECS {
 
@@ -12,10 +13,16 @@ public:
     virtual void deserialize(Json& jsonObject) override;
     virtual void loadResource(std::shared_ptr<Object> parentObject) override;
 
+    osg::ref_ptr<osg::Node> getMeshNode() const;
+
+    // Setter for m_meshNode
+    void setMeshNode(osg::ref_ptr<osg::Node> node);
+
     void setMeshPath(const std::string& meshPath);
     const std::string& getMeshPath();
 private:
-    osg::ref_ptr<osg::Node> meshNode;
+    osg::ref_ptr<osg::Node> m_meshNode;
     std::string m_meshPath;
+    std::vector<std::string> m_materialPaths;
 };
 }

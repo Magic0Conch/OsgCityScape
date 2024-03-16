@@ -18,7 +18,8 @@ namespace CSEditor::Resources
         // const std::filesystem::path& getEditorFontPath() const;
 
         const std::filesystem::path& getDefaultWorldUrl() const;
-        const std::filesystem::path& getShaderRoot() const;
+        const std::filesystem::path& getShaderFolder() const;
+        const std::filesystem::path& getMaterialFolder() const;
         // const std::string& getGlobalRenderingResUrl() const;
 
     private:
@@ -26,5 +27,6 @@ namespace CSEditor::Resources
         std::filesystem::path m_assetFolder;
         std::filesystem::path m_defaultWorldUrl;
         std::filesystem::path m_shaderRootPath;
+        std::filesystem::path m_materialRootPath;
     };
 } 

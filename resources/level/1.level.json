@@ -65,9 +65,7 @@
           {
             "context": {
                 "modelPath":"objects/environment/wall/barricada.obj",
-                "materials":[
-                  "wall.mat"
-                ]
+                "materials":["wall.json"]
             },
             "typeName": "Mesh"
           }
