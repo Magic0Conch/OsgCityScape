@@ -48,3 +48,7 @@ void Level::setObjects(const std::vector<ObjectInstance>& objects) {
 void Level::addObject(const ObjectInstance &object){
     m_objects.emplace_back(object);
 }
+
+void Level::loadResource(){
+        
+}

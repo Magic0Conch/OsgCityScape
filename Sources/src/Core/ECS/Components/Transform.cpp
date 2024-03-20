@@ -26,9 +26,9 @@ void Transform::deserialize(Json& jsonObject){
     Serializer::deserializeVector3f(positionJson, position);
     Serializer::deserializeVector4f(rotationJson, rotation);
     Serializer::deserializeVector3f(scaleJson, scale);
-    setPosition(position);
-    setRotation(rotation);
-    setScale(scale);
+    m_position = position;
+    m_rotation = rotation;
+    m_scale = scale;
 }
 
 osg::Vec3f Transform::getPosition() const{
@@ -64,7 +64,11 @@ void Transform::setNode(osg::ref_ptr<osg::PositionAttitudeTransform> node){
 }
 
 void Transform::loadResource(std::shared_ptr<Object> parentObject){
+    m_node = new osg::PositionAttitudeTransform();
     m_parentObject = parentObject;
+    m_node->setPosition(m_position);
+    m_node->setAttitude(osg::Quat(m_rotation));
+    m_node->setScale(m_scale);
 }
 
 void Transform::addChild(Transform& childTransform){

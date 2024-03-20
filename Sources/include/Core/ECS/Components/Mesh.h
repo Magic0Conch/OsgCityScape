@@ -12,6 +12,7 @@ public:
     virtual void serialize(Json& jsonObject) override;
     virtual void deserialize(Json& jsonObject) override;
     virtual void loadResource(std::shared_ptr<Object> parentObject) override;
+    virtual void onComponentAdded() override;
 
     osg::ref_ptr<osg::Node> getMeshNode() const;
 

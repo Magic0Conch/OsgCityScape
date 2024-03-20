@@ -17,7 +17,7 @@ void Mesh::deserialize(Json &jsonObject){
     const auto modelPath = jsonObject["modelPath"].string_value();
     const auto absoluteModelPath = Core::g_runtimeContext.configManager->getAssetFolder()/modelPath;
     m_meshPath = absoluteModelPath.string();
-    m_meshNode = osgDB::readNodeFile(m_meshPath);
+    
     const auto& materialPaths = jsonObject["materials"].array_items();
     for(const auto& materialPath:materialPaths){
         m_materialPaths.emplace_back(materialPath.string_value());
@@ -25,7 +25,9 @@ void Mesh::deserialize(Json &jsonObject){
 }
 
 void Mesh::loadResource(std::shared_ptr<Object> parentObject){
+    m_meshNode = osgDB::readNodeFile(m_meshPath);
     m_parentObject = parentObject;
+    m_parentObject.lock()->getTransformComponent().getNode()->addChild(m_meshNode);
     for(const auto& materialPath:m_materialPaths){
         auto matertial = Resources::MaterialManager::getInstance().getMaterial(materialPath);
         matertial->loadResource(parentObject);
@@ -48,4 +50,8 @@ osg::ref_ptr<osg::Node> Mesh::getMeshNode() const {
 // Setter for m_meshNode
 void Mesh::setMeshNode(osg::ref_ptr<osg::Node> node) {
     m_meshNode = node;
+}
+
+void Mesh::onComponentAdded(){
+
 }

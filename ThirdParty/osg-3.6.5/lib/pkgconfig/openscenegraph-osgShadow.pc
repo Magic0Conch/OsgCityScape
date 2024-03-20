@@ -1,0 +1,14 @@
+# pkg-config source file
+
+prefix=D:/BaiduNetdiskDownload/OpenSceneGraph-3.6.5_src/osg3.6.5Vs2022X64
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: openscenegraph-osgShadow
+Description: Shadow techniques library for Openscenegraph
+Version: 3.6.5
+Requires: openscenegraph-osgUtil openscenegraph-osgDB openscenegraph-osg openthreads
+Conflicts:
+Libs: -L${libdir} -losgShadow
+Cflags: -I${includedir}

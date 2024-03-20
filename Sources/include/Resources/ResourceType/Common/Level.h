@@ -19,6 +19,7 @@ public:
 
     virtual void serialize(Json& jsonBody) override;
     virtual void deserialize(Json& jsonBody) override;
+    void loadResource();
 
 private:
     osg::Vec3f m_gravity {0.f, 0.f, -9.8f};

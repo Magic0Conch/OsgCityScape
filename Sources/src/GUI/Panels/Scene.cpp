@@ -13,8 +13,11 @@ void Scene::drawImpl(){
     window_flags |= ImGuiWindowFlags_NoScrollbar;
     window_flags |= ImGuiWindowFlags_NoCollapse;
     bool p_open = true;
+    const auto textureId =  Core::g_runtimeContext.windowSystem->getScreenTexture()->getTextureObject(0)->id();
+    ImTextureID imguiTextureID = (ImTextureID)(intptr_t)textureId;
+
     if(ImGui::Begin("Scene",&p_open,window_flags)){
-        ImGui::Image((ImTextureID)2, main_viewport->Size);
+        ImGui::Image(imguiTextureID, main_viewport->Size);
     }
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
     ImGui::PopItemWidth();

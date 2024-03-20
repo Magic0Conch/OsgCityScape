@@ -20,6 +20,10 @@ namespace CSEditor{
     namespace Helpers {
         class LogSystem;
     }
+
+    namespace Render {
+        class RenderSystem;
+    }
 }
 
 namespace CSEditor::Core {
@@ -35,6 +39,7 @@ public:
     std::unique_ptr<Resources::AssetManager> assetManager;
     osg::ref_ptr<GUI::UIManager> uiManager;
     std::unique_ptr<Helpers::LogSystem> logSystem;
+    std::unique_ptr<Render::RenderSystem> renderSystem;
 };
 
 extern RuntimeContext g_runtimeContext;
