@@ -27,4 +27,5 @@ void main()
     vec3 ambientColor = ambientColor * v_color.rgb;
 
     fragColor = vec4(ambientColor + diffuseColor + specularColor, v_color.a);
+    fragColor = vec4(1.0,0.0,1.0,1.0);
 }

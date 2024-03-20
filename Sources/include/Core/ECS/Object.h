@@ -6,6 +6,7 @@
 #include "Resources/ResourceType/Common/Object.h"
 #include "Core/ECS/Components/ComponentFactory.h"
 #include "ObjectIDAllocator.h"
+#include "osg/ref_ptr"
 #include <memory>
 #include <string>
 #include <unordered_set>
@@ -48,7 +49,7 @@ namespace CSEditor::ECS{
             auto found = getComponent<T>();
             if(found)
                 return found;
-            std::shared_ptr<T> comp = ComponentFactory::createComponent(componentType);
+            std::shared_ptr<T> comp = std::dynamic_pointer_cast<T>(ComponentFactory::createComponent(componentType));
             m_components.push_back(
                 std::make_pair(componentType, comp) 
             );

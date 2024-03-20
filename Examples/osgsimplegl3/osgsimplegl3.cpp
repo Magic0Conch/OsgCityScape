@@ -8,6 +8,7 @@
 // The comment block at the end of the source describes building OSG
 // for use with OpenGL 3.x.
 #include <Windows.h>
+#include <iostream>
 #include <osgViewer/Viewer>
 #include <osgDB/ReadFile>
 #include <osg/GraphicsContext>
@@ -65,18 +66,22 @@ void configureShaders( osg::StateSet* stateSet )
 
 int main( int argc, char** argv )
 {
-    
-    // osg::ArgumentParser arguments( &argc, argv );
+    std::string filename = "E:\\work\\github\\OsgCityScape\\resources\\materials\\wall.png";
+    osg::ref_ptr<osg::Image> image = osgDB::readImageFile(filename);
+    if (!image.valid()) {
+        // 处理加载失败的情况
+        std::cerr << "Failed to load image: " << filename << std::endl;
+        int x;
+        std::cin>>x;
+    }
+    return 0;
 
     auto root = osgDB::readNodeFile("resources/models/cow.osg");
-    if( root == NULL )
-    {
+    if( root == NULL ){
         osg::notify( osg::FATAL ) << "Unable to load model from command line." << std::endl;
-        // return( 1 );
     }
-
-    configureShaders( root->getOrCreateStateSet() );
-    const int width( 800 ), height( 450 );
+    configureShaders(root->getOrCreateStateSet());
+    const int width(800 ), height( 450 );
     osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
     traits->x = 20; traits->y = 30;
     traits->width = width; traits->height = height;
@@ -87,9 +92,7 @@ int main( int argc, char** argv )
     traits->setUndefinedScreenDetailsToDefaultScreen();
     traits->glContextProfileMask = 0x1;// 0x1;// 
     osg::ref_ptr< osg::GraphicsContext > gc = osg::GraphicsContext::createGraphicsContext( traits.get() );
-    if( !gc.valid() )
-    {
-        // osg::notify( osg::FATAL ) << "Unable to create OpenGL v" << version << " context." << std::endl;
+    if(!gc.valid()){
         return( 1 );
     }
     gc->getState()->resetVertexAttributeAlias(false);
@@ -101,14 +104,10 @@ int main( int argc, char** argv )
     // Must set perspective projection for fovy and aspect.
     cam->setProjectionMatrix( osg::Matrix::perspective( 30., (double)width/(double)height, 1., 100. ) );
     // Unlike OpenGL, OSG viewport does *not* default to window dimensions.
-    cam->setViewport( new osg::Viewport( 0, 0, width, height ) );
+    cam->setViewport(new osg::Viewport(0,0,width,height));
 
-    viewer.setSceneData( root );
+    viewer.setSceneData(root);
     gc->getState()->setCheckForGLErrors(osg::State::CheckForGLErrors::ONCE_PER_ATTRIBUTE);
-    // for non GL3/GL4 and non GLES2 platforms we need enable the osg_ uniforms that the shaders will use,
-    // you don't need thse two lines on GL3/GL4 and GLES2 specific builds as these will be enable by default.
-    // gc->getState()->setUseModelViewAndProjectionUniforms(true);
-    // gc->getState()->setUseVertexAttributeAliasing(true);
 
     return( viewer.run() );
 }

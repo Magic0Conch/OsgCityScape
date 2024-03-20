@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/ECS/Level.h"
+#include "Core/ECS/ObjectIDAllocator.h"
 #include "Resources/ResourceType/Common/World.h"
 #include "Resources/ResourceType/Common/Level.h"
 #include <memory>
@@ -21,9 +22,13 @@ public:
     void tick(float delta_time);
     std::shared_ptr<ECS::Level> getCurrentActiveLevel() const;
 
+    std::shared_ptr<ResourceType::World> getCurrentWorldResource() const;
+
 private:
     bool loadLevel(const std::string& level_url);
     bool loadWorld(const std::string& world_url);
+
+    bool addObject(const std::string& name,const ObjectID& id) const;
 
     bool m_isWorldLoaded {false};
     std::string m_currentWorldUrl;

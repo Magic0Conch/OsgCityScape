@@ -71,9 +71,9 @@ void WindowSystem::createWindow(const Settings::WindowSettings& windowSettings){
     m_viewport = mainCamera->getViewport();
     mainCamera->setGraphicsContext(gc);
     mainCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+    
     m_screenTexture = new Resources::RenderTexture(windowSettings.width,windowSettings.height);
     mainCamera->attach( osg::Camera::COLOR_BUFFER, m_screenTexture.get());
-    m_screenTexture->getTextureTarget();
     osgViewer::Viewer::Windows windows;
     CSEditor::Core::g_runtimeContext.viewer->getWindows(windows);
     m_graphicsWindow = windows.front();

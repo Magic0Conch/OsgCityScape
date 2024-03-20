@@ -6,7 +6,7 @@
     },
     "textures":{
         "diffuse":{
-            "path":"wall.jpg"
+            "path":"wall.png"
         }
     },
     "ints":{

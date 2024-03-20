@@ -2,17 +2,24 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include "Core/ECS/Components/Mesh.h"
+#include "Core/ECS/Components/Transform.h"
 #include "Core/ECS/Object.h"
 #include "Core/ECS/ObjectIDAllocator.h"
 #include "Resources/ResourceType/Common/Object.h"
 #include "Editor/Core/RuntimeContext.h"
 #include "Resources/ResourceType/Common/Level.h"
 #include "Core/ECS/Level.h"
+#include "osg/ref_ptr"
+#include "osgDB/ReadFile"
 #include "osgGA/TrackballManipulator"
 
 
 using namespace CSEditor::ECS;
 
+Level::Level(){
+    m_levelResource = std::make_shared<ResourceType::Level>();
+}
 
 /// The main class to manage all game objects
 Level::~Level(){
@@ -21,35 +28,23 @@ Level::~Level(){
 
 bool Level::load(const std::string& levelResourceUrl){
     //setup scene root
-    auto objectId = ObjectIDAllocator::alloc();
-    Transform* rootTransform = new Transform();
-    m_sceneObject = std::make_shared<Object>(objectId,-1);
-    m_sceneObject->setTransform(rootTransform);
-    m_sceneObject->setName("Scene");
-    m_objects[objectId] = m_sceneObject;
-    auto viewer = Core::g_runtimeContext.viewer;
-    viewer->setSceneData(rootTransform->getNode().get());
+    m_sceneObject = createObjectInLevel("Scene",-1);
 
-    osg::ref_ptr<osgGA::TrackballManipulator> manipulator = new osgGA::TrackballManipulator();
-    manipulator->setHomePosition(osg::Vec3d(0,10,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
-    viewer->setCameraManipulator(manipulator);
 
+    auto loadedModelObject = createObjectInLevel("cow", m_sceneObject->getID());
+    auto cowMesh = loadedModelObject->addComponent<Mesh>();
+    cowMesh->setMeshPath("resources/models/cow.osg");
+    cowMesh->loadResource(loadedModelObject);
     //load level resource
+    
     spdlog::info("Loading level: {}", levelResourceUrl);
     m_levelResourceUrl = levelResourceUrl;
-    ResourceType::Level levelResource;
-    Core::g_runtimeContext.assetManager->loadAsset(levelResourceUrl, levelResource);
-    auto objects = levelResource.getObjects();
-    for (const ResourceType::ObjectInstance& objectInstanceRes:objects) {
-        auto curObjectId = createObject(objectInstanceRes);
-        auto thisTransform = m_objects[curObjectId]->getTransformComponent();
-        m_sceneObject->addChild(thisTransform);
-    }
-    m_isLoaded = true;
+    
+    Core::g_runtimeContext.assetManager->loadAsset(levelResourceUrl, *m_levelResource);
     return true;
 }
 
-ObjectID Level::createObject(const ResourceType::ObjectInstance& objectInstance){
+ObjectID Level::loadObjectInstance(const ResourceType::ObjectInstance& objectInstance){
     auto objectId = ObjectIDAllocator::alloc();
     Transform* transform = new Transform();
     std::shared_ptr<ECS::Object> object = std::make_shared<ECS::Object>(objectId,m_sceneObject->getID());
@@ -59,6 +54,14 @@ ObjectID Level::createObject(const ResourceType::ObjectInstance& objectInstance)
         m_objects[objectId] = object;
     }
     return objectId;
+}
+
+void Level::setIsLoaded(bool isLoaded){
+    m_isLoaded = isLoaded;
+}
+
+bool Level::getIsLoaded() const{
+    return m_isLoaded;
 }
 
 
@@ -85,7 +88,20 @@ std::unordered_map<ObjectID, std::shared_ptr<Object>>& Level::getSceneObjectsMap
     return m_objects;
 }
 
-
+std::shared_ptr<Object> Level::createObjectInLevel(const std::string& name,const ObjectID& parentID){
+    auto objectId = ObjectIDAllocator::alloc();
+    Transform* transform = new Transform();
+    auto object = std::make_shared<Object>(objectId,-1);
+    transform->loadResource(object);
+    object->setTransform(transform);
+    object->setName(name);
+    m_objects[objectId] = object;
+    if(parentID == -1)
+        return getSceneObjectById(objectId);
+    const auto& parentObject = getSceneObjectById(parentID);
+    parentObject->getTransformComponent().addChild(*transform);
+    return object;
+}
 
 // void Level::unload(){
 
@@ -103,6 +119,9 @@ const std::string& Level::getLevelResUrl() const {
     return m_levelResourceUrl; 
 }
 
+std::shared_ptr<CSEditor::ResourceType::Level> Level::getLevelResource(){
+    return m_levelResource;
+}
 // const LevelObjectsMap& Level::getAllGObjects() const { 
 //     return m_gobjects; 
 // }

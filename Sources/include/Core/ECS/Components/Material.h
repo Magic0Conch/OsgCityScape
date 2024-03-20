@@ -25,6 +25,17 @@ public:
     virtual void deserialize(Json& jsonObject) override;
     virtual void loadResource(std::shared_ptr<Object> parentObject) override;
     
+    template<class T>
+    void updateUniform(const std::string& name,const T& value){
+        auto uniform = m_stateSet->getUniform(name);
+        if(uniform){
+            uniform->set(value);
+        }
+        else{
+            osg::ref_ptr<osg::Uniform> uniform = new osg::Uniform(name.c_str(), value);
+            m_stateSet->addUniform(uniform.get());
+        }
+    }
         
     void setStateSet(osg::ref_ptr<osg::StateSet> stateSet);
     void setName(const std::string& name);

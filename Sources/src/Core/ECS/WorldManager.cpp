@@ -54,8 +54,7 @@ void WorldManager::tick(float delta_time)
     }
 }
 
-bool WorldManager::loadWorld(const std::string& world_url)
-{
+bool WorldManager::loadWorld(const std::string& world_url){
     spdlog::info("Loading world from " + world_url + ".");
     ResourceType::World worldRes;
     const auto isWorldLoadSuccess = Core::g_runtimeContext.assetManager->loadAsset(world_url,worldRes);
@@ -80,7 +79,6 @@ bool WorldManager::loadWorld(const std::string& world_url)
 
 bool WorldManager::loadLevel(const std::string& levelUrl)
 {
-    // std::shared_ptr<ECS::Level> level = std::make_shared<ECS::Level>();
     m_currentActiveLevel = std::make_shared<Level>();
 
     const bool isLevelLoadSuccess = m_currentActiveLevel->load(levelUrl);

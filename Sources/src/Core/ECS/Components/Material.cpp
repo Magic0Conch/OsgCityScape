@@ -6,6 +6,7 @@
 #include "Core/ECS/Object.h"
 #include "Editor/Core/RuntimeContext.h"
 #include "Core/ECS/Components/Mesh.h"
+#include "spdlog/spdlog.h"
 #include <osgDB/ReadFile>
 using namespace CSEditor::ECS;
 
@@ -26,13 +27,14 @@ void Material::deserialize(Json &jsonObject){
     for (const auto &texturePair : texturesJson.object_items()) {
         osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
         const auto texturePath = (Core::g_runtimeContext.configManager->getMaterialFolder()/ texturePair.second["path"].string_value()).string();
-        texture->setImage(osgDB::readImageFile(texturePath));
-        addTexture(texturePair.first,texture);
+        auto image = osgDB::readImageFile(texturePath);
+        texture->setImage(image);
+        m_textures[texturePair.first] = texture;
     }
 
     const auto intsJson = jsonObject["ints"];
     for (const auto &intValue : intsJson.object_items()) {
-        addInt(intValue.first, intValue.second.int_value());
+        m_ints[intValue.first]=intValue.second.int_value();
     }
 
     const auto floatsJson = jsonObject["floats"];
@@ -55,17 +57,16 @@ void Material::deserialize(Json &jsonObject){
         m_vec4s[vec4.first] = osg::Vec4f(vec4.second["x"].number_value(), vec4.second["y"].number_value(), vec4.second["z"].number_value(), vec4.second["w"].number_value());
     }
     
-    m_program = new osg::Program;
-    m_program->addShader(osgDB::readShaderFile(osg::Shader::VERTEX, m_vertPath));
-    m_program->addShader(osgDB::readShaderFile(osg::Shader::FRAGMENT, m_fragPath));
 }
 
 void Material::loadResource(std::shared_ptr<Object> parentObject){
+    m_program = new osg::Program;
+    m_program->addShader(osgDB::readShaderFile(osg::Shader::VERTEX, m_vertPath));
+    m_program->addShader(osgDB::readShaderFile(osg::Shader::FRAGMENT, m_fragPath));
     m_parentObject = parentObject;
     auto meshNodeComponent = parentObject->getComponent<Mesh>();
     auto meshNode = meshNodeComponent->getMeshNode();
 
-    // 获取或创建状态集
     m_stateSet = meshNode->getOrCreateStateSet();
 
     unsigned int textureUnit = 0; 
@@ -130,14 +131,17 @@ void Material::setFloats(const std::unordered_map<std::string, float>& floats) {
 
 void Material::addTexture(const std::string &key,const osg::ref_ptr<osg::Texture2D>value){
     m_textures[key]=value;
+    updateUniform(key,value);
 }
 
 void Material::addInt (const std::string &key,int value){
     m_ints[key]=value;
+    updateUniform(key,value);
 }
 
 void Material::addFloat(const std::string &key,float value){
     m_floats[key]=value;
+    updateUniform(key,value);
 }
 
 osg::ref_ptr<osg::StateSet> Material::getStateSet() const{
@@ -170,30 +174,36 @@ const std::unordered_map<std::string,float >& Material::getFloat ()const{
 
 void Material::setTexture(const std::string& name, const osg::ref_ptr<osg::Texture2D>& texture) {
     m_textures[name] = texture;
-    m_stateSet->getUniform(name)->set(texture);
+    auto uniform = m_stateSet->getUniform(name);
+    if(uniform){
+        uniform->set(texture);
+    }
+    else {
+        spdlog::error(name + "in" + m_vertPath + " or " + m_fragPath + " doesn't exist!");
+    }
 }
 
 void Material::setInt(const std::string& name, int value) {
     m_ints[name] = value;
-    m_stateSet->getUniform(name)->set(value);
+    updateUniform(name,value);
 }
 
 void Material::setFloat(const std::string& name, float value) {
     m_floats[name] = value;
-    m_stateSet->getUniform(name)->set(value);
+    updateUniform(name,value);
 }
 
 void Material::setVec2(const std::string& name, const osg::Vec2f& value) {
     m_vec2s[name] = value;
-    m_stateSet->getUniform(name)->set(value);
+    updateUniform(name,value);
 }
 
 void Material::setVec3(const std::string& name, const osg::Vec3f& value) {
     m_vec3s[name] = value;
-    m_stateSet->getUniform(name)->set(value);
+    updateUniform(name,value);
 }
 
 void Material::setVec4(const std::string& name, const osg::Vec4f& value) {
     m_vec4s[name] = value;
-    m_stateSet->getUniform(name)->set(value);
+    updateUniform(name,value);
 }
