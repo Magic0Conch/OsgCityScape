@@ -64,6 +64,7 @@ namespace CSEditor::ECS{
         ObjectID getID() const;
         void setName(std::string name);
         void setTransform(Transform*);
+        void setTransform(std::shared_ptr<Transform>);
         const std::string& getName() const;
         const std::string& getDefinitionUrl() const;
         void setDefinitionUrl(const std::string& definitionUrl);

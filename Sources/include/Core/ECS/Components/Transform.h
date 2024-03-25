@@ -3,6 +3,7 @@
 #include "Core/ECS/Components/Component.h"
 #include "Core/ECS/ObjectIDAllocator.h"
 #include "osg/NodeVisitor"
+#include "osg/Quat"
 #include "osg/Vec3f"
 #include "osg/Vec4f"
 #include "osg/ref_ptr"
@@ -18,7 +19,8 @@ public:
     virtual void serialize(Json& jsonObject) override;
     virtual void deserialize(Json& jsonObject) override;
     virtual void loadResource(std::shared_ptr<Object> parentObject) override;
-    
+    virtual void onComponentAdded() override;
+
     osg::Vec3f getPosition() const;
     osg::Vec4f getRotation() const;
     osg::Vec3f getScale() const;
@@ -35,9 +37,9 @@ public:
     const std::vector<int>& getChildIndex() const; 
 
 private:
-    osg::Vec3f m_position;
-    osg::Vec4f m_rotation;
-    osg::Vec3f m_scale;
+    osg::Vec3f m_position = osg::Vec3f(0,0,0);
+    osg::Vec4f m_rotation = osg::Vec4f(0,0,0,1);
+    osg::Vec3f m_scale = osg::Vec3f(1,1,1);
     osg::ref_ptr<osg::PositionAttitudeTransform> m_node;
     std::vector<int> m_childrenIndex;
 };

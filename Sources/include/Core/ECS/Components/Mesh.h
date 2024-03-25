@@ -21,9 +21,9 @@ public:
 
     void setMeshPath(const std::string& meshPath);
     const std::string& getMeshPath();
+    std::string m_meshPath;
 private:
     osg::ref_ptr<osg::Node> m_meshNode;
-    std::string m_meshPath;
     std::vector<std::string> m_materialPaths;
 };
 }

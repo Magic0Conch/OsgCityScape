@@ -3,13 +3,13 @@
 #include "Core/Helpers/Serializer.h"
 #include "osg/Quat"
 #include "osg/Vec3f"
+#include "spdlog/spdlog.h"
 #include <memory>
 
 using namespace CSEditor::ECS;
 using namespace CSEditor::Helpers;
 
 Transform::Transform(){
-    m_node = new osg::PositionAttitudeTransform();
 }
 
 void Transform::serialize(Json& jsonObject){
@@ -67,8 +67,12 @@ void Transform::loadResource(std::shared_ptr<Object> parentObject){
     m_node = new osg::PositionAttitudeTransform();
     m_parentObject = parentObject;
     m_node->setPosition(m_position);
-    m_node->setAttitude(osg::Quat(m_rotation));
+    m_node->setAttitude(osg::Quat(m_rotation)); 
     m_node->setScale(m_scale);
+}
+
+void Transform::onComponentAdded(){
+    
 }
 
 void Transform::addChild(Transform& childTransform){
