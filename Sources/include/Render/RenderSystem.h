@@ -6,12 +6,16 @@
 #include "osgGA/TrackballManipulator"
 #include "Core/ECS/WorldManager.h"
 #include <memory>
+#include <locale>
+#include <iostream>
 namespace CSEditor::Render {
 class RenderSystem{
 public:
     RenderSystem(){
         m_level = Core::g_runtimeContext.worldManager->getCurrentActiveLevel();
         m_levelResource = m_level->getLevelResource();
+        std::cout.ios_base::imbue(std::locale::classic());
+        std::ios::sync_with_stdio();
         initialize();
     };
 
@@ -34,6 +38,8 @@ public:
             m_level->getRootObject()->addChild(thisTransform);
         }
         m_level->setIsLoaded(true);
+
+        
     };
 
     void tick(float deltaTime){

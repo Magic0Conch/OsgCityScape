@@ -25,7 +25,8 @@ void Mesh::deserialize(Json &jsonObject){
 }
 
 void Mesh::loadResource(std::shared_ptr<Object> parentObject){
-    m_meshNode = osgDB::readNodeFile(m_meshPath);
+    osgDB::Options *a = new osgDB::Options(std::string("noTriStripPolygons"));
+    m_meshNode = osgDB::readNodeFile(m_meshPath,a);
     m_parentObject = parentObject;
     m_parentObject.lock()->getTransformComponent().getNode()->addChild(m_meshNode);
     for(const auto& materialPath:m_materialPaths){

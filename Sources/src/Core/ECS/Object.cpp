@@ -77,6 +77,14 @@ void Object::setTransform(Transform* transform){
     m_transform.reset(transform);
 }
 
+void Object::setTransform(std::shared_ptr<Transform> other){
+    if(m_transform == nullptr){
+        auto p = std::make_pair("Transform", other);
+        m_components.emplace_back(p);
+    }
+    m_transform = other;    
+}
+
 void Object::addChild(Object& childObject){
     getTransformComponent().addChild(childObject.getTransformComponent());
 }

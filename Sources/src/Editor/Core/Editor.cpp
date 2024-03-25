@@ -1,5 +1,8 @@
 #include "Editor/Core/Editor.h"
 #include "Editor/Core/RuntimeContext.h"
+#include "osg/PositionAttitudeTransform"
+#include "osg/Vec3f"
+#include "osg/ref_ptr"
 #include "osgDB/ReadFile"
 #include "osgViewer/GraphicsWindow"
 #include <iostream>
@@ -24,6 +27,7 @@
 #include <osgUtil/IntersectionVisitor>
 #include <osgUtil/Statistics>
 #include <imgui.h>
+#include <utility>
 #include "GUI/Panels/Hierachy.h"
 #include "GUI/Panels/Inspector.h"
 #include "GUI/Panels/Console.h"
@@ -88,10 +92,11 @@ void Editor::setUpUI(){
     g_runtimeContext.uiManager->createPanel<GUI::Scene>("Scene");
     g_runtimeContext.uiManager->createPanel<GUI::MainMenuBar>("MainMenuBar");
     g_runtimeContext.viewer->setRealizeOperation(new GUI::ImGuiInitOperation);
-    auto root = osgDB::readNodeFile("resources/models/cow.osg");
-    auto data = CSEditor::Core::g_runtimeContext.viewer->getSceneData();
-    data->asGroup()->addChild(root);
-    CSEditor::Core::g_runtimeContext.viewer->setSceneData(data);
+
+
+    // auto data = CSEditor::Core::g_runtimeContext.viewer->getSceneData();
+    // data->asGroup()->addChild(root);
+    // CSEditor::Core::g_runtimeContext.viewer->setSceneData(pat);
     CSEditor::Core::g_runtimeContext.viewer->realize();
     g_runtimeContext.logSystem = std::make_unique<Helpers::LogSystem>();
     g_runtimeContext.logSystem->info("Hello world");

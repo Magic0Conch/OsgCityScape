@@ -48,11 +48,12 @@ public:
     // const LevelObjectsMap& getAllGObjects() const;
 
     // std::weak_ptr<GObject> getGObjectByID(GObjectID go_id) const;
-    
+    bool importObjFromFolderRecursively(const std::string& folderPath);
+
 
     // GObjectID createObject(const ObjectInstanceRes& object_instance_res);
     // void deleteGObjectByID(GObjectID go_id);
-    
+
     /*create empty object in the scene as the child of parentID*/
     std::shared_ptr<Object> createObjectInLevel(const std::string& name,const ObjectID& parentID);
 

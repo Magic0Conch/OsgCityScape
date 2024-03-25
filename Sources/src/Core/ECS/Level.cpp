@@ -10,7 +10,10 @@
 #include "Editor/Core/RuntimeContext.h"
 #include "Resources/ResourceType/Common/Level.h"
 #include "Core/ECS/Level.h"
+#include "osg/Vec3f"
 #include "osg/ref_ptr"
+#include "osgDB/FileNameUtils"
+#include "osgDB/FileUtils"
 #include "osgDB/ReadFile"
 #include "osgGA/TrackballManipulator"
 
@@ -26,15 +29,37 @@ Level::~Level(){
 
 }
 
+bool Level::importObjFromFolderRecursively(const std::string& folderPath){
+    osgDB::DirectoryContents contents = osgDB::getDirectoryContents(folderPath);
+
+    for (const auto& file : contents) {
+        std::string fullPath = osgDB::concatPaths(folderPath, file);
+        if (osgDB::fileType(fullPath) == osgDB::DIRECTORY && file!="." && file!="..") {
+            importObjFromFolderRecursively(fullPath);
+        } else if (osgDB::getLowerCaseFileExtension(fullPath) == "obj") {
+            if (fullPath.find("_bbox") != std::string::npos) {
+                continue;
+            }
+            auto loadedModelObject = createObjectInLevel(file, m_sceneObject->getID());
+            auto mesh = loadedModelObject->addComponent<Mesh>();
+            mesh->m_meshPath = fullPath;
+            mesh->loadResource(loadedModelObject);
+            std::cout << "Loaded: " << fullPath << std::endl;
+        }
+    }
+
+    return true;
+}
+
 bool Level::load(const std::string& levelResourceUrl){
     //setup scene root
     m_sceneObject = createObjectInLevel("Scene",-1);
 
 
-    auto loadedModelObject = createObjectInLevel("cow", m_sceneObject->getID());
-    auto cowMesh = loadedModelObject->addComponent<Mesh>();
-    cowMesh->setMeshPath("resources/models/cow.osg");
-    cowMesh->loadResource(loadedModelObject);
+    // auto loadedModelObject = createObjectInLevel("cow", m_sceneObject->getID());
+    // auto cowMesh = loadedModelObject->addComponent<Mesh>();
+    // cowMesh->setMeshPath("resources/models/cow.osg");
+    // cowMesh->loadResource(loadedModelObject);
     //load level resource
     
     spdlog::info("Loading level: {}", levelResourceUrl);
@@ -90,14 +115,21 @@ std::unordered_map<ObjectID, std::shared_ptr<Object>>& Level::getSceneObjectsMap
 
 std::shared_ptr<Object> Level::createObjectInLevel(const std::string& name,const ObjectID& parentID){
     auto objectId = ObjectIDAllocator::alloc();
-    Transform* transform = new Transform();
-    auto object = std::make_shared<Object>(objectId,-1);
+    auto object = std::make_shared<ECS::Object>(objectId,parentID);
+
+    std::shared_ptr<Transform> transform = std::make_shared<Transform>();
     transform->loadResource(object);
     object->setTransform(transform);
     object->setName(name);
     m_objects[objectId] = object;
-    if(parentID == -1)
+    if (parentID == -1) {
         return getSceneObjectById(objectId);
+    }
+    // auto transform = object->addComponent<Transform>();
+    // transform->loadResource(object);
+    // object->setName(name);
+    // m_objects[objectId] = object;
+    
     const auto& parentObject = getSceneObjectById(parentID);
     parentObject->getTransformComponent().addChild(*transform);
     return object;
