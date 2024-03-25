@@ -1,12 +1,3 @@
-// This is public domain software and comes with
-// absolutely no warranty. Use of public domain software
-// may vary between counties, but in general you are free
-// to use and distribute this software for any purpose.
-
-
-// Example: OSG using an OpenGL 3.1 context.
-// The comment block at the end of the source describes building OSG
-// for use with OpenGL 3.x.
 #include <Windows.h>
 #include <iostream>
 #include <osgViewer/Viewer>
@@ -18,6 +9,9 @@
 #include <osg/Program>
 #include <osg/Shader>
 #include <osgUtil/Optimizer>
+#include <ostream>
+#include "Editor/Core/RuntimeContext.h"
+#include "Utils/OsgconvWrapper.h"
 
 void configureShaders( osg::StateSet* stateSet )
 {
@@ -66,21 +60,26 @@ void configureShaders( osg::StateSet* stateSet )
 
 int main( int argc, char** argv )
 {
-    std::string filename = "E:\\work\\github\\OsgCityScape\\resources\\materials\\wall.png";
-    osg::ref_ptr<osg::Image> image = osgDB::readImageFile(filename);
-    if (!image.valid()) {
-        // 处理加载失败的情况
-        std::cerr << "Failed to load image: " << filename << std::endl;
-        int x;
-        std::cin>>x;
-    }
-    return 0;
+    // std::string filename = "E:\\work\\github\\OsgCityScape\\resources\\materials\\wall.png";
+    // osg::ref_ptr<osg::Image> image = osgDB::readImageFile(filename);
+    // if (!image.valid()) {
+    //     // 处理加载失败的情况
+    //     std::cerr << "Failed to load image: " << filename << std::endl;
+    //     int x;
+    //     std::cin>>x;
+    // }
+    // return 0;
 
-    auto root = osgDB::readNodeFile("resources/models/cow.osg");
+    // const auto& binFolder = CSEditor::Core::g_runtimeContext.configManager->getBinaryFolder();
+    std::string inputFile = "C:\\suizhou\\GovFacility\\Data\\Tile_+000_+003\\Tile_+000_+003.obj";
+    std::string outputFile = "C:\\suizhou\\GovFacility\\Data\\Tile_+000_+003\\Tile_+000_+003.ive";
+    CSEditor::Dialog::OsgconvWrapper::callOsgconv(inputFile, outputFile);
+
+    auto root = osgDB::readNodeFile("C:/suizhou/GovFacility/Data/Tile_+000_+003/Tile_+000_+003.ive");
     if( root == NULL ){
         osg::notify( osg::FATAL ) << "Unable to load model from command line." << std::endl;
     }
-    configureShaders(root->getOrCreateStateSet());
+    // configureShaders(root->getOrCreateStateSet());
     const int width(800 ), height( 450 );
     osg::ref_ptr< osg::GraphicsContext::Traits > traits = new osg::GraphicsContext::Traits();
     traits->x = 20; traits->y = 30;

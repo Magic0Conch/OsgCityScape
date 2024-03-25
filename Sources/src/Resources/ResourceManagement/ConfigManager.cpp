@@ -20,11 +20,11 @@ void ConfigManager::initialize(const std::filesystem::path& configFilePath){
             {
                 std::string name  = configLine.substr(0, seperatePos);
                 std::string value = configLine.substr(seperatePos + 1, configLine.length() - seperatePos - 1);
-                // if(value == ".")
-                //     value = "";
-                if (name == "BinaryRootFolder")
-                {
+                if (name == "RootFolder"){
                     m_rootFolder = configFilePath.parent_path().parent_path() / value;
+                }            
+                else if (name == "BinaryRootFolder"){
+                    m_binaryFolder = configFilePath.parent_path().parent_path().parent_path()/value;
                 }
                 else if (name == "AssetFolder")
                 {
@@ -63,3 +63,6 @@ const std::filesystem::path& ConfigManager::getMaterialFolder() const{
     return m_materialRootPath;
 }
 
+const std::filesystem::path& ConfigManager::getBinaryFolder() const{
+    return m_binaryFolder;
+}
