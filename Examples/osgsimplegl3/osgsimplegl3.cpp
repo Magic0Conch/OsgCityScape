@@ -60,7 +60,7 @@ void configureShaders( osg::StateSet* stateSet )
 
 int main( int argc, char** argv )
 {
-    // std::string filename = "E:\\work\\github\\OsgCityScape\\resources\\materials\\wall.png";
+    // std::string filename = "E:\\work\\github\\OsgCityScape\\resources\\objects\\texture\\default\\albedo.jpg";
     // osg::ref_ptr<osg::Image> image = osgDB::readImageFile(filename);
     // if (!image.valid()) {
     //     // 处理加载失败的情况
@@ -70,12 +70,12 @@ int main( int argc, char** argv )
     // }
     // return 0;
 
-    // const auto& binFolder = CSEditor::Core::g_runtimeContext.configManager->getBinaryFolder();
-    std::string inputFile = "C:\\suizhou\\GovFacility\\Data\\Tile_+000_+003\\Tile_+000_+003.obj";
-    std::string outputFile = "C:\\suizhou\\GovFacility\\Data\\Tile_+000_+003\\Tile_+000_+003.ive";
+    const auto& binFolder = CSEditor::Core::g_runtimeContext.configManager->getBinaryFolder();
+    std::string inputFile = "C:\\data\\suizhou\\GovFacility\\Data\\Tile_+000_+003\\Tile_+000_+003.obj";
+    std::string outputFile = "C:\\data\\suizhou\\GovFacility\\Data\\Tile_+000_+003\\Tile_+000_+003.ive";
     CSEditor::Dialog::OsgconvWrapper::callOsgconv(inputFile, outputFile);
 
-    auto root = osgDB::readNodeFile("C:/suizhou/GovFacility/Data/Tile_+000_+003/Tile_+000_+003.ive");
+    auto root = osgDB::readNodeFile("C:/data/suizhou/GovFacility/Data/Tile_+000_+003/Tile_+000_+003.ive");
     if( root == NULL ){
         osg::notify( osg::FATAL ) << "Unable to load model from command line." << std::endl;
     }

@@ -29,6 +29,17 @@ Level::~Level(){
 
 }
 
+// void t0(){
+
+// }
+
+// void t(){
+//     std::thread workerThread(callOsgconv, inputPath, outputPath);
+
+//     workerThread.detach();
+
+// }
+
 bool Level::importObjFromFolderRecursively(const std::string& folderPath){
     osgDB::DirectoryContents contents = osgDB::getDirectoryContents(folderPath);
 
@@ -36,7 +47,7 @@ bool Level::importObjFromFolderRecursively(const std::string& folderPath){
         std::string fullPath = osgDB::concatPaths(folderPath, file);
         if (osgDB::fileType(fullPath) == osgDB::DIRECTORY && file!="." && file!="..") {
             importObjFromFolderRecursively(fullPath);
-        } else if (osgDB::getLowerCaseFileExtension(fullPath) == "obj") {
+        } else if (osgDB::getLowerCaseFileExtension(fullPath) == "ive") {
             if (fullPath.find("_bbox") != std::string::npos) {
                 continue;
             }
