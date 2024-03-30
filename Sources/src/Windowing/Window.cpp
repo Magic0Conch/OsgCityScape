@@ -80,6 +80,11 @@ void WindowSystem::createWindow(const Settings::WindowSettings& windowSettings){
     osg::setNotifyLevel(osg::FATAL);
 }
 
+void WindowSystem::updateViewportSize(int width,int height){
+    m_viewport->setViewport(m_position.first, m_position.second, width, height);
+    m_screenTexture->setTextureSize(width, height);
+}
+
 void WindowSystem::setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow){
     m_graphicsWindow = graphicsWindow;
 }

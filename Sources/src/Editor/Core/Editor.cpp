@@ -60,7 +60,6 @@ void Editor::run(){
 }
 
 void Editor::preTick(){
-
 }
 
 void Editor::tick(float deltaTime){
@@ -83,7 +82,7 @@ void Editor::renderTick(float frameTime){
 }
 
 void Editor::setUpUI(){
-    g_runtimeContext.viewer->addEventHandler(new osgViewer::StatsHandler());
+    // g_runtimeContext.viewer->addEventHandler(new osgViewer::StatsHandler());
     g_runtimeContext.viewer->addEventHandler(Core::g_runtimeContext.uiManager.get());
     g_runtimeContext.uiManager->createPanel<GUI::Hierachy>("Hierachy");
     g_runtimeContext.uiManager->createPanel<GUI::Inspector>("Inspector");

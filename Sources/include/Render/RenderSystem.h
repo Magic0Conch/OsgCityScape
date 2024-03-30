@@ -27,9 +27,9 @@ public:
         auto viewer = Core::g_runtimeContext.viewer;
         viewer->setSceneData(m_level->getRootObject()->getTransformComponent().getNode().get());
         // viewer
-        osg::ref_ptr<osgGA::TrackballManipulator> manipulator = new osgGA::TrackballManipulator();
-        manipulator->setHomePosition(osg::Vec3d(0,10,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
-        viewer->setCameraManipulator(manipulator);
+        // osg::ref_ptr<osgGA::TrackballManipulator> manipulator = new osgGA::TrackballManipulator();
+        // manipulator->setHomePosition(osg::Vec3d(0,10,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
+        // viewer->setCameraManipulator(manipulator);
 
         auto objects = m_levelResource->getObjects();
         for (const ResourceType::ObjectInstance& objectInstanceRes:objects) {

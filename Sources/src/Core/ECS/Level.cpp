@@ -1,7 +1,6 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <vector>
 #include "Core/ECS/Components/Mesh.h"
 #include "Core/ECS/Components/Transform.h"
 #include "Core/ECS/Object.h"
@@ -10,12 +9,8 @@
 #include "Editor/Core/RuntimeContext.h"
 #include "Resources/ResourceType/Common/Level.h"
 #include "Core/ECS/Level.h"
-#include "osg/Vec3f"
-#include "osg/ref_ptr"
 #include "osgDB/FileNameUtils"
 #include "osgDB/FileUtils"
-#include "osgDB/ReadFile"
-#include "osgGA/TrackballManipulator"
 
 
 using namespace CSEditor::ECS;
@@ -29,16 +24,6 @@ Level::~Level(){
 
 }
 
-// void t0(){
-
-// }
-
-// void t(){
-//     std::thread workerThread(callOsgconv, inputPath, outputPath);
-
-//     workerThread.detach();
-
-// }
 
 bool Level::importObjFromFolderRecursively(const std::string& folderPath){
     osgDB::DirectoryContents contents = osgDB::getDirectoryContents(folderPath);
@@ -53,8 +38,9 @@ bool Level::importObjFromFolderRecursively(const std::string& folderPath){
             }
             auto loadedModelObject = createObjectInLevel(file, m_sceneObject->getID());
             auto mesh = loadedModelObject->addComponent<Mesh>();
-            mesh->m_meshPath = fullPath;
-            mesh->loadResource(loadedModelObject);
+            mesh->m_meshPath = fullPath;            
+            std::thread workTread(&Mesh::loadResource,mesh,loadedModelObject);
+            workTread.detach();
             std::cout << "Loaded: " << fullPath << std::endl;
         }
     }

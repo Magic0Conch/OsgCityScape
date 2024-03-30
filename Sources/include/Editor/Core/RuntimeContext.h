@@ -1,5 +1,7 @@
 #pragma once
+#include "Core/EventManager.h"
 #include "Core/Helpers/LogSystem.h"
+#include "Editor/Core/EditorInputManager.h"
 #include "GUI/Core/UIManager.h"
 #include "Resources/ResourceManagement/AssetManager.h"
 #include <osgViewer/Viewer>
@@ -7,7 +9,7 @@
 #include <osg/ref_ptr>
 #include <memory>
 namespace CSEditor{
-    namespace  Windowing {
+    namespace Windowing {
         class WindowSystem;
     }
     namespace Resources {
@@ -23,6 +25,11 @@ namespace CSEditor{
 
     namespace Render {
         class RenderSystem;
+    }
+
+    namespace Core{
+        class EditorInputManager;
+        class EventManager;
     }
 }
 
@@ -40,6 +47,8 @@ public:
     osg::ref_ptr<GUI::UIManager> uiManager;
     std::unique_ptr<Helpers::LogSystem> logSystem;
     std::unique_ptr<Render::RenderSystem> renderSystem;
+    std::unique_ptr<Core::EditorInputManager> editorInputManager;
+    std::unique_ptr<Core::EventManager> eventManager;
 };
 
 extern RuntimeContext g_runtimeContext;

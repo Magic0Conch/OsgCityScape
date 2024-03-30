@@ -22,7 +22,8 @@ public:
     void setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow);
     void setViewport(osg::ref_ptr<osg::Viewport> viewport);
     osg::ref_ptr<Resources::RenderTexture> getScreenTexture();
-    
+    void updateViewportSize(int width,int height);
+
 private:
     std::string m_title;
     std::pair<uint16_t, uint16_t> m_size;

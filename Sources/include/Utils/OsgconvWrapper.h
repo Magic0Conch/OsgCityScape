@@ -33,8 +33,8 @@ public:
                     continue;
                 }
                 std::filesystem::path pathObj(fullPath);
-                std::string fileName = pathObj.filename().string();
-                std::string newPath = outputPath + "/" + fileName + ".ive";
+                std::string fileName = pathObj.filename().replace_extension("ive").string();
+                std::string newPath = outputPath + "/" + fileName;
                 std::cout << "start conv: "<<fullPath << std::endl;
                 callOsgconvAsync(fullPath, newPath);
             }
@@ -45,7 +45,6 @@ public:
 
     static void callOsgconvAsync(const std::string& inputPath, const std::string& outputPath) {
         std::thread workerThread(callOsgconv, inputPath, outputPath);
-
         workerThread.detach();
     }
 };
