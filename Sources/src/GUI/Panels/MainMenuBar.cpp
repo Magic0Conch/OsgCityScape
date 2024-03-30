@@ -46,7 +46,6 @@ void MainMenuBar::drawImpl(){
     if (ImGui::BeginMainMenuBar()){
         if (ImGui::BeginMenu("File")){     
             if (ImGui::MenuItem("Convert Obj To ive")){
-
                 m_showImportWindow = true;
             }
             if (ImGui::MenuItem("import ive model")){
