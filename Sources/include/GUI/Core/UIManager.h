@@ -6,7 +6,7 @@
 #include <imgui_impl_opengl3.h>
 #include "Panel.h"
 #include <unordered_map>
-
+#include "Core/EventManager.h"
 namespace osg {
 class Camera;
 }
@@ -60,6 +60,7 @@ private:
     bool mousePressed_[3];
     float mouseWheel_;
     bool initialized_;
+    std::shared_ptr<Core::Event<int,int>> onScenePanelSizeChanged;
 };
 
 }

@@ -29,7 +29,7 @@ Console::Console(){
 
 void Console::drawImpl(){
     bool p_open = true;
-    ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
+    // ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
     ImGui::Begin("Console", &p_open);
     if (ImGui::SmallButton("[Debug] Log a info"))
     {
