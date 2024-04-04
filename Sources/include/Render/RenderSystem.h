@@ -1,13 +1,19 @@
 #pragma once
 #include "Core/ECS/Level.h"
 #include "Editor/Core/RuntimeContext.h"
+#include "Render/LowRender/RenderColorToTexture.h"
 #include "Resources/ResourceType/Common/Level.h"
+#include "osg/Camera"
+#include "osg/Group"
 #include "osg/ref_ptr"
 #include "osgGA/TrackballManipulator"
+#include "Windowing/Window.h"
 #include "Core/ECS/WorldManager.h"
 #include <memory>
 #include <locale>
 #include <iostream>
+#include <osgDB/WriteFile>
+
 namespace CSEditor::Render {
 class RenderSystem{
 public:
@@ -40,10 +46,15 @@ public:
         m_level->setIsLoaded(true);
 
         
+        Render::RenderColorToTexture *rtt = new Render::RenderColorToTexture();
+        rtt->setGraphicsContext(Core::g_runtimeContext.windowSystem->getGraphicsContext());
+        rtt->setViewport(0,0,2048,2048);
+        rtt->setProjectionMatrixAsPerspective(60.0f, 1.0, 1.0f, 1000.0f);
+        Core::g_runtimeContext.viewer->addSlave(rtt);
     };
 
     void tick(float deltaTime){
-
+        
     };
     
 private:
@@ -53,5 +64,5 @@ private:
     //pipeline
     std::shared_ptr<ResourceType::Level> m_levelResource;
     std::shared_ptr<ECS::Level> m_level;
-};
+    };
 }

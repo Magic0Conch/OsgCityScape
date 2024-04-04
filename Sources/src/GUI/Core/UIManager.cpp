@@ -42,6 +42,9 @@ private:
 
 
 UIManager::UIManager(): time_(0.0f), mousePressed_{false,false,false}, mouseWheel_(0.0f), initialized_(false){
+    auto& eventOriType = Core::g_runtimeContext.eventManager->getOrCreateEvent("ScenePanelSizeChanged");
+    auto& event = std::get<Core::Event<int,int>>(eventOriType);
+    onScenePanelSizeChanged.reset(&event);        
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui_ImplOpenGL3_Init();
@@ -320,6 +323,7 @@ void UIManager::newFrame(osg::RenderInfo& renderInfo){
     osg::Viewport* viewport = renderInfo.getCurrentCamera()->getViewport();
     io.DisplaySize = ImVec2(viewport->width(), viewport->height());
 
+
     double currentTime = renderInfo.getView()->getFrameStamp()->getSimulationTime();
     io.DeltaTime = currentTime - time_ + 0.0000001;
     time_ = currentTime;
@@ -330,17 +334,22 @@ void UIManager::newFrame(osg::RenderInfo& renderInfo){
     io.MouseWheel = mouseWheel_;
     mouseWheel_ = 0.0f;
 	ImGui::NewFrame();
+    auto [x,y]  = ImGui::GetWindowSize();
     if (dockspace_on_){
         ImGuiViewport* viewport = ImGui::GetMainViewport();
+
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(viewport->Size);
         ImGui::SetNextWindowViewport(viewport->ID);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-        ImGui::Begin("##dockspace", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking);
+        ImGui::Begin("##dockspace", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking);
         ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+
+
+
         ImGui::End();
         ImGui::PopStyleVar(3);      
     }
@@ -413,6 +422,11 @@ bool UIManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter
         {
             mouseWheel_ = ea.getScrollingMotion() == osgGA::GUIEventAdapter::SCROLL_UP ? 1.0 : -1.0;
             return wantCaptureMouse;
+        }
+        case (osgGA::GUIEventAdapter::RESIZE):
+        {
+            onScenePanelSizeChanged->invoke(ea.getWindowWidth(), ea.getWindowHeight());
+            return false;
         }
         default:
         {

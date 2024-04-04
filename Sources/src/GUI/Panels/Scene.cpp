@@ -8,9 +8,7 @@
 using namespace CSEditor::GUI;
 
 Scene::Scene(){
-    auto eventOriType = Core::g_runtimeContext.eventManager->getOrCreateEvent("ScenePanelSizeChanged");
-    auto& event = std::get<Core::Event<int,int>>(eventOriType);
-    onScenePanelSizeChanged.reset(&event);    
+
 }
 
 void Scene::drawImpl(){
@@ -21,11 +19,18 @@ void Scene::drawImpl(){
     window_flags |= ImGuiWindowFlags_NoScrollbar;
     window_flags |= ImGuiWindowFlags_NoCollapse;
     bool p_open = true;
-    const auto textureId =  Core::g_runtimeContext.windowSystem->getScreenTexture()->getTextureObject(0)->id();
-    ImTextureID imguiTextureID = (ImTextureID)(intptr_t)textureId;
-    onScenePanelSizeChanged->invoke(main_viewport->Size.x,main_viewport->Size.y);
+    ImTextureID imguiTextureID = 0; 
+    auto textureObject = Core::g_runtimeContext.windowSystem->getScreenTexture()->getTextureObject(0);
+    if(textureObject){
+        const auto textureId =  textureObject->id();
+        imguiTextureID = (ImTextureID)(intptr_t)textureId;        
+    }
     if(ImGui::Begin("Scene",&p_open,window_flags)){
-        ImGui::Image(imguiTextureID, main_viewport->Size);
+        const auto& windowSize = ImGui::GetWindowSize();
+        // onScenePanelSizeChanged->invoke(windowSize.x,windowSize.y);
+        auto width = Core::g_runtimeContext.windowSystem->getScreenTexture()->getTextureWidth();
+        auto height = Core::g_runtimeContext.windowSystem->getScreenTexture()->getTextureHeight();
+        ImGui::Image(imguiTextureID, ImVec2(width,height));
     }
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
     ImGui::PopItemWidth();
