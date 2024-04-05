@@ -80,7 +80,7 @@ void WindowSystem::createWindow(Settings::WindowSettings& windowSettings){
     osgViewer::Viewer::Windows windows;
     CSEditor::Core::g_runtimeContext.viewer->getWindows(windows);
     m_graphicsWindow = windows.front();
-    osg::setNotifyLevel(osg::FATAL);
+    // osg::setNotifyLevel(osg::FATAL);
 
     // Render::RenderColorToTexture *rtt = new Render::RenderColorToTexture();
     // rtt->setGraphicsContext(m_graphicsContext);
