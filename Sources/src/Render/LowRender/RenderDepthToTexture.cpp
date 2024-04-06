@@ -20,7 +20,7 @@ RenderDepthToTexture::RenderDepthToTexture()
     _texture->setInternalFormat(GL_DEPTH_COMPONENT);
     _texture->setSourceFormat(GL_DEPTH_COMPONENT);
     _texture->setSourceType(GL_FLOAT);
-    attach(osg::Camera::DEPTH_BUFFER, _texture);
+    // attach(osg::Camera::DEPTH_BUFFER, _texture);
     // createDepthVisualizationShader(0.1, 1000, getOrCreateStateSet());
 }
 

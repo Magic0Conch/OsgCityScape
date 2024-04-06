@@ -4,9 +4,13 @@
 #include <osg/Program>
 #include <osg/Shader>
 #include <osg/Geometry>
+#include <string>
 #include <vector>
 #include "Render/Pass/TextureProjectionPass.h"
-
+#include "Editor/Core/RuntimeContext.h"
+#include "osg/FrameBufferObject"
+#include "osg/ref_ptr"
+#include "Windowing/Window.h"
 
 using namespace CSEditor::Render;
 
@@ -40,8 +44,9 @@ void createTextureProjectionShader(osg::StateSet* ss) {
         #ifdef GL_ES
             precision highp float;
         #endif
-        uniform sampler2DArray depthMap;
+uniform sampler2DArray depthMap;
         uniform sampler2DArray colorMap;
+        uniform sampler2D testMap;
         uniform int mapSize;
         in vec2 texCoord;
         in vec4 lightSpacePos[16];
@@ -59,6 +64,8 @@ void createTextureProjectionShader(osg::StateSet* ss) {
             for(int i = 0;i<mapSize;i++){
                 vec3 projCoords = lightSpacePos[i].xyz / lightSpacePos[i].w;
                 projCoords = projCoords * 0.5 + 0.5;
+                if(projCoords.x < 0 || projCoords.x > 1 || projCoords.y < 0 || projCoords.y > 1)
+                    continue;
                 float closestDepth = texture(depthMap, vec3(projCoords.xy, i)).r;
                 float currentDepth = projCoords.z;
                 flag[i] = currentDepth - bias > closestDepth;
@@ -79,7 +86,8 @@ void createTextureProjectionShader(osg::StateSet* ss) {
 
         void main(void)
         {
-            fragColor = projectTexture();
+            vec4 col = texture(testMap, texCoord);
+            fragColor = projectTexture()+col/5.0;
         }
     )");
 
@@ -98,35 +106,50 @@ void createTextureProjectionShader(osg::StateSet* ss) {
 }
 
 TextureProjectionPass::TextureProjectionPass() {
+    setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+    setRenderOrder(osg::Camera::PRE_RENDER);
+    setName("RenderColor");
+
+    _texture = new osg::Texture2D();
+    _texture->setWrap(osg::Texture2D::WrapParameter::WRAP_T,osg::Texture2D::WrapMode::REPEAT);
+    _texture->setWrap(osg::Texture2D::WrapParameter::WRAP_S,osg::Texture2D::WrapMode::REPEAT);
+    _texture->setSourceFormat(GL_RGBA);
+    _texture->setInternalFormat(GL_RGBA32F_ARB);
+    _texture->setSourceType(GL_FLOAT);
+
     auto stateSet = getOrCreateStateSet();
+    setRenderOrder(osg::Camera::POST_RENDER);
     createTextureProjectionShader(stateSet);
     stateSet->addUniform(new osg::Uniform("depthMap", 0));
     stateSet->addUniform(new osg::Uniform("colorMap", 1));
+    stateSet->addUniform(new osg::Uniform("testMap", 2));
     stateSet->addUniform(new osg::Uniform("mapSize", 0));
     m_lightSpaceMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "lightSpaceMatrix", 16);
     stateSet->addUniform(m_lightSpaceMatrixUniform);
+
+    attach(osg::Camera::COLOR_BUFFER0, _texture);
+    Core::g_runtimeContext.windowSystem->setScreenTexture(_texture);
 }
 
-void TextureProjectionPass::setTextureArray(std::vector<osg::Texture2D*>  depthTexVec, std::vector<osg::Texture2D *> colorTexVec, std::vector<osg::Matrixd*> projectionMatrixVec) {
-    if (!m_depthMap) {
-        m_depthMap = new osg::Texture2DArray;
-        m_depthMap->setSourceType(GL_FLOAT);
-    }
+void tick(){
+
+}
+
+void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> depthMapArray, std::vector<osg::Texture2D *> colorTexVec, std::vector<osg::Matrixd*> projectionMatrixVec) {
     if (!m_colorMap) {
         m_colorMap = new osg::Texture2DArray;
         m_colorMap->setInternalFormat(GL_RGBA);
     }
-    int cnt = depthTexVec.size();
-    m_depthMap->setTextureSize(colorTexVec[0]->getTextureWidth(), colorTexVec[0]->getTextureWidth(), cnt);
+    int cnt = colorTexVec.size();
     m_colorMap->setTextureSize(colorTexVec[0]->getTextureWidth(), colorTexVec[0]->getTextureHeight(), cnt);
     m_colorMap->setInternalFormat(colorTexVec[0]->getInternalFormat());
-    
+
     for (int i = 0; i < cnt; i++) {
-        m_depthMap->setImage(i, depthTexVec[i]->getImage());
         m_colorMap->setImage(i, colorTexVec[i]->getImage());
     }
     auto stateSet = getOrCreateStateSet();
-    stateSet->setTextureAttributeAndModes(0, m_depthMap, osg::StateAttribute::ON);
+    stateSet->setTextureAttributeAndModes(0, depthMapArray, osg::StateAttribute::ON);
     stateSet->setTextureAttributeAndModes(1, m_colorMap, osg::StateAttribute::ON);
     stateSet->getUniform("mapSize")->set(cnt);
     for (int i = 0; i < cnt; ++i) {
@@ -135,4 +158,9 @@ void TextureProjectionPass::setTextureArray(std::vector<osg::Texture2D*>  depthT
     }
 }
 
+osg::ref_ptr<osg::Texture2D> tex1;
 
+void TextureProjectionPass::setTexture(osg::Texture2D * tex) {
+    auto stateSet = getOrCreateStateSet();
+    stateSet->setTextureAttributeAndModes(2, tex, osg::StateAttribute::ON);
+}
