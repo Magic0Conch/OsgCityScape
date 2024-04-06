@@ -3,6 +3,7 @@
 #include "Settings/WindowSettings.h"
 #include "osg/Camera"
 #include "osg/Group"
+#include "osg/Texture2D"
 #include "osgViewer/View"
 #include "osg/ref_ptr"
 #include <memory>
@@ -23,7 +24,8 @@ public:
     std::string getTitle() const;
     void setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow);
     void setViewport(osg::ref_ptr<osg::Viewport> viewport);
-    osg::ref_ptr<Resources::RenderTexture> getScreenTexture();
+    osg::ref_ptr<osg::Texture2D> getScreenTexture();
+    void setScreenTexture(osg::ref_ptr<osg::Texture2D> screenTexture);
     void updateViewportSize(int width,int height);
     osg::ref_ptr<osg::GraphicsContext> getGraphicsContext() const;
 private:
@@ -40,7 +42,7 @@ private:
     osg::ref_ptr<osgViewer::GraphicsWindow> m_graphicsWindow = nullptr;
     osg::ref_ptr<osg::Viewport> m_viewport = nullptr;
     osg::GraphicsContext::ScreenSettings m_screenSettings;
-    osg::ref_ptr<Resources::RenderTexture> m_screenTexture;
+    osg::ref_ptr<osg::Texture2D> m_screenTexture;
     osg::ref_ptr<osg::Group> m_rootNode;
 
     osg::ref_ptr<osg::GraphicsContext> m_graphicsContext;

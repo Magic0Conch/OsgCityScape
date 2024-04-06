@@ -76,7 +76,8 @@ void WindowSystem::createWindow(Settings::WindowSettings& windowSettings){
     mainCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
     
     m_screenTexture = new Resources::RenderTexture(windowSettings.width,windowSettings.height);
-    mainCamera->attach( osg::Camera::COLOR_BUFFER, m_screenTexture.get());
+    // mainCamera->attach( osg::Camera::COLOR_BUFFER, m_screenTexture.get());
+    // mainCamera->setCullMask(0x0);
     osgViewer::Viewer::Windows windows;
     CSEditor::Core::g_runtimeContext.viewer->getWindows(windows);
     m_graphicsWindow = windows.front();
@@ -100,12 +101,16 @@ void WindowSystem::setViewport(osg::ref_ptr<osg::Viewport> viewport){
     m_viewport = viewport;
 }
 
-osg::ref_ptr<CSEditor::Resources::RenderTexture> WindowSystem::getScreenTexture(){
+osg::ref_ptr<osg::Texture2D> WindowSystem::getScreenTexture(){
     return m_screenTexture;
 }
 
 osg::ref_ptr<osg::GraphicsContext> WindowSystem::getGraphicsContext() const{
     return m_graphicsContext;
+}
+
+void WindowSystem::setScreenTexture(osg::ref_ptr<osg::Texture2D> screenTexture){
+    m_screenTexture = screenTexture;
 }
 
 // osg::ref_ptr<osg::Camera> WindowSystem::getMainCamera(){

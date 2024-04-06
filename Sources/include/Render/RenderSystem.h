@@ -10,6 +10,7 @@
 #include "osg/Group"
 #include "osg/Matrix"
 #include "osg/Texture2D"
+#include "osg/Texture2DArray"
 #include "osg/ref_ptr"
 #include "osgDB/ReadFile"
 #include "osgGA/TrackballManipulator"
@@ -55,15 +56,21 @@ public:
         m_level->setIsLoaded(true);
 
         //render pass
+        //depth pass
+        m_depthArray = new osg::Texture2DArray;
+        m_depthArray->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
+        m_depthArray->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
+        m_depthArray->setInternalFormat(GL_DEPTH_COMPONENT);
+        m_depthArray->setSourceFormat(GL_DEPTH_COMPONENT);
+        m_depthArray->setSourceType(GL_FLOAT);
+        m_depthArray->setTextureSize(width, height, 16);
         Render::RenderDepthToTexture *depthPass = new Render::RenderDepthToTexture;
         depthPass->setGraphicsContext(graphicsContext);
+        
         depthPass->setViewport(0,0,width,height);
-        depthPass->setProjectionMatrixAsPerspective(60.0f, 1.0, 1.0f, 1000.0f);
+        depthPass->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);
+        depthPass->attach(osg::Camera::DEPTH_BUFFER,m_depthArray.get(),0,0);
         viewer->addSlave(depthPass);
-
-        //depth
-        std::vector<osg::Texture2D *> depthTextureVector;
-        depthTextureVector.emplace_back(depthPass->getTexture());
 
         //color
         std::vector<osg::Texture2D *> colorTextureVector;
@@ -82,9 +89,8 @@ public:
         Render::TextureProjectionPass *textureProjectionPass = new Render::TextureProjectionPass;
         textureProjectionPass->setGraphicsContext(graphicsContext);
         textureProjectionPass->setViewport(0,0,width,height);
-        textureProjectionPass->setProjectionMatrixAsPerspective(60.0f, 1.0, 1.0f, 1000.0f);
-        
-        textureProjectionPass->setTextureArray(depthTextureVector, colorTextureVector, lightMatrices);
+        textureProjectionPass->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);
+        textureProjectionPass->setTextureArray(m_depthArray, colorTextureVector, lightMatrices);
         viewer->addSlave(textureProjectionPass);
 
     };
@@ -100,5 +106,6 @@ private:
     //pipeline
     std::shared_ptr<ResourceType::Level> m_levelResource;
     std::shared_ptr<ECS::Level> m_level;
+    osg::ref_ptr<osg::Texture2DArray> m_depthArray;
     };
 }
