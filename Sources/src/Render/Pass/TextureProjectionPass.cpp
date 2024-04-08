@@ -46,7 +46,7 @@ void createTextureProjectionShader(osg::StateSet* ss) {
         #endif
 uniform sampler2DArray depthMap;
         uniform sampler2DArray colorMap;
-        uniform sampler2D testMap;
+        uniform sampler2D mainTexture;
         uniform int mapSize;
         in vec2 texCoord;
         in vec4 lightSpacePos[16];
@@ -86,8 +86,8 @@ uniform sampler2DArray depthMap;
 
         void main(void)
         {
-            vec4 col = texture(testMap, texCoord);
-            fragColor = projectTexture()+col/5.0;
+            vec4 col = texture(mainTexture, texCoord);
+            fragColor = projectTexture()+col/2.0;
         }
     )");
 
@@ -96,20 +96,14 @@ uniform sampler2DArray depthMap;
     program->addShader(vertexShader.get());
     program->addShader(fragmentShader.get());
     
-    // 设置uniform变量
-    // osg::ref_ptr<osg::Uniform> nearPlaneUniform = new osg::Uniform("near_plane", near_plane);
-    // osg::ref_ptr<osg::Uniform> farPlaneUniform = new osg::Uniform("far_plane", far_plane);
-
-    // ss->addUniform(nearPlaneUniform.get());
-    // ss->addUniform(farPlaneUniform.get());
     ss->setAttributeAndModes(program.get(), osg::StateAttribute::ON);
 }
 
-TextureProjectionPass::TextureProjectionPass() {
-    setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-    setRenderOrder(osg::Camera::PRE_RENDER);
-    setName("RenderColor");
+TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m_camera(camera) {
+    m_camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    m_camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+    m_camera->setRenderOrder(osg::Camera::PRE_RENDER);
+    m_camera->setName("RenderColor");
 
     _texture = new osg::Texture2D();
     _texture->setWrap(osg::Texture2D::WrapParameter::WRAP_T,osg::Texture2D::WrapMode::REPEAT);
@@ -118,23 +112,20 @@ TextureProjectionPass::TextureProjectionPass() {
     _texture->setInternalFormat(GL_RGBA32F_ARB);
     _texture->setSourceType(GL_FLOAT);
 
-    auto stateSet = getOrCreateStateSet();
-    setRenderOrder(osg::Camera::POST_RENDER);
+    auto stateSet = m_camera->getOrCreateStateSet();
+    m_camera->setRenderOrder(osg::Camera::POST_RENDER);
     createTextureProjectionShader(stateSet);
-    stateSet->addUniform(new osg::Uniform("depthMap", 0));
-    stateSet->addUniform(new osg::Uniform("colorMap", 1));
-    stateSet->addUniform(new osg::Uniform("testMap", 2));
+    stateSet->addUniform(new osg::Uniform("depthMap", 1));
+    stateSet->addUniform(new osg::Uniform("colorMap", 2));
+    stateSet->addUniform(new osg::Uniform("mainTexture", 0));
     stateSet->addUniform(new osg::Uniform("mapSize", 0));
     m_lightSpaceMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "lightSpaceMatrix", 16);
     stateSet->addUniform(m_lightSpaceMatrixUniform);
 
-    attach(osg::Camera::COLOR_BUFFER0, _texture);
+    m_camera->attach(osg::Camera::COLOR_BUFFER0, _texture);
     Core::g_runtimeContext.windowSystem->setScreenTexture(_texture);
 }
 
-void tick(){
-
-}
 
 void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> depthMapArray, std::vector<osg::Texture2D *> colorTexVec, std::vector<osg::Matrixd*> projectionMatrixVec) {
     if (!m_colorMap) {
@@ -148,9 +139,9 @@ void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> de
     for (int i = 0; i < cnt; i++) {
         m_colorMap->setImage(i, colorTexVec[i]->getImage());
     }
-    auto stateSet = getOrCreateStateSet();
-    stateSet->setTextureAttributeAndModes(0, depthMapArray, osg::StateAttribute::ON);
-    stateSet->setTextureAttributeAndModes(1, m_colorMap, osg::StateAttribute::ON);
+    auto stateSet = m_camera->getOrCreateStateSet();
+    stateSet->setTextureAttributeAndModes(1, depthMapArray, osg::StateAttribute::ON);
+    stateSet->setTextureAttributeAndModes(2, m_colorMap, osg::StateAttribute::ON);
     stateSet->getUniform("mapSize")->set(cnt);
     for (int i = 0; i < cnt; ++i) {
         auto& projectionMatrix = *projectionMatrixVec[i];
@@ -158,9 +149,8 @@ void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> de
     }
 }
 
-osg::ref_ptr<osg::Texture2D> tex1;
 
 void TextureProjectionPass::setTexture(osg::Texture2D * tex) {
-    auto stateSet = getOrCreateStateSet();
+    auto stateSet = m_camera->getOrCreateStateSet();
     stateSet->setTextureAttributeAndModes(2, tex, osg::StateAttribute::ON);
 }

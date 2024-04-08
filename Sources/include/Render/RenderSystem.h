@@ -23,6 +23,55 @@
 #include <vector>
 #include "Resources/ResourceManagement/ConfigManager.h"
 namespace CSEditor::Render {
+
+class GeometryTextureSetterVisitor : public osg::NodeVisitor
+{
+public:
+    GeometryTextureSetterVisitor(const std::string& slaveCameraName)
+        : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN),
+          _slaveCameraName(slaveCameraName)
+    {
+    }
+
+    virtual void apply(osg::Camera& camera) override
+    {
+        if (camera.getName() == _slaveCameraName)
+        {
+            for (unsigned int i = 0; i < camera.getNumChildren(); ++i)
+            {
+                camera.getChild(i)->accept(*this);
+            }
+        }
+        else
+        {
+            traverse(camera);
+        }
+    }
+
+    virtual void apply(osg::Geometry& geometry) override
+    {
+
+        osg::StateSet* stateSet = geometry.getOrCreateStateSet();
+        if (stateSet)
+        {
+            auto node = osgDB::readNodeFile("1.obj");
+            
+            // 创建一个纹理对象，并设置到StateSet中
+            osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
+            // 这里需要设置纹理的图像数据，例如：
+            // texture->setImage(osgDB::readImageFile("texture.png"));
+
+            // 将纹理设置到StateSet的纹理单元0
+            stateSet->setTextureAttributeAndModes(0, texture.get());
+        }
+
+        traverse(geometry);
+    }
+
+private:
+    std::string _slaveCameraName;
+};
+
 class RenderSystem{
 public:
     RenderSystem(){
@@ -46,7 +95,9 @@ public:
         const int height = 2048;
 
         // initialize the level resource
-        viewer->setSceneData(m_level->getRootObject()->getTransformComponent().getNode().get());
+        auto rootSceneNode = m_level->getRootObject()->getTransformComponent().getNode().get();
+        rootSceneNode->setNodeMask(0x1);
+        viewer->setSceneData(rootSceneNode);
         auto objects = m_levelResource->getObjects();
         for (const ResourceType::ObjectInstance& objectInstanceRes:objects) {
             auto curObjectId = m_level->loadObjectInstance(objectInstanceRes);
@@ -66,7 +117,7 @@ public:
         m_depthArray->setTextureSize(width, height, 16);
         Render::RenderDepthToTexture *depthPass = new Render::RenderDepthToTexture;
         depthPass->setGraphicsContext(graphicsContext);
-        
+        depthPass->setNodeMask(0x1);
         depthPass->setViewport(0,0,width,height);
         depthPass->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);
         depthPass->attach(osg::Camera::DEPTH_BUFFER,m_depthArray.get(),0,0);
@@ -86,12 +137,15 @@ public:
         std::vector<osg::Matrixd*> lightMatrices;
         lightMatrices.emplace_back(&lightProjectionMatrix);
 
-        Render::TextureProjectionPass *textureProjectionPass = new Render::TextureProjectionPass;
-        textureProjectionPass->setGraphicsContext(graphicsContext);
-        textureProjectionPass->setViewport(0,0,width,height);
-        textureProjectionPass->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);
+        auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
+
+        Render::TextureProjectionPass *textureProjectionPass = new Render::TextureProjectionPass(mainCamera);
+        // mainCamera->setGraphicsContext(graphicsContext);
+        // mainCamera->setViewport(0,0,width,height);
+        mainCamera->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);
         textureProjectionPass->setTextureArray(m_depthArray, colorTextureVector, lightMatrices);
-        viewer->addSlave(textureProjectionPass);
+        mainCamera->setNodeMask(0x1);
+        // viewer->addSlave(textureProjectionPass);
 
     };
 

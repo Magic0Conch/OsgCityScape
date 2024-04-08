@@ -47,7 +47,7 @@ std::string WindowSystem::getTitle() const{
 }
 
 void WindowSystem::createWindow(Settings::WindowSettings& windowSettings){     
-        //monitor
+    //monitor
     osg::GraphicsContext::getWindowingSystemInterface()->getScreenSettings(0, m_screenSettings);
     int x = m_screenSettings.width/2 - windowSettings.width/2;
     int y = m_screenSettings.height/2 - windowSettings.height/2;
@@ -69,12 +69,12 @@ void WindowSystem::createWindow(Settings::WindowSettings& windowSettings){
         Core::g_runtimeContext.viewer->setUpViewOnSingleScreen(0);
     }
 
-    auto mainCamera = CSEditor::Core::g_runtimeContext.viewer->getCamera();
-    mainCamera->setViewport(new osg::Viewport( m_position.first, m_position.second, windowSettings.width, windowSettings.height));
-    m_viewport = mainCamera->getViewport();
-    mainCamera->setGraphicsContext(m_graphicsContext);
-    mainCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-    
+    m_mainCamera = CSEditor::Core::g_runtimeContext.viewer->getCamera();
+    m_mainCamera->setViewport(new osg::Viewport( m_position.first, m_position.second, windowSettings.width, windowSettings.height));
+    m_viewport = m_mainCamera->getViewport();
+    m_mainCamera->setGraphicsContext(m_graphicsContext);
+    // m_mainCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+    m_mainCamera->setCullMask(0x1);
     m_screenTexture = new Resources::RenderTexture(windowSettings.width,windowSettings.height);
     // mainCamera->attach( osg::Camera::COLOR_BUFFER, m_screenTexture.get());
     // mainCamera->setCullMask(0x0);
@@ -113,9 +113,9 @@ void WindowSystem::setScreenTexture(osg::ref_ptr<osg::Texture2D> screenTexture){
     m_screenTexture = screenTexture;
 }
 
-// osg::ref_ptr<osg::Camera> WindowSystem::getMainCamera(){
-//     return m_mainCamera;
-// }
+osg::ref_ptr<osg::Camera> WindowSystem::getMainCamera() const{
+    return m_mainCamera;
+}
 
 // osg::ref_ptr<osg::Group> WindowSystem::getRootNode(){
 //     return m_rootNode;

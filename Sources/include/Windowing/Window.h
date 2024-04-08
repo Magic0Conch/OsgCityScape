@@ -28,6 +28,7 @@ public:
     void setScreenTexture(osg::ref_ptr<osg::Texture2D> screenTexture);
     void updateViewportSize(int width,int height);
     osg::ref_ptr<osg::GraphicsContext> getGraphicsContext() const;
+    osg::ref_ptr<osg::Camera> getMainCamera() const;
 private:
     std::string m_title;
     std::pair<uint16_t, uint16_t> m_size;
@@ -44,7 +45,6 @@ private:
     osg::GraphicsContext::ScreenSettings m_screenSettings;
     osg::ref_ptr<osg::Texture2D> m_screenTexture;
     osg::ref_ptr<osg::Group> m_rootNode;
-
     osg::ref_ptr<osg::GraphicsContext> m_graphicsContext;
     
 };
