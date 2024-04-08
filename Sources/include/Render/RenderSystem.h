@@ -39,6 +39,28 @@ public:
         }
         m_level->setIsLoaded(true);
 
+
+        osg::ref_ptr<osg::Texture2D> depthTexture = new osg::Texture2D;
+        depthTexture->setTextureSize(1024, 1024);
+        depthTexture->setInternalFormat(GL_DEPTH_COMPONENT);
+        depthTexture->setSourceFormat(GL_DEPTH_COMPONENT);
+        depthTexture->setSourceType(GL_FLOAT);
+
+        osg::ref_ptr<osg::Camera> depthCamera = new osg::Camera;
+        depthCamera->setClearMask(GL_DEPTH_BUFFER_BIT); // 只清除深度缓冲
+        depthCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+        depthCamera->setRenderOrder(osg::Camera::PRE_RENDER); // 在渲染主场景之前渲染
+        depthCamera->setViewport(0, 0, 1024, 1024);
+        depthCamera->attach(osg::Camera::DEPTH_BUFFER, depthTexture.get()); // 将深度缓冲附加到纹理
+
+
+        osg::ref_ptr<osg::Group> root = new osg::Group;
+        root->addChild(depthCamera.get());
+
+        // depthCamera->render();
+
+
+        // osgDB::writeImageFile(*depthTexture->getImage(0), "depth.png");
         
     };
 
