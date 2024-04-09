@@ -53,7 +53,7 @@ void Inspector::drawImpl(){
     ImGuiWindowFlags window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoCollapse;
     ImGui::SetNextWindowPos(ImVec2(main_viewport->GetWorkCenter()),ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(550,680),ImGuiCond_FirstUseEver);
+    // ImGui::SetNextWindowSize(ImVec2(550,680),ImGuiCond_FirstUseEver);
     bool p_open = true;
     if(ImGui::Begin("Inspector",&p_open,window_flags)){
         if(m_selectedObjectID==-1||m_selectedObjectID==0){

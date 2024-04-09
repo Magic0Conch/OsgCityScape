@@ -37,7 +37,7 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                 osg::Vec3d lookDir = center - eye;
                 osg::Vec3d sideDir = lookDir ^ up;
 
-                osg::Quat pitch(-m_mouseSensitivity * mouseDelta.y(), sideDir);
+                osg::Quat pitch(m_mouseSensitivity * mouseDelta.y(), sideDir);
                 osg::Quat yaw(-m_mouseSensitivity * mouseDelta.x(), up);
                 osg::Quat rotation = pitch * yaw;
 

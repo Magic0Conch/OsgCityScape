@@ -1,5 +1,6 @@
 #include "Windowing/Window.h"
 #include "Windowing/Settings/WindowSettings.h"
+#include "osg/Group"
 #include "spdlog/spdlog.h"
 #include "Editor/Core/RuntimeContext.h"
 #include <osg/Camera>
@@ -7,11 +8,13 @@
 #include <osgDB/ReadFile>
 #include <osgGA/TrackballManipulator>
 #include <osgViewer/Viewer>
+#include "Render/LowRender/RenderColorToTexture.h"
+
 using namespace CSEditor::Windowing;
 
 // extern CSEditor::Core::RuntimeContext g_runtimeContext;
 
-WindowSystem::WindowSystem(const Settings::WindowSettings& windowSettings):
+WindowSystem::WindowSystem(Settings::WindowSettings& windowSettings):
     m_title(windowSettings.title),
     m_size(windowSettings.width,windowSettings.height),
     m_fullscreen(windowSettings.fullscreen),    
@@ -43,7 +46,7 @@ std::string WindowSystem::getTitle() const{
     return m_title;
 }
 
-void WindowSystem::createWindow(const Settings::WindowSettings& windowSettings){     
+void WindowSystem::createWindow(Settings::WindowSettings& windowSettings){     
     //monitor
     osg::GraphicsContext::getWindowingSystemInterface()->getScreenSettings(0, m_screenSettings);
     int x = m_screenSettings.width/2 - windowSettings.width/2;
@@ -58,26 +61,32 @@ void WindowSystem::createWindow(const Settings::WindowSettings& windowSettings){
     traits->glContextProfileMask = 0x1;// 0x1;// 
     traits->x = x,traits->y = y;
     
-    osg::ref_ptr<osg::GraphicsContext> gc = osg::GraphicsContext::createGraphicsContext(traits.get());    
-    gc->getState()->resetVertexAttributeAlias(false);
-    gc->getState()->setCheckForGLErrors(osg::State::CheckForGLErrors::ONCE_PER_ATTRIBUTE);
+    m_graphicsContext = osg::GraphicsContext::createGraphicsContext(traits.get());    
+    m_graphicsContext->getState()->resetVertexAttributeAlias(false);
+    m_graphicsContext->getState()->setCheckForGLErrors(osg::State::CheckForGLErrors::ONCE_PER_ATTRIBUTE);
     
     if(m_fullscreen){
         Core::g_runtimeContext.viewer->setUpViewOnSingleScreen(0);
     }
 
-    auto mainCamera = CSEditor::Core::g_runtimeContext.viewer->getCamera();
-    mainCamera->setViewport(new osg::Viewport( m_position.first, m_position.second, windowSettings.width, windowSettings.height));
-    m_viewport = mainCamera->getViewport();
-    mainCamera->setGraphicsContext(gc);
-    mainCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-    
+    m_mainCamera = CSEditor::Core::g_runtimeContext.viewer->getCamera();
+    m_mainCamera->setViewport(new osg::Viewport( m_position.first, m_position.second, windowSettings.width, windowSettings.height));
+    m_viewport = m_mainCamera->getViewport();
+    m_mainCamera->setGraphicsContext(m_graphicsContext);
+    // m_mainCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+    m_mainCamera->setCullMask(0x1);
     m_screenTexture = new Resources::RenderTexture(windowSettings.width,windowSettings.height);
-    mainCamera->attach( osg::Camera::COLOR_BUFFER, m_screenTexture.get());
+    // mainCamera->attach( osg::Camera::COLOR_BUFFER, m_screenTexture.get());
+    // mainCamera->setCullMask(0x0);
     osgViewer::Viewer::Windows windows;
     CSEditor::Core::g_runtimeContext.viewer->getWindows(windows);
     m_graphicsWindow = windows.front();
-    osg::setNotifyLevel(osg::FATAL);
+    // osg::setNotifyLevel(osg::FATAL);
+
+    // Render::RenderColorToTexture *rtt = new Render::RenderColorToTexture();
+    // rtt->setGraphicsContext(m_graphicsContext);
+    // rtt->setViewport(new osg::Viewport(0,0, traits->width, traits->height));
+    // Core::g_runtimeContext.viewer->addSlave(rtt);
 }
 
 void WindowSystem::updateViewportSize(int width,int height){
@@ -92,6 +101,22 @@ void WindowSystem::setViewport(osg::ref_ptr<osg::Viewport> viewport){
     m_viewport = viewport;
 }
 
-osg::ref_ptr<CSEditor::Resources::RenderTexture> WindowSystem::getScreenTexture(){
+osg::ref_ptr<osg::Texture2D> WindowSystem::getScreenTexture(){
     return m_screenTexture;
 }
+
+osg::ref_ptr<osg::GraphicsContext> WindowSystem::getGraphicsContext() const{
+    return m_graphicsContext;
+}
+
+void WindowSystem::setScreenTexture(osg::ref_ptr<osg::Texture2D> screenTexture){
+    m_screenTexture = screenTexture;
+}
+
+osg::ref_ptr<osg::Camera> WindowSystem::getMainCamera() const{
+    return m_mainCamera;
+}
+
+// osg::ref_ptr<osg::Group> WindowSystem::getRootNode(){
+//     return m_rootNode;
+// }
