@@ -1,14 +1,77 @@
 #pragma once
 #include "Core/ECS/Level.h"
 #include "Editor/Core/RuntimeContext.h"
+#include "Render/LowRender/DisplayTexture.h"
+#include "Render/LowRender/RenderColorToTexture.h"
+#include "Render/LowRender/RenderDepthToTexture.h"
+#include "Render/Pass/TextureProjectionPass.h"
 #include "Resources/ResourceType/Common/Level.h"
+#include "osg/Camera"
+#include "osg/Group"
+#include "osg/Matrix"
+#include "osg/Texture2D"
+#include "osg/Texture2DArray"
 #include "osg/ref_ptr"
+#include "osgDB/ReadFile"
 #include "osgGA/TrackballManipulator"
+#include "Windowing/Window.h"
 #include "Core/ECS/WorldManager.h"
 #include <memory>
 #include <locale>
 #include <iostream>
+#include <osgDB/WriteFile>
+#include <vector>
+#include "Resources/ResourceManagement/ConfigManager.h"
 namespace CSEditor::Render {
+
+class GeometryTextureSetterVisitor : public osg::NodeVisitor
+{
+public:
+    GeometryTextureSetterVisitor(const std::string& slaveCameraName)
+        : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN),
+          _slaveCameraName(slaveCameraName)
+    {
+    }
+
+    virtual void apply(osg::Camera& camera) override
+    {
+        if (camera.getName() == _slaveCameraName)
+        {
+            for (unsigned int i = 0; i < camera.getNumChildren(); ++i)
+            {
+                camera.getChild(i)->accept(*this);
+            }
+        }
+        else
+        {
+            traverse(camera);
+        }
+    }
+
+    virtual void apply(osg::Geometry& geometry) override
+    {
+
+        osg::StateSet* stateSet = geometry.getOrCreateStateSet();
+        if (stateSet)
+        {
+            auto node = osgDB::readNodeFile("1.obj");
+            
+            // 创建一个纹理对象，并设置到StateSet中
+            osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
+            // 这里需要设置纹理的图像数据，例如：
+            // texture->setImage(osgDB::readImageFile("texture.png"));
+
+            // 将纹理设置到StateSet的纹理单元0
+            stateSet->setTextureAttributeAndModes(0, texture.get());
+        }
+
+        traverse(geometry);
+    }
+
+private:
+    std::string _slaveCameraName;
+};
+
 class RenderSystem{
 public:
     RenderSystem(){
@@ -24,13 +87,17 @@ public:
     };
 
     void initialize(){
+        //setup 
         auto viewer = Core::g_runtimeContext.viewer;
-        viewer->setSceneData(m_level->getRootObject()->getTransformComponent().getNode().get());
-        // viewer
-        // osg::ref_ptr<osgGA::TrackballManipulator> manipulator = new osgGA::TrackballManipulator();
-        // manipulator->setHomePosition(osg::Vec3d(0,10,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
-        // viewer->setCameraManipulator(manipulator);
+        auto graphicsContext = Core::g_runtimeContext.windowSystem->getGraphicsContext();
 
+        const int width = 2048;
+        const int height = 2048;
+
+        // initialize the level resource
+        auto rootSceneNode = m_level->getRootObject()->getTransformComponent().getNode().get();
+        rootSceneNode->setNodeMask(0x1);
+        viewer->setSceneData(rootSceneNode);
         auto objects = m_levelResource->getObjects();
         for (const ResourceType::ObjectInstance& objectInstanceRes:objects) {
             auto curObjectId = m_level->loadObjectInstance(objectInstanceRes);
@@ -39,33 +106,51 @@ public:
         }
         m_level->setIsLoaded(true);
 
+        //render pass
+        //depth pass
+        m_depthArray = new osg::Texture2DArray;
+        m_depthArray->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
+        m_depthArray->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
+        m_depthArray->setInternalFormat(GL_DEPTH_COMPONENT);
+        m_depthArray->setSourceFormat(GL_DEPTH_COMPONENT);
+        m_depthArray->setSourceType(GL_FLOAT);
+        m_depthArray->setTextureSize(width, height, 16);
+        Render::RenderDepthToTexture *depthPass = new Render::RenderDepthToTexture;
+        depthPass->setGraphicsContext(graphicsContext);
+        depthPass->setNodeMask(0x1);
+        depthPass->setViewport(0,0,width,height);
+        depthPass->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);
+        depthPass->attach(osg::Camera::DEPTH_BUFFER,m_depthArray.get(),0,0);
+        viewer->addSlave(depthPass);
 
-        osg::ref_ptr<osg::Texture2D> depthTexture = new osg::Texture2D;
-        depthTexture->setTextureSize(1024, 1024);
-        depthTexture->setInternalFormat(GL_DEPTH_COMPONENT);
-        depthTexture->setSourceFormat(GL_DEPTH_COMPONENT);
-        depthTexture->setSourceType(GL_FLOAT);
+        //color
+        std::vector<osg::Texture2D *> colorTextureVector;
+        osg::ref_ptr<osg::Texture2D> textureWall = new osg::Texture2D;
+        const auto texturePath = (Core::g_runtimeContext.configManager->getMaterialFolder()/ "WoodPlanks.jpg").string();
+        std::cout<<texturePath<<std::endl;
+        auto imageWall = osgDB::readImageFile(texturePath);
+        textureWall->setImage(imageWall);
+        colorTextureVector.emplace_back(textureWall);
 
-        osg::ref_ptr<osg::Camera> depthCamera = new osg::Camera;
-        depthCamera->setClearMask(GL_DEPTH_BUFFER_BIT); // 只清除深度缓冲
-        depthCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-        depthCamera->setRenderOrder(osg::Camera::PRE_RENDER); // 在渲染主场景之前渲染
-        depthCamera->setViewport(0, 0, 1024, 1024);
-        depthCamera->attach(osg::Camera::DEPTH_BUFFER, depthTexture.get()); // 将深度缓冲附加到纹理
+        //light projection matrix
+        auto lightProjectionMatrix = depthPass->getProjectionMatrix();
+        std::vector<osg::Matrixd*> lightMatrices;
+        lightMatrices.emplace_back(&lightProjectionMatrix);
 
+        auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
 
-        osg::ref_ptr<osg::Group> root = new osg::Group;
-        root->addChild(depthCamera.get());
+        Render::TextureProjectionPass *textureProjectionPass = new Render::TextureProjectionPass(mainCamera);
+        // mainCamera->setGraphicsContext(graphicsContext);
+        // mainCamera->setViewport(0,0,width,height);
+        mainCamera->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);
+        textureProjectionPass->setTextureArray(m_depthArray, colorTextureVector, lightMatrices);
+        mainCamera->setNodeMask(0x1);
+        // viewer->addSlave(textureProjectionPass);
 
-        // depthCamera->render();
-
-
-        // osgDB::writeImageFile(*depthTexture->getImage(0), "depth.png");
-        
     };
 
     void tick(float deltaTime){
-
+        
     };
     
 private:
@@ -75,5 +160,6 @@ private:
     //pipeline
     std::shared_ptr<ResourceType::Level> m_levelResource;
     std::shared_ptr<ECS::Level> m_level;
-};
+    osg::ref_ptr<osg::Texture2DArray> m_depthArray;
+    };
 }

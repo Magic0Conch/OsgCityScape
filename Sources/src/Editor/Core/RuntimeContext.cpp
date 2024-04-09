@@ -26,10 +26,11 @@ RuntimeContext::RuntimeContext(){
     
     eventManager = std::make_unique<Core::EventManager>();
     worldManager = std::make_unique<ECS::WorldManager>();
-    renderSystem = std::make_unique<Render::RenderSystem>();
 
     Settings::WindowSettings windowSettings;
     windowSystem = std::make_unique<Windowing::WindowSystem>(windowSettings);
+    
+    renderSystem = std::make_unique<Render::RenderSystem>();
     editorInputManager = std::make_unique<Core::EditorInputManager>(CSEditor::Core::g_runtimeContext.viewer->getCamera());
 
     assetManager = std::make_unique<Resources::AssetManager>();

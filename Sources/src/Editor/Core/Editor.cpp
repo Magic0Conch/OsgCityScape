@@ -35,6 +35,7 @@
 #include "GUI/Panels/Scene.h"
 #include "GUI/Panels/MainMenuBar.h"
 #include "GUI/Helper/ImGuiInitOperation.h"
+#include "Render/RenderSystem.h"
 
 using namespace CSEditor::Core;
 
@@ -79,6 +80,7 @@ void Editor::logicTick(float frameTime){
 
 void Editor::renderTick(float frameTime){
     g_runtimeContext.viewer->frame();
+    g_runtimeContext.renderSystem->tick(frameTime);
 }
 
 void Editor::setUpUI(){

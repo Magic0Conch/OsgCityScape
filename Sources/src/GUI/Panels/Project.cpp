@@ -12,7 +12,7 @@ void Project::drawImpl(){
     ImGuiWindowFlags window_flags = 0;
     window_flags |= ImGuiWindowFlags_NoCollapse;
     ImGui::SetNextWindowPos(ImVec2(main_viewport->GetWorkCenter()),ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(550,680),ImGuiCond_FirstUseEver);
+    // ImGui::SetNextWindowSize(ImVec2(550,680),ImGuiCond_FirstUseEver);
     bool p_open = true;
     if(ImGui::Begin("Project",&p_open,window_flags)){
         // Left

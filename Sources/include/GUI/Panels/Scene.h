@@ -10,6 +10,6 @@ public:
 protected:
     virtual void drawImpl() override;
 private:
-    std::shared_ptr<Core::Event<int,int>> onScenePanelSizeChanged;
+    
 };
 }
