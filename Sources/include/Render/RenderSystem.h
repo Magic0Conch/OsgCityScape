@@ -9,6 +9,7 @@
 #include "osg/Camera"
 #include "osg/Group"
 #include "osg/Matrix"
+#include "osg/Matrixd"
 #include "osg/Texture2D"
 #include "osg/Texture2DArray"
 #include "osg/ref_ptr"
@@ -91,8 +92,8 @@ public:
         auto viewer = Core::g_runtimeContext.viewer;
         auto graphicsContext = Core::g_runtimeContext.windowSystem->getGraphicsContext();
 
-        const int width = 2048;
-        const int height = 2048;
+        const int width = 1200;
+        const int height = 900;
 
         // initialize the level resource
         auto rootSceneNode = m_level->getRootObject()->getTransformComponent().getNode().get();
@@ -126,16 +127,24 @@ public:
         //color
         std::vector<osg::Texture2D *> colorTextureVector;
         osg::ref_ptr<osg::Texture2D> textureWall = new osg::Texture2D;
-        const auto texturePath = (Core::g_runtimeContext.configManager->getMaterialFolder()/ "WoodPlanks.jpg").string();
+        const auto texturePath = (Core::g_runtimeContext.configManager->getMaterialFolder()/ "DJI_0314.JPG").string();
         std::cout<<texturePath<<std::endl;
         auto imageWall = osgDB::readImageFile(texturePath);
         textureWall->setImage(imageWall);
         colorTextureVector.emplace_back(textureWall);
 
         //light projection matrix
-        auto lightProjectionMatrix = depthPass->getProjectionMatrix();
+        auto lightViewMatrix = osg::Matrixd(0.695647,-0.319652,0.643348,0,0.718382,0.308087,-0.623706,0,0.001162,0.896050,0.443952,0,-3.889762,-81.353875,-186.377313,1);
+        osg::Camera *lightCamera = new osg::Camera;
+        lightCamera->setViewMatrix(lightViewMatrix);
+        double fovy = 1.5500;
+        double asectRatio = 1.333;
+        double zNear = 5;
+        double zFar = 1500;
+        osg::Matrixd projectionMatrix = osg::Matrixd::perspective(fovy, asectRatio, zNear, zFar);        
+        auto lightViewProjectionMatrix = lightViewMatrix*projectionMatrix;
         std::vector<osg::Matrixd*> lightMatrices;
-        lightMatrices.emplace_back(&lightProjectionMatrix);
+        lightMatrices.emplace_back(&lightViewProjectionMatrix);
 
         auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
 
