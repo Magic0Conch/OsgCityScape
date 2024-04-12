@@ -50,5 +50,5 @@ void Project::drawImpl(){
     ImGui::PushItemWidth(ImGui::GetFontSize() * -12);
     ImGui::PopItemWidth();
     ImGui::End();
-    ImGui::ShowDemoWindow();
+    // ImGui::ShowDemoWindow();
 }

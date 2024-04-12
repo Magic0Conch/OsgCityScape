@@ -34,6 +34,7 @@
 #include "GUI/Panels/Project.h"
 #include "GUI/Panels/Scene.h"
 #include "GUI/Panels/MainMenuBar.h"
+#include "GUI/Panels/StatusBar.h"
 #include "GUI/Helper/ImGuiInitOperation.h"
 #include "Render/RenderSystem.h"
 
@@ -92,6 +93,7 @@ void Editor::setUpUI(){
     g_runtimeContext.uiManager->createPanel<GUI::Project>("Project");
     g_runtimeContext.uiManager->createPanel<GUI::Scene>("Scene");
     g_runtimeContext.uiManager->createPanel<GUI::MainMenuBar>("MainMenuBar");
+    g_runtimeContext.uiManager->createPanel<GUI::StatusBar>("StatusBar");
     g_runtimeContext.viewer->setRealizeOperation(new GUI::ImGuiInitOperation);
 
 

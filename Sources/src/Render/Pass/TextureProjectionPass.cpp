@@ -68,7 +68,7 @@ uniform sampler2DArray depthMap;
                     continue;
                 float closestDepth = texture(depthMap, vec3(projCoords.xy, i)).r;
                 float currentDepth = projCoords.z;
-                flag[i] = currentDepth - bias > closestDepth;
+                flag[i] = currentDepth > closestDepth;
 
                 validCnt += flag[i]? 1 : 0;                
             }
@@ -76,9 +76,10 @@ uniform sampler2DArray depthMap;
                 return outColor;
             for(int i = 0;i<mapSize;i++){
                 if(flag[i]){
-                    vec3 projCoords = lightSpacePos[i].xyz / lightSpacePos[i].w;
-                    projCoords = projCoords * 0.5 + 0.5;
-                    outColor += texture(colorMap, vec3(projCoords.xy, i)) / (validCnt*1.0);
+                    // vec3 projCoords = lightSpacePos[i].xyz / lightSpacePos[i].w;
+                    // projCoords = projCoords * 0.5 + 0.5;
+                    // outColor += texture(colorMap, vec3(projCoords.xy, i)) / (validCnt*1.0);
+                    outColor = vec4(1.0,0.0,0.0,1.0);
                 }                
             }
             return outColor;
@@ -88,6 +89,7 @@ uniform sampler2DArray depthMap;
         {
             vec4 col = texture(mainTexture, texCoord);
             fragColor = projectTexture()+col/2.0;
+            fragColor.a = 1.0;
         }
     )");
 
