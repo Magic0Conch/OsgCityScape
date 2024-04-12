@@ -15,7 +15,8 @@ public:
     static void callOsgconv(const std::string& inputPath, const std::string& outputPath) {
         std::string command = (Core::g_runtimeContext.configManager->getBinaryFolder() /"osgconv.exe ").string()+ inputPath + " " + outputPath;
         std::cout<<command<<std::endl;
-        command = "D:\\package\\osg3.6.5Vs2022X64\\bin\\osgconv.exe "+ inputPath + " " + outputPath;
+        // E:\work\2401\OpenSceneGraph\bin
+        command = "E:\\work\\2401\\OpenSceneGraph\\bin\\osgconv.exe "+ inputPath + " " + outputPath;
         int result = std::system(command.c_str());
         if (result != EXIT_SUCCESS) {
             std::cerr << "osgconv.exe failed with error code: " << result << std::endl;

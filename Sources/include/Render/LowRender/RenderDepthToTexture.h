@@ -1,5 +1,6 @@
 #pragma once
 
+#include "osg/Matrixd"
 #include <osg/Camera>
 #include <osg/Texture2D>
 
@@ -12,7 +13,7 @@ public:
     // virtual ~RenderDepthToTexture() {}
 
     osg::Texture2D* getTexture() const;
-
+    void setViewProjectionMatrix(const osg::Matrixd& viewMatrix);
 private:
     osg::ref_ptr<osg::Texture2D> _texture;
 };

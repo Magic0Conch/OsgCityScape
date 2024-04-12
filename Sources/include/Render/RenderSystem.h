@@ -1,11 +1,14 @@
 #pragma once
 #include "Core/ECS/Level.h"
+#include "Core/Math/MatrixHelper.h"
 #include "Editor/Core/RuntimeContext.h"
 #include "Render/LowRender/DisplayTexture.h"
 #include "Render/LowRender/RenderColorToTexture.h"
 #include "Render/LowRender/RenderDepthToTexture.h"
 #include "Render/Pass/TextureProjectionPass.h"
 #include "Resources/ResourceType/Common/Level.h"
+#include "glm/fwd.hpp"
+#include "glm/matrix.hpp"
 #include "osg/Camera"
 #include "osg/Group"
 #include "osg/Matrix"
@@ -23,6 +26,7 @@
 #include <osgDB/WriteFile>
 #include <vector>
 #include "Resources/ResourceManagement/ConfigManager.h"
+#include "Core/Math/MatrixHelper.h"
 namespace CSEditor::Render {
 
 class GeometryTextureSetterVisitor : public osg::NodeVisitor
@@ -88,7 +92,33 @@ public:
     };
 
     void initialize(){
+        auto camera = Core::g_runtimeContext.windowSystem->getMainCamera();
+        osg::Vec3d eye, center, up;
+        auto viewMatrix = MatrixHelper::glmToOsgMatrix(glm::dmat4(0.671205,-0.474751,0.569293,0,0.740948,0.452385,-0.496331,0,-0.021905,0.754957,0.655409,0,-39.120093,-26.573260,-168.144351,1));
+        auto perspectiveMatrix = MatrixHelper::glmToOsgMatrix(MatrixHelper::getPerspectiveMatrix(1.55, 5, 1500, 1.0));        
+        camera->setViewMatrix(viewMatrix);
+        // camera->setProjectionMatrix(perspectiveMatrix);
+        camera->getViewMatrixAsLookAt(eye, center, up);
+        osg::Vec3f dir = (center - eye);
+        dir.normalize();
+        camera->setViewMatrixAsLookAt(osg::Vec3f(109.365,-42.448,129.408), osg::Vec3f(39.45,18.21,51.77), up);
+        // osg::Matrix projMatrix = camera->getProjectionMatrix();
+        // projMatrix(0, 0) *= -1;
+        // camera->setProjectionMatrix(projMatrix);
+        osg::Vec3f dir2 = osg::Vec3f(39.45,18.21,51.77) - osg::Vec3f(109.365,-42.448,129.408);
+        dir2.normalize();
+
+
+
+
+        auto viewProjectionMatrix = perspectiveMatrix * viewMatrix;
+
+        auto lightMatrix = viewProjectionMatrix;
+        // glm::dvec3 position,ypr;
+        // MatrixHelper::getXYZYawPitchRoll(viewMatrix, position, ypr);        
         //setup 
+        auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
+
         auto viewer = Core::g_runtimeContext.viewer;
         auto graphicsContext = Core::g_runtimeContext.windowSystem->getGraphicsContext();
 
@@ -116,49 +146,54 @@ public:
         m_depthArray->setSourceFormat(GL_DEPTH_COMPONENT);
         m_depthArray->setSourceType(GL_FLOAT);
         m_depthArray->setTextureSize(width, height, 16);
-        Render::RenderDepthToTexture *depthPass = new Render::RenderDepthToTexture;
-        depthPass->setGraphicsContext(graphicsContext);
-        depthPass->setNodeMask(0x1);
-        depthPass->setViewport(0,0,width,height);
-        depthPass->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);
-        depthPass->attach(osg::Camera::DEPTH_BUFFER,m_depthArray.get(),0,0);
-        viewer->addSlave(depthPass);
+
+        m_depthPass = new Render::RenderDepthToTexture;
+        m_depthPass->setGraphicsContext(graphicsContext);
+        m_depthPass->setNodeMask(0x1);
+        m_depthPass->setViewport(0,0,width,height);
+        auto tmp = mainCamera->getProjectionMatrix() * mainCamera->getViewMatrix();
+        m_depthPass->setViewProjectionMatrix(tmp);        
+        // depthPass->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);
+        // depthPass->setViewMatrix(viewMatrix);
+        // depthPass->setProjectionMatrix(perspectiveMatrix);
+        m_depthPass->attach(osg::Camera::DEPTH_BUFFER,m_depthArray.get(),0,0);
+        viewer->addSlave(m_depthPass);
 
         //color
         std::vector<osg::Texture2D *> colorTextureVector;
         osg::ref_ptr<osg::Texture2D> textureWall = new osg::Texture2D;
         const auto texturePath = (Core::g_runtimeContext.configManager->getMaterialFolder()/ "DJI_0314.JPG").string();
-        std::cout<<texturePath<<std::endl;
         auto imageWall = osgDB::readImageFile(texturePath);
         textureWall->setImage(imageWall);
         colorTextureVector.emplace_back(textureWall);
 
         //light projection matrix
-        auto lightViewMatrix = osg::Matrixd(0.695647,-0.319652,0.643348,0,0.718382,0.308087,-0.623706,0,0.001162,0.896050,0.443952,0,-3.889762,-81.353875,-186.377313,1);
-        osg::Camera *lightCamera = new osg::Camera;
-        lightCamera->setViewMatrix(lightViewMatrix);
-        double fovy = 1.5500;
-        double asectRatio = 1.333;
-        double zNear = 5;
-        double zFar = 1500;
-        osg::Matrixd projectionMatrix = osg::Matrixd::perspective(fovy, asectRatio, zNear, zFar);        
-        auto lightViewProjectionMatrix = lightViewMatrix*projectionMatrix;
-        std::vector<osg::Matrixd*> lightMatrices;
-        lightMatrices.emplace_back(&lightViewProjectionMatrix);
+        // auto lightViewMatrix = osg::Matrixd(0.695647,-0.319652,0.643348,0,0.718382,0.308087,-0.623706,0,0.001162,0.896050,0.443952,0,-3.889762,-81.353875,-186.377313,1);
+        // osg::Camera *lightCamera = new osg::Camera;
+        // lightCamera->setViewMatrix(lightViewMatrix);
+        // double fovy = 1.5500;
+        // double asectRatio = 1.333;
+        // double zNear = 5;
+        // double zFar = 1500;
+        // osg::Matrixd projectionMatrix = osg::Matrixd::perspective(fovy, asectRatio, zNear, zFar);        
+        // auto lightViewProjectionMatrix = lightViewMatrix*projectionMatrix;
+        m_lightMatrices.emplace_back(&tmp);
 
-        auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
 
-        Render::TextureProjectionPass *textureProjectionPass = new Render::TextureProjectionPass(mainCamera);
+        m_textureProjectionPass = std::make_unique<Render::TextureProjectionPass>(mainCamera);
         // mainCamera->setGraphicsContext(graphicsContext);
         // mainCamera->setViewport(0,0,width,height);
-        mainCamera->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);
-        textureProjectionPass->setTextureArray(m_depthArray, colorTextureVector, lightMatrices);
+        // mainCamera->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);        
+        m_textureProjectionPass->setTextureArray(m_depthArray, colorTextureVector, m_lightMatrices);
         mainCamera->setNodeMask(0x1);
         // viewer->addSlave(textureProjectionPass);
 
     };
 
     void tick(float deltaTime){
+        auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
+        auto viewMatrix = mainCamera->getProjectionMatrix() * mainCamera->getViewMatrix();
+        m_lightMatrices[0] = &viewMatrix;
         
     };
     
@@ -170,5 +205,8 @@ private:
     std::shared_ptr<ResourceType::Level> m_levelResource;
     std::shared_ptr<ECS::Level> m_level;
     osg::ref_ptr<osg::Texture2DArray> m_depthArray;
-    };
+    std::vector<osg::Matrixd*> m_lightMatrices;
+    osg::ref_ptr<Render::RenderDepthToTexture> m_depthPass;
+    std::unique_ptr<Render::TextureProjectionPass> m_textureProjectionPass;
+};
 }

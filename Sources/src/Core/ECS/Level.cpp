@@ -9,6 +9,7 @@
 #include "Editor/Core/RuntimeContext.h"
 #include "Resources/ResourceType/Common/Level.h"
 #include "Core/ECS/Level.h"
+#include "osg/Vec3f"
 #include "osgDB/FileNameUtils"
 #include "osgDB/FileUtils"
 
@@ -37,6 +38,21 @@ bool Level::importObjFromFolderRecursively(const std::string& folderPath){
                 continue;
             }
             auto loadedModelObject = createObjectInLevel(file, m_sceneObject->getID());
+            auto pat = loadedModelObject->getTransformComponent().getNode();
+            osg::Quat rotation;
+
+            // 绕X轴旋转-90度，将Y轴变换到Z轴
+            rotation *= osg::Quat(-osg::PI_2, osg::Vec3d(1, 0, 0));
+
+            // // 绕Z轴旋转90度，将X轴变换到X轴
+            // rotation *= osg::Quat(osg::PI_2, osg::Vec3d(0, 0, 1));
+
+            // // 绕Y轴旋转180度，将Z轴变换到-Y轴
+            // rotation *= osg::Quat(osg::PI, osg::Vec3d(0, 1, 0));
+
+            // 设置姿态
+            pat->setAttitude(rotation);
+            pat->setScale(osg::Vec3f(-1, 1, 1));
             auto mesh = loadedModelObject->addComponent<Mesh>();
             mesh->m_meshPath = fullPath;            
             std::thread workTread(&Mesh::loadResource,mesh,loadedModelObject);

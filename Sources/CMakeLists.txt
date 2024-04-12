@@ -18,6 +18,7 @@ target_link_libraries(${TEST_NAME}
       nativefiledialog
       spdlog
       json11
+      glm
 )
 
 install (TARGETS ${TEST_NAME}
