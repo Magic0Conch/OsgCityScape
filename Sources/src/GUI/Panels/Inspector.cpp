@@ -11,6 +11,7 @@
 #include <memory>
 #include <string>
 #include "GUI/Event/UIEventManager.h"
+#include "osg/Math"
 
 using namespace CSEditor::GUI;
 
@@ -18,6 +19,7 @@ Inspector::Inspector():
 m_objectsMap(Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->getSceneObjectsMap()),
 m_position{0.0,0.0,0.0},
 m_rotation{1.0,0.0,0.0,0.0},
+m_rotationEurler{0,0,0},
 m_scale{1.0,1.0,1.0},
 m_meshPath(128,'\0'),
 m_curSceneObject(){
@@ -81,13 +83,27 @@ void Inspector::drawImpl(){
             if(name == "Transform"){
                 if (ImGui::CollapsingHeader("Transform")){
                     ImGui::DragFloat3("Position", &m_position[0]);
-                    ImGui::DragFloat4("Rotation", &m_rotation[0]);
                     ImGui::DragFloat3("Scale", &m_scale[0]);
                     auto transform = std::dynamic_pointer_cast<ECS::Transform>(component);                    
+                    if(m_useEuler){
+                        ImGui::DragFloat3("RotationEurler", &m_rotationEurler[0],1);
+                        osg::Quat rotation;
+                        // m_rotationEurler[0]*=osg::PI/180;
+                        // m_rotationEurler[1]*=osg::PI/180;
+                        // m_rotationEurler[2]*=osg::PI/180;
+                        rotation *= osg::Quat(-m_rotationEurler[1] * osg::PI/180, osg::Vec3d(1, 0, 0));
+                        rotation *= osg::Quat(-m_rotationEurler[2] * osg::PI/180, osg::Vec3d(0, 0, -1));
+                        rotation *= osg::Quat(-m_rotationEurler[0] * osg::PI/180, osg::Vec3d(0, 1,0));
+                        transform->setRotation(rotation);
+                    }
+                    else {                    
+                        ImGui::DragFloat4("Rotation", &m_rotation[0],0.05f);
+                        auto rotation = Helpers::VectorConverter::stdVectorToOsgVec4f(m_rotation);
+                        transform->setRotation(rotation);
+                    }
+                    ImGui::Checkbox("use eurler", &m_useEuler);
                     auto position = Helpers::VectorConverter::stdVectorToOsgVec3f(m_position);
                     transform->setPosition(position);
-                    auto rotation = Helpers::VectorConverter::stdVectorToOsgVec4f(m_rotation);
-                    transform->setRotation(rotation);
                     auto scale = Helpers::VectorConverter::stdVectorToOsgVec3f(m_scale);
                     transform->setScale(scale);
                 }

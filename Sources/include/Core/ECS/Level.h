@@ -48,7 +48,7 @@ public:
     // const LevelObjectsMap& getAllGObjects() const;
 
     // std::weak_ptr<GObject> getGObjectByID(GObjectID go_id) const;
-    bool importObjFromFolderRecursively(const std::string& folderPath);
+    bool importObjFromFolderRecursively(const std::string& folderPath,const std::string& extension="ive");
 
 
     // GObjectID createObject(const ObjectInstanceRes& object_instance_res);

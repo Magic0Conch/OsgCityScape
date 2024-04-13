@@ -88,7 +88,7 @@ uniform sampler2DArray depthMap;
         void main(void)
         {
             vec4 col = texture(mainTexture, texCoord);
-            fragColor = projectTexture()+col/2.0;
+            fragColor = col/2.0;
             fragColor.a = 1.0;
         }
     )");

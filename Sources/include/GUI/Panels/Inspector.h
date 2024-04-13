@@ -15,8 +15,10 @@ private:
     ECS::ObjectID m_selectedObjectID = -1;
     std::vector<float> m_position;
     std::vector<float> m_rotation;
+    std::vector<float> m_rotationEurler;
     std::vector<float> m_scale;
     std::string m_meshPath;
     ECS::Object m_curSceneObject;
+    bool m_useEuler = true;
 };
 }
