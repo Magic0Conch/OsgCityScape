@@ -28,6 +28,7 @@ public:
 
     void setPosition(const osg::Vec3f& position);
     void setRotation(const osg::Vec4f& rotation);
+    void setRotation(const osg::Quat& rotation);
     void setScale(const osg::Vec3f& scale);
     void setNode(osg::ref_ptr<osg::PositionAttitudeTransform> node);
     void addChild(Transform& childTransform);

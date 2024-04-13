@@ -26,14 +26,14 @@ Level::~Level(){
 }
 
 
-bool Level::importObjFromFolderRecursively(const std::string& folderPath){
+bool Level::importObjFromFolderRecursively(const std::string& folderPath,const std::string& extension){
     osgDB::DirectoryContents contents = osgDB::getDirectoryContents(folderPath);
 
     for (const auto& file : contents) {
         std::string fullPath = osgDB::concatPaths(folderPath, file);
         if (osgDB::fileType(fullPath) == osgDB::DIRECTORY && file!="." && file!="..") {
             importObjFromFolderRecursively(fullPath);
-        } else if (osgDB::getLowerCaseFileExtension(fullPath) == "ive") {
+        } else if (osgDB::getLowerCaseFileExtension(fullPath) == extension) {
             if (fullPath.find("_bbox") != std::string::npos) {
                 continue;
             }
@@ -42,17 +42,17 @@ bool Level::importObjFromFolderRecursively(const std::string& folderPath){
             osg::Quat rotation;
 
             // 绕X轴旋转-90度，将Y轴变换到Z轴
-            rotation *= osg::Quat(-osg::PI_2, osg::Vec3d(1, 0, 0));
+            // rotation *= osg::Quat(osg::PI_2, osg::Vec3d(1, 0, 0));
 
-            // // 绕Z轴旋转90度，将X轴变换到X轴
-            // rotation *= osg::Quat(osg::PI_2, osg::Vec3d(0, 0, 1));
+            // 绕Z轴旋转90度，将X轴变换到X轴
+            // rotation *= osg::Quat(-osg::PI_2, osg::Vec3d(0, 0, 1));
 
             // // 绕Y轴旋转180度，将Z轴变换到-Y轴
             // rotation *= osg::Quat(osg::PI, osg::Vec3d(0, 1, 0));
 
             // 设置姿态
-            pat->setAttitude(rotation);
-            pat->setScale(osg::Vec3f(-1, 1, 1));
+            // pat->setAttitude(rotation);
+            // pat->setScale(osg::Vec3f(1, -1,-1));
             auto mesh = loadedModelObject->addComponent<Mesh>();
             mesh->m_meshPath = fullPath;            
             std::thread workTread(&Mesh::loadResource,mesh,loadedModelObject);

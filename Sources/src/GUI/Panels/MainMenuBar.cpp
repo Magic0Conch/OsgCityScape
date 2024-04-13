@@ -79,6 +79,11 @@ void MainMenuBar::drawImpl(){
                     auto activeLevel = Core::g_runtimeContext.worldManager->getCurrentActiveLevel();
                     activeLevel->importObjFromFolderRecursively(folderPath);                
                 }
+                if (ImGui::MenuItem("import obj model")){
+                    auto folderPath = Dialog::NfdDialog::OpenFolderDlg();
+                    auto activeLevel = Core::g_runtimeContext.worldManager->getCurrentActiveLevel();
+                    activeLevel->importObjFromFolderRecursively(folderPath,"obj");                
+                }
                 if (ImGui::MenuItem("Save As","CTRL + SHIFT + S")){
                 }
                 ImGui::EndMenu();

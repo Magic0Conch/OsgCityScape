@@ -97,16 +97,16 @@ public:
         auto viewMatrix = MatrixHelper::glmToOsgMatrix(glm::dmat4(0.671205,-0.474751,0.569293,0,0.740948,0.452385,-0.496331,0,-0.021905,0.754957,0.655409,0,-39.120093,-26.573260,-168.144351,1));
         auto perspectiveMatrix = MatrixHelper::glmToOsgMatrix(MatrixHelper::getPerspectiveMatrix(1.55, 5, 1500, 1.0));        
         camera->setViewMatrix(viewMatrix);
-        // camera->setProjectionMatrix(perspectiveMatrix);
+        camera->setProjectionMatrix(perspectiveMatrix);
         camera->getViewMatrixAsLookAt(eye, center, up);
-        osg::Vec3f dir = (center - eye);
-        dir.normalize();
-        camera->setViewMatrixAsLookAt(osg::Vec3f(109.365,-42.448,129.408), osg::Vec3f(39.45,18.21,51.77), up);
+        // osg::Vec3f dir = (center - eye);
+        // dir.normalize();
+        // camera->setViewMatrixAsLookAt(osg::Vec3f(109.365,-42.448,129.408), osg::Vec3f(39.45,18.21,51.77), up);
         // osg::Matrix projMatrix = camera->getProjectionMatrix();
         // projMatrix(0, 0) *= -1;
         // camera->setProjectionMatrix(projMatrix);
-        osg::Vec3f dir2 = osg::Vec3f(39.45,18.21,51.77) - osg::Vec3f(109.365,-42.448,129.408);
-        dir2.normalize();
+        // osg::Vec3f dir2 = osg::Vec3f(39.45,18.21,51.77) - osg::Vec3f(109.365,-42.448,129.408);
+        // dir2.normalize();
 
 
 
@@ -151,7 +151,9 @@ public:
         m_depthPass->setGraphicsContext(graphicsContext);
         m_depthPass->setNodeMask(0x1);
         m_depthPass->setViewport(0,0,width,height);
-        auto tmp = mainCamera->getProjectionMatrix() * mainCamera->getViewMatrix();
+        // auto tmp = mainCamera->getProjectionMatrix() * mainCamera->getViewMatrix();
+        osg::Matrixd tmp = osg::Matrixd{1.3,0,0,0,0,1.732,0,0,0,0,-1.006
+        ,-1.0,0,0,261.753,269.981};
         m_depthPass->setViewProjectionMatrix(tmp);        
         // depthPass->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);
         // depthPass->setViewMatrix(viewMatrix);

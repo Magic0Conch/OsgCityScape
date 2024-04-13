@@ -49,8 +49,12 @@ void Transform::setPosition(const osg::Vec3f& position) {
 void Transform::setRotation(const osg::Vec4f& rotation) {
     m_rotation = rotation;
     m_node->setAttitude(osg::Quat(m_rotation));
-
 }
+
+void Transform::setRotation(const osg::Quat& rotation) {    
+    m_node->setAttitude(rotation);
+}
+
 void Transform::setScale(const osg::Vec3f& scale) {
     m_scale = scale;
     m_node->setScale(m_scale);
