@@ -13,7 +13,7 @@ public:
     // virtual ~RenderDepthToTexture() {}
 
     osg::Texture2D* getTexture() const;
-    void setViewProjectionMatrix(const osg::Matrixd& viewMatrix);
+    void setViewProjectionMatrix(const osg::Matrixd& modelViewProjectionMatrix);
 private:
     osg::ref_ptr<osg::Texture2D> _texture;
 };

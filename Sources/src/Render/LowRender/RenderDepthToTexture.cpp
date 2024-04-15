@@ -42,10 +42,10 @@ osg::Texture2D* RenderDepthToTexture::getTexture() const
     return _texture.get();
 }
 
-void RenderDepthToTexture::setViewProjectionMatrix(const osg::Matrixd& viewMatrix){
+void RenderDepthToTexture::setViewProjectionMatrix(const osg::Matrixd& modelViewProjectionMatrix){
     auto ss = getOrCreateStateSet();
-    osg::ref_ptr<osg::Uniform> viewProjectionMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4,"viewProjectionMatrix");
-    viewProjectionMatrixUniform->set(viewMatrix);
+    osg::ref_ptr<osg::Uniform> viewProjectionMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4,"modelViewProjectionMatrix");
+    viewProjectionMatrixUniform->set(modelViewProjectionMatrix);
     ss->addUniform(viewProjectionMatrixUniform);
 }
 

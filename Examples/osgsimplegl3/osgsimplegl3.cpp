@@ -12,13 +12,44 @@
 #include <ostream>
 #include "Editor/Core/RuntimeContext.h"
 #include "Utils/OsgconvWrapper.h"
-
+#include "osg/Math"
+#pragma once
+#include "Core/ECS/Level.h"
+#include "Core/Math/MatrixHelper.h"
+#include "Editor/Core/RuntimeContext.h"
+#include "Render/LowRender/DisplayTexture.h"
+#include "Render/LowRender/RenderColorToTexture.h"
+#include "Render/LowRender/RenderDepthToTexture.h"
+#include "Render/Pass/TextureProjectionPass.h"
+#include "Resources/ResourceType/Common/Level.h"
+#include "glm/fwd.hpp"
+#include "glm/matrix.hpp"
+#include "osg/Camera"
+#include "osg/Group"
+#include "osg/Matrix"
+#include "osg/Matrixd"
+#include "osg/Texture2D"
+#include "osg/Texture2DArray"
+#include "osg/ref_ptr"
+#include "osgDB/ReadFile"
+#include "osgGA/TrackballManipulator"
+#include "Windowing/Window.h"
+#include "Core/ECS/WorldManager.h"
+#include <memory>
+#include <locale>
+#include <iostream>
+#include <osgDB/WriteFile>
+#include <vector>
+#include "Resources/ResourceManagement/ConfigManager.h"
+#include "Core/Math/MatrixHelper.h"
+#include <osg/CullFace>
 void configureShaders( osg::StateSet* stateSet )
 {
     const std::string vertexSource =
         "#version 330 \n"
         " \n"
         "uniform mat4 osg_ModelViewProjectionMatrix; \n"
+        "uniform mat4 osg_ProjectionMatrix; \n"
         "uniform mat3 osg_NormalMatrix; \n"
         "uniform vec3 ecLightDir; \n"
         " \n"
@@ -32,7 +63,7 @@ void configureShaders( osg::StateSet* stateSet )
         "    float diffuse = max( dot( ecLightDir, ecNormal ), 0. ); \n"
         "    color = vec4( vec3( diffuse ), 1. ); \n"
         " \n"
-        "    gl_Position = osg_ModelViewProjectionMatrix * osg_Vertex; \n"
+        "    gl_Position = osg_ModelViewProjectionMatrix * osg_ProjectionMatrix * osg_Vertex; \n"
         "} \n";
     osg::Shader* vShader = new osg::Shader( osg::Shader::VERTEX, vertexSource );
 
@@ -100,10 +131,14 @@ int main( int argc, char** argv )
 
     // Create a Camera that uses the above OpenGL context.
     osg::Camera* cam = viewer.getCamera();
+    configureShaders(cam->getOrCreateStateSet());
     cam->setGraphicsContext( gc.get() );
+    auto perspectiveMatrix = CSEditor:: MatrixHelper::glmToOsgMatrix(CSEditor::MatrixHelper::getPerspectiveMatrix(1.55, 5, 1500, 1.0));        
+    // cam->setProjectionMatrix(perspectiveMatrix);
+    cam->setProjectionMatrixAsPerspective(osg::PI/3, 1.0, 5.0, 1500);
+    auto projection = cam->getProjectionMatrix();
     // Must set perspective projection for fovy and aspect.
     // cam->setProjectionMatrix( osg::Matrix::perspective( 30., (double)width/(double)height, 1., 100. ) );
-
     // Unlike OpenGL, OSG viewport does *not* default to window dimensions.
     cam->setViewport(new osg::Viewport(0,0,width,height));
 

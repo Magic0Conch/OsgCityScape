@@ -1,102 +1,17 @@
 #include <osg/Camera>
-#include <osg/Texture2D>
-#include <osg/Texture2DArray>
 #include <osg/Program>
-#include <osg/Shader>
-#include <osg/Geometry>
-#include <string>
-#include <vector>
+#include "Resources/ResourceManagement/ConfigManager.h"
 #include "Render/Pass/TextureProjectionPass.h"
 #include "Editor/Core/RuntimeContext.h"
-#include "osg/FrameBufferObject"
-#include "osg/ref_ptr"
 #include "Windowing/Window.h"
+#include "Resources/Loaders/ShaderLoader.h"
 
 using namespace CSEditor::Render;
-
+using namespace CSEditor;
 void createTextureProjectionShader(osg::StateSet* ss) {
-    osg::ref_ptr<osg::Shader> vertexShader = new osg::Shader(osg::Shader::VERTEX, R"(
-        #version 330 core
-        #ifdef GL_ES
-            precision highp float;
-        #endif
-        in vec4 osg_Vertex;
-        in vec4 osg_MultiTexCoord0;
-        // in vec3 osg_Normal;
-        uniform mat4 osg_ModelViewProjectionMatrix;
-        uniform mat4 lightSpaceMatrix[16];
-        out vec4 lightSpacePos[16];
-        out vec2 texCoord;
-        // out normal;
-        void main(void)
-        {
-            gl_Position = osg_ModelViewProjectionMatrix * osg_Vertex;
-            texCoord = osg_MultiTexCoord0.xy;
-            // normal = transpose(inverse(mat3(model))) * osg_Normal;
-            for(int i = 0; i < 16; i++) {
-                lightSpacePos[i] = lightSpaceMatrix[i] * osg_Vertex;
-            }
-        }
-    )");
-
-    osg::ref_ptr<osg::Shader> fragmentShader = new osg::Shader(osg::Shader::FRAGMENT, R"(
-        #version 330 core
-        #ifdef GL_ES
-            precision highp float;
-        #endif
-uniform sampler2DArray depthMap;
-        uniform sampler2DArray colorMap;
-        uniform sampler2D mainTexture;
-        uniform int mapSize;
-        in vec2 texCoord;
-        in vec4 lightSpacePos[16];
-        out vec4 fragColor;
-
-        bool flag[16];
-
-        vec4 projectTexture() {
-            vec4 outColor = vec4(0);
-            float bias = 0.005;
-            int validCnt = 0;
-            for(int i = 0;i<mapSize;i++){
-                flag[i] = false;
-            }
-            for(int i = 0;i<mapSize;i++){
-                vec3 projCoords = lightSpacePos[i].xyz / lightSpacePos[i].w;
-                projCoords = projCoords * 0.5 + 0.5;
-                if(projCoords.x < 0 || projCoords.x > 1 || projCoords.y < 0 || projCoords.y > 1)
-                    continue;
-                float closestDepth = texture(depthMap, vec3(projCoords.xy, i)).r;
-                float currentDepth = projCoords.z;
-                flag[i] = currentDepth > closestDepth;
-
-                validCnt += flag[i]? 1 : 0;                
-            }
-            if(validCnt == 0)
-                return outColor;
-            for(int i = 0;i<mapSize;i++){
-                if(flag[i]){
-                    // vec3 projCoords = lightSpacePos[i].xyz / lightSpacePos[i].w;
-                    // projCoords = projCoords * 0.5 + 0.5;
-                    // outColor += texture(colorMap, vec3(projCoords.xy, i)) / (validCnt*1.0);
-                    outColor = vec4(1.0,0.0,0.0,1.0);
-                }                
-            }
-            return outColor;
-        }
-
-        void main(void)
-        {
-            vec4 col = texture(mainTexture, texCoord);
-            fragColor = col/2.0;
-            fragColor.a = 1.0;
-        }
-    )");
-
-    // 创建着色器程序
-    osg::ref_ptr<osg::Program> program = new osg::Program;
-    program->addShader(vertexShader.get());
-    program->addShader(fragmentShader.get());
+    const std::string& vertPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "common/TextureProjection.vert").string();
+    const std::string& fragPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "common/TextureProjection.frag").string();
+    osg::ref_ptr<osg::Program> program = Resources::ShaderLoader::create(vertPath, fragPath);   
     
     ss->setAttributeAndModes(program.get(), osg::StateAttribute::ON);
 }
