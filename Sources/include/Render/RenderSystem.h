@@ -27,6 +27,7 @@
 #include <vector>
 #include "Resources/ResourceManagement/ConfigManager.h"
 #include "Core/Math/MatrixHelper.h"
+#include <osg/CullFace>
 namespace CSEditor::Render {
 
 class GeometryTextureSetterVisitor : public osg::NodeVisitor
@@ -98,27 +99,16 @@ public:
         auto perspectiveMatrix = MatrixHelper::glmToOsgMatrix(MatrixHelper::getPerspectiveMatrix(1.55, 5, 1500, 1.0));        
         camera->setViewMatrix(viewMatrix);
         camera->setProjectionMatrix(perspectiveMatrix);
+        auto viewProjectionMatrix = viewMatrix * perspectiveMatrix;
         camera->getViewMatrixAsLookAt(eye, center, up);
-        // osg::Vec3f dir = (center - eye);
-        // dir.normalize();
-        // camera->setViewMatrixAsLookAt(osg::Vec3f(109.365,-42.448,129.408), osg::Vec3f(39.45,18.21,51.77), up);
-        // osg::Matrix projMatrix = camera->getProjectionMatrix();
-        // projMatrix(0, 0) *= -1;
-        // camera->setProjectionMatrix(projMatrix);
-        // osg::Vec3f dir2 = osg::Vec3f(39.45,18.21,51.77) - osg::Vec3f(109.365,-42.448,129.408);
-        // dir2.normalize();
-
-
-
-
-        auto viewProjectionMatrix = perspectiveMatrix * viewMatrix;
-
-        auto lightMatrix = viewProjectionMatrix;
-        // glm::dvec3 position,ypr;
-        // MatrixHelper::getXYZYawPitchRoll(viewMatrix, position, ypr);        
+        osg::Matrixd rotationMatrix(1, 0, 0, 0,
+                                    0, 0, -1, 0,
+                                    0, 1, 0, 0,
+                                    0, 0, 0, 1);
+        auto lightMatrix = rotationMatrix * viewMatrix * perspectiveMatrix;
+        
         //setup 
         auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
-
         auto viewer = Core::g_runtimeContext.viewer;
         auto graphicsContext = Core::g_runtimeContext.windowSystem->getGraphicsContext();
 
@@ -151,13 +141,7 @@ public:
         m_depthPass->setGraphicsContext(graphicsContext);
         m_depthPass->setNodeMask(0x1);
         m_depthPass->setViewport(0,0,width,height);
-        // auto tmp = mainCamera->getProjectionMatrix() * mainCamera->getViewMatrix();
-        osg::Matrixd tmp = osg::Matrixd{1.3,0,0,0,0,1.732,0,0,0,0,-1.006
-        ,-1.0,0,0,261.753,269.981};
-        m_depthPass->setViewProjectionMatrix(tmp);        
-        // depthPass->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);
-        // depthPass->setViewMatrix(viewMatrix);
-        // depthPass->setProjectionMatrix(perspectiveMatrix);
+        m_depthPass->setViewProjectionMatrix(lightMatrix);
         m_depthPass->attach(osg::Camera::DEPTH_BUFFER,m_depthArray.get(),0,0);
         viewer->addSlave(m_depthPass);
 
@@ -169,17 +153,8 @@ public:
         textureWall->setImage(imageWall);
         colorTextureVector.emplace_back(textureWall);
 
-        //light projection matrix
-        // auto lightViewMatrix = osg::Matrixd(0.695647,-0.319652,0.643348,0,0.718382,0.308087,-0.623706,0,0.001162,0.896050,0.443952,0,-3.889762,-81.353875,-186.377313,1);
-        // osg::Camera *lightCamera = new osg::Camera;
-        // lightCamera->setViewMatrix(lightViewMatrix);
-        // double fovy = 1.5500;
-        // double asectRatio = 1.333;
-        // double zNear = 5;
-        // double zFar = 1500;
-        // osg::Matrixd projectionMatrix = osg::Matrixd::perspective(fovy, asectRatio, zNear, zFar);        
-        // auto lightViewProjectionMatrix = lightViewMatrix*projectionMatrix;
-        m_lightMatrices.emplace_back(&tmp);
+        // light projection matrix
+        m_lightMatrices.emplace_back(&lightMatrix);
 
 
         m_textureProjectionPass = std::make_unique<Render::TextureProjectionPass>(mainCamera);
@@ -188,6 +163,12 @@ public:
         // mainCamera->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);        
         m_textureProjectionPass->setTextureArray(m_depthArray, colorTextureVector, m_lightMatrices);
         mainCamera->setNodeMask(0x1);
+        mainCamera->setCullingMode(mainCamera->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
+        osg::ref_ptr<osg::CullFace> cullFace = new osg::CullFace;
+        cullFace->setMode(osg::CullFace::BACK);
+        mainCamera->getOrCreateStateSet()->setAttributeAndModes(cullFace, osg::StateAttribute::ON);
+
+
         // viewer->addSlave(textureProjectionPass);
 
     };
@@ -195,7 +176,7 @@ public:
     void tick(float deltaTime){
         auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
         auto viewMatrix = mainCamera->getProjectionMatrix() * mainCamera->getViewMatrix();
-        m_lightMatrices[0] = &viewMatrix;
+        // m_lightMatrices[0] = &viewMatrix;
         
     };
     

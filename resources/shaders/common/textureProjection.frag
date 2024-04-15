@@ -1,9 +1,10 @@
-#version 330 core
+#version 440 core
 #ifdef GL_ES
     precision highp float;
 #endif
 uniform sampler2DArray depthMap;
 uniform sampler2DArray colorMap;
+uniform sampler2D mainTexture;
 uniform int mapSize;
 in vec2 texCoord;
 in vec4 lightSpacePos[16];
@@ -21,11 +22,13 @@ vec4 projectTexture() {
     for(int i = 0;i<mapSize;i++){
         vec3 projCoords = lightSpacePos[i].xyz / lightSpacePos[i].w;
         projCoords = projCoords * 0.5 + 0.5;
-        float closestDepth = texture(depthMap[i], vec3(projCoords.xy, i)).r;
+        if(projCoords.x < 0 || projCoords.x > 1 || projCoords.y < 0 || projCoords.y > 1)
+            continue;
+        float closestDepth = texture(depthMap, vec3(projCoords.xy, i)).r;
         float currentDepth = projCoords.z;
-        flag[i] = currentDepth - bias > closestDepth;
-
-        vaildCnt += flag[i]? 1 : 0;                
+        flag[i] = currentDepth < closestDepth + 0.005f;
+        // return vec4(currentDepth,currentDepth,currentDepth,currentDepth);
+        validCnt += flag[i]? 1 : 0;                
     }
     if(validCnt == 0)
         return outColor;
@@ -33,7 +36,8 @@ vec4 projectTexture() {
         if(flag[i]){
             vec3 projCoords = lightSpacePos[i].xyz / lightSpacePos[i].w;
             projCoords = projCoords * 0.5 + 0.5;
-            outColor += texture(colorMap[i], vec3(projCoords.xy, i)) / (validCnt*1.0);
+            outColor += texture(colorMap, vec3(projCoords.xy, i)) / (validCnt*1.0);
+            // outColor = vec4(1.0,0.0,0.0,1.0);
         }                
     }
     return outColor;
@@ -41,5 +45,7 @@ vec4 projectTexture() {
 
 void main(void)
 {
-    fragColor = projectTexture();
+    vec4 col = texture(mainTexture, texCoord);
+    fragColor = projectTexture() + col/2;
+    // fragColor.a = 1.0;
 }
