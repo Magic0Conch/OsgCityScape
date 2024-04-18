@@ -96,7 +96,7 @@ public:
         auto camera = Core::g_runtimeContext.windowSystem->getMainCamera();
         osg::Vec3d eye, center, up;
         auto viewMatrix = MatrixHelper::glmToOsgMatrix(glm::dmat4(0.671205,-0.474751,0.569293,0,0.740948,0.452385,-0.496331,0,-0.021905,0.754957,0.655409,0,-39.120093,-26.573260,-168.144351,1));
-        auto perspectiveMatrix = MatrixHelper::glmToOsgMatrix(MatrixHelper::getPerspectiveMatrix(1.55, 5, 1500, 1.0));        
+        auto perspectiveMatrix = MatrixHelper::glmToOsgMatrix(MatrixHelper::getPerspectiveMatrix(1.55, 5, 1500, 1.33333));        
         camera->setViewMatrix(viewMatrix);
         camera->setProjectionMatrix(perspectiveMatrix);
         auto viewProjectionMatrix = viewMatrix * perspectiveMatrix;
