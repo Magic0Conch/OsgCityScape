@@ -9,6 +9,7 @@
 #include "Resources/ResourceType/Common/Object.h"
 #include "Object.h"
 #include "osg/Group"
+#include "osg/Node"
 #include "osg/ref_ptr"
 namespace CSEditor::ECS{
 
@@ -56,16 +57,23 @@ public:
 
     /*create empty object in the scene as the child of parentID*/
     std::shared_ptr<Object> createObjectInLevel(const std::string& name,const ObjectID& parentID);
-
+    void setSelectedObjectID(ObjectID id);
+    ObjectID getSelectedObjectID() const;
+    std::shared_ptr<ECS::Object> getSelectedObject();
+    bool isObjectSelected() const;
+    std::unordered_map<osg::Node*, std::shared_ptr<Object>> m_nodeToObjectID;
 protected:
     void clear();
 
     bool m_isLoaded {false};
     std::string m_levelResourceUrl;
 
-    std::unordered_map<ObjectID, std::shared_ptr<Object>> m_objects;    
+    std::unordered_map<ObjectID, std::shared_ptr<Object>> m_objects;
     std::shared_ptr<Object> m_sceneObject;
     std::shared_ptr<ResourceType::Level> m_levelResource;
+private:
+    ObjectID selectedObjectID = -1;
+    std::shared_ptr<Object> m_selectedObject = nullptr;
 };
 
 }

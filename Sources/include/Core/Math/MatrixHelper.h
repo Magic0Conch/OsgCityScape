@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/Math/Math.h"
 #include "glm/fwd.hpp"
 #include <osg/Matrix>
 #include <osg/ref_ptr>
@@ -6,9 +7,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include "Math.h"
 
-namespace CSEditor {
-    static const float Math_PI = 3.14159265358979323846264338327950288f;
+namespace CSEditor::Math {
     class MatrixHelper{
         public:
         // static double getAspectRatio() 
@@ -18,15 +19,11 @@ namespace CSEditor {
         //     else return 1;
         // };
 
-        static double focal2fov(double focal)
-        {
-            if (focal < 0) focal = -focal;
-            return  double(atan(1.0 / focal) * 2.0);
-        }
+
 
         static glm::dmat4 getPerspectiveMatrix(double focal_length,double cut_off_near,double cut_off_far,float aspectRatio)
         {
-            double fov = focal2fov(focal_length);
+            double fov = Math::focal2fov(focal_length);
             glm::dmat4 perspective_matrix = glm::scale(
                 glm::perspective(fov, 1.0, cut_off_near, cut_off_far),
                 glm::dvec3(1.0 / aspectRatio, 1, 1));

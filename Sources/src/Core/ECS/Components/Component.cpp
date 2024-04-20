@@ -13,7 +13,7 @@ void Component::deserialize(Json& jsonObject){
 
 void Component::loadResource(std::shared_ptr<Object> parentObject){
     m_parentObject = parentObject;
-    
+    onComponentAdded();
 }
 
 void Component::onComponentAdded(){

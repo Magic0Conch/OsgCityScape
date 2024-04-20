@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/ECS/Components/Mesh.h"
 #include "Core/ECS/Level.h"
 #include "Core/Math/MatrixHelper.h"
 #include "Editor/Core/RuntimeContext.h"
@@ -11,6 +12,7 @@
 #include "glm/matrix.hpp"
 #include "osg/Camera"
 #include "osg/Group"
+#include "osg/Math"
 #include "osg/Matrix"
 #include "osg/Matrixd"
 #include "osg/Texture2D"
@@ -28,6 +30,9 @@
 #include "Resources/ResourceManagement/ConfigManager.h"
 #include "Core/Math/MatrixHelper.h"
 #include <osg/CullFace>
+#include "Core/Math/Math.h"
+#include <osgFX/Outline>
+
 namespace CSEditor::Render {
 
 class GeometryTextureSetterVisitor : public osg::NodeVisitor
@@ -93,14 +98,14 @@ public:
     };
 
     void initialize(){
-        auto camera = Core::g_runtimeContext.windowSystem->getMainCamera();
-        osg::Vec3d eye, center, up;
+        using namespace CSEditor::Math;
+        auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
         auto viewMatrix = MatrixHelper::glmToOsgMatrix(glm::dmat4(0.671205,-0.474751,0.569293,0,0.740948,0.452385,-0.496331,0,-0.021905,0.754957,0.655409,0,-39.120093,-26.573260,-168.144351,1));
-        auto perspectiveMatrix = MatrixHelper::glmToOsgMatrix(MatrixHelper::getPerspectiveMatrix(1.55, 5, 1500, 1.33333));        
-        camera->setViewMatrix(viewMatrix);
-        camera->setProjectionMatrix(perspectiveMatrix);
+        float fovy = CSEditor::Math::Math::focal2fovEuler(1.55);
+        mainCamera->setProjectionMatrixAsPerspective(fovy, 1.33333, 5, 1500);
+        mainCamera->setViewMatrix(viewMatrix);
+        auto perspectiveMatrix = mainCamera->getProjectionMatrix();
         auto viewProjectionMatrix = viewMatrix * perspectiveMatrix;
-        camera->getViewMatrixAsLookAt(eye, center, up);
         osg::Matrixd rotationMatrix(1, 0, 0, 0,
                                     0, 0, -1, 0,
                                     0, 1, 0, 0,
@@ -108,7 +113,6 @@ public:
         auto lightMatrix = rotationMatrix * viewMatrix * perspectiveMatrix;
         
         //setup 
-        auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
         auto viewer = Core::g_runtimeContext.viewer;
         auto graphicsContext = Core::g_runtimeContext.windowSystem->getGraphicsContext();
 
@@ -147,20 +151,17 @@ public:
 
         //color
         std::vector<osg::Texture2D *> colorTextureVector;
-        osg::ref_ptr<osg::Texture2D> textureWall = new osg::Texture2D;
+        osg::ref_ptr<osg::Texture2D> projectionTexture = new osg::Texture2D;
         const auto texturePath = (Core::g_runtimeContext.configManager->getMaterialFolder()/ "DJI_0314.JPG").string();
-        auto imageWall = osgDB::readImageFile(texturePath);
-        textureWall->setImage(imageWall);
-        colorTextureVector.emplace_back(textureWall);
+        auto projectionImage = osgDB::readImageFile(texturePath);
+        projectionImage->scaleImage(width, height, 1);
+        projectionTexture->setImage(projectionImage);
+        colorTextureVector.emplace_back(projectionTexture);
 
         // light projection matrix
         m_lightMatrices.emplace_back(&lightMatrix);
 
-
         m_textureProjectionPass = std::make_unique<Render::TextureProjectionPass>(mainCamera);
-        // mainCamera->setGraphicsContext(graphicsContext);
-        // mainCamera->setViewport(0,0,width,height);
-        // mainCamera->setProjectionMatrixAsPerspective(60.0f, 1.0, 0.1f, 5000.0f);        
         m_textureProjectionPass->setTextureArray(m_depthArray, colorTextureVector, m_lightMatrices);
         mainCamera->setNodeMask(0x1);
         mainCamera->setCullingMode(mainCamera->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
@@ -168,16 +169,27 @@ public:
         cullFace->setMode(osg::CullFace::BACK);
         mainCamera->getOrCreateStateSet()->setAttributeAndModes(cullFace, osg::StateAttribute::ON);
 
-
-        // viewer->addSlave(textureProjectionPass);
-
+        
+        
     };
 
     void tick(float deltaTime){
-        auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
-        auto viewMatrix = mainCamera->getProjectionMatrix() * mainCamera->getViewMatrix();
-        // m_lightMatrices[0] = &viewMatrix;
-        
+        if(m_level->isObjectSelected()){
+            auto selectedObject = m_level->getSelectedObject();
+            auto transform = selectedObject->getTransformComponent();
+            auto position = transform.getPosition();
+            auto rotation = transform.getRotation();
+            auto scale = transform.getScale();
+            auto mesh = selectedObject->getComponent<ECS::Mesh>();
+            auto meshNode = mesh->getMeshNode();
+            osg::ref_ptr<osgFX::Outline> pOutLine = new osgFX::Outline;
+
+            
+            // auto meshTransform = new osg::MatrixTransform;
+            // meshTransform->setMatrix(osg::Matrix::translate(position) * osg::Matrix::rotate(rotation) * osg::Matrix::scale(scale));
+            // meshTransform->addChild(meshNode);
+            // m_textureProjectionPass->setMeshNode(meshTransform);
+        }
     };
     
 private:

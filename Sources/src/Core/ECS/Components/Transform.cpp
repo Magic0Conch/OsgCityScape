@@ -5,6 +5,9 @@
 #include "osg/Vec3f"
 #include "spdlog/spdlog.h"
 #include <memory>
+#include "Core/ECS/Level.h"
+#include "Core/ECS/WorldManager.h"
+#include "Editor/Core/RuntimeContext.h"
 
 using namespace CSEditor::ECS;
 using namespace CSEditor::Helpers;
@@ -65,6 +68,7 @@ osg::ref_ptr<osg::PositionAttitudeTransform> Transform::getNode(){
 }
 void Transform::setNode(osg::ref_ptr<osg::PositionAttitudeTransform> node){
     m_node = node;
+    CSEditor::Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->m_nodeToObjectID[m_node] = m_parentObject.lock();
 }
 
 void Transform::loadResource(std::shared_ptr<Object> parentObject){
@@ -73,10 +77,11 @@ void Transform::loadResource(std::shared_ptr<Object> parentObject){
     m_node->setPosition(m_position);
     m_node->setAttitude(osg::Quat(m_rotation)); 
     m_node->setScale(m_scale);
+    onComponentAdded();
 }
 
 void Transform::onComponentAdded(){
-    
+    Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->m_nodeToObjectID[m_node] = m_parentObject.lock();
 }
 
 void Transform::addChild(Transform& childTransform){

@@ -16,7 +16,8 @@
 using namespace CSEditor::GUI;
 
 Inspector::Inspector():
-m_objectsMap(Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->getSceneObjectsMap()),
+m_level(Core::g_runtimeContext.worldManager->getCurrentActiveLevel()),
+m_objectsMap(m_level->getSceneObjectsMap()),
 m_position{0.0,0.0,0.0},
 m_rotation{1.0,0.0,0.0,0.0},
 m_rotationEurler{0,0,0},

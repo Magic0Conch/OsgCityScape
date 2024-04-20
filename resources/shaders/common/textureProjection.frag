@@ -27,7 +27,6 @@ vec4 projectTexture() {
         float closestDepth = texture(depthMap, vec3(projCoords.xy, i)).r;
         float currentDepth = projCoords.z;
         flag[i] = currentDepth < closestDepth + 0.005f;
-        // return vec4(currentDepth,currentDepth,currentDepth,currentDepth);
         validCnt += flag[i]? 1 : 0;                
     }
     if(validCnt == 0)
@@ -37,7 +36,6 @@ vec4 projectTexture() {
             vec3 projCoords = lightSpacePos[i].xyz / lightSpacePos[i].w;
             projCoords = projCoords * 0.5 + 0.5;
             outColor += texture(colorMap, vec3(projCoords.xy, i)) / (validCnt*1.0);
-            // outColor = vec4(1.0,0.0,0.0,1.0);
         }                
     }
     return outColor;
@@ -46,6 +44,8 @@ vec4 projectTexture() {
 void main(void)
 {
     vec4 col = texture(mainTexture, texCoord);
-    fragColor = projectTexture() + col/2;
+    vec4 projColor = projectTexture();
+    // fragColor = projColor.x == 0?col:projColor;
+    fragColor = col/2 + projectTexture()/2;
     // fragColor.a = 1.0;
 }

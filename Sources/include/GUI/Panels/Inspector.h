@@ -1,5 +1,7 @@
 #pragma once
 #include <imgui.h>
+#include <memory>
+#include "Core/ECS/Level.h"
 #include "Core/ECS/ObjectIDAllocator.h"
 #include "GUI/Core/Panel.h"
 #include "Core/ECS/Object.h"
@@ -11,6 +13,7 @@ public:
 protected:
     virtual void drawImpl() override;
 private:
+    std::shared_ptr<ECS::Level> m_level;
     std::unordered_map<ECS::ObjectID, std::shared_ptr<ECS::Object>>& m_objectsMap;
     ECS::ObjectID m_selectedObjectID = -1;
     std::vector<float> m_position;
