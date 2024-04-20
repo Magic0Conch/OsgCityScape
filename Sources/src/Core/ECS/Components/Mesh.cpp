@@ -4,6 +4,8 @@
 #include "Resources/ResourceManagement/MaterialManager.h"
 #include "osgDB/ReadFile"
 #include "Resources/ResourceManagement/ConfigManager.h"
+#include "Core/ECS/Level.h"
+#include "Core/ECS/WorldManager.h"
 #include <memory>
 #include <string>
 #include <thread>
@@ -43,6 +45,7 @@ void Mesh::loadResource(std::shared_ptr<Object> parentObject){
         auto matertial = Resources::MaterialManager::getInstance().getMaterial(materialPath);
         matertial->loadResource(parentObject);
     }
+    onComponentAdded();
 }
 
 void Mesh::setMeshPath(const std::string& meshPath){
@@ -61,8 +64,9 @@ osg::ref_ptr<osg::Node> Mesh::getMeshNode() const {
 // Setter for m_meshNode
 void Mesh::setMeshNode(osg::ref_ptr<osg::Node> node) {
     m_meshNode = node;
+    Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->m_nodeToObjectID[m_meshNode] = m_parentObject.lock();
 }
 
 void Mesh::onComponentAdded(){
-
+    Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->m_nodeToObjectID[m_meshNode] = m_parentObject.lock();
 }

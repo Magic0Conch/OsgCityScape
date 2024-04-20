@@ -9,7 +9,7 @@ using namespace CSEditor::Core;
 EditorInputManager::EditorInputManager(osg::Camera* camera)
     : m_camera(camera), m_mouseSensitivity(0.002), m_movementSpeed(0.5), m_rightMouseButtonPressed(false) {
     g_runtimeContext.viewer->addEventHandler(this);
-
+    m_viewer = g_runtimeContext.viewer;
 }
 
 bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) {
@@ -19,6 +19,40 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                 m_rightMouseButtonPressed = true;
                 m_lastMousePosition.set(ea.getX(), ea.getY());
                 return false; 
+            }
+            else if (ea.getButton() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON) {
+                osgUtil::LineSegmentIntersector::Intersections intersections;
+                osg::ref_ptr<osg::Node> node = new osg::Node();
+                osg::ref_ptr<osg::Group> parent = new osg::Group();
+                if (m_viewer->computeIntersections(ea.getX(), ea.getY(), intersections))
+                {
+                    //得到选择的节点
+                    osgUtil::LineSegmentIntersector::Intersection intersection = *intersections.begin();
+                    osg::NodePath& nodePath = intersection.nodePath;	
+                    node = nodePath.back();
+                    
+                    osg::ref_ptr<osg::Group> group =dynamic_cast<osg::Group*>( nodePath[2]);							
+
+                    //点击节点切换高亮
+                    parent = dynamic_cast<osg::Group*> (nodePath[nodePath.size() - 2]);//当前选择节点的父节点
+                    // osgFX::Outline *ot = dynamic_cast<osgFX::Outline*>(parent.get());
+                    // if (!ot) //若ot不存在（未高亮） (node->parent)=>(node->outline->parent)
+                    // {
+                    //     osg::ref_ptr<osgFX::Outline> outline = new osgFX::Outline();
+                    //     outline->setColor(osg::Vec4(1, 1, 0, 1));
+                    //     outline->setWidth(5);
+                    //     outline->addChild(node);
+                    //     parent->replaceChild(node, outline);
+                    // }
+                    // //若ot存在（高亮）找出当前outline的父节点（node->outline->*itr）=>(node->*itr)
+                    // else
+                    // {
+                    //     osg::Node::ParentList parentList = ot->getParents();
+                    //     osg::Node::ParentList::iterator itr = parentList.begin();
+                    //     (*itr)->replaceChild(ot, node);
+                    // }
+                }
+                
             }
             break;
         case osgGA::GUIEventAdapter::RELEASE:
@@ -96,12 +130,12 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                 center += sideDir * m_movementSpeed;
                 break;
             case osgGA::GUIEventAdapter::KEY_Q:
-                eye += up * m_movementSpeed;
-                center += up * m_movementSpeed;
-                break;
-            case osgGA::GUIEventAdapter::KEY_E:
                 eye -= up * m_movementSpeed;
                 center -= up * m_movementSpeed;
+                break;
+            case osgGA::GUIEventAdapter::KEY_E:
+                eye += up * m_movementSpeed;
+                center += up * m_movementSpeed;
                 break;
             
             default:

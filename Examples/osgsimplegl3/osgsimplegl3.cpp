@@ -133,7 +133,7 @@ int main( int argc, char** argv )
     osg::Camera* cam = viewer.getCamera();
     configureShaders(cam->getOrCreateStateSet());
     cam->setGraphicsContext( gc.get() );
-    auto perspectiveMatrix = CSEditor:: MatrixHelper::glmToOsgMatrix(CSEditor::MatrixHelper::getPerspectiveMatrix(1.55, 5, 1500, 1.0));        
+    auto perspectiveMatrix = CSEditor::Math::MatrixHelper::glmToOsgMatrix(CSEditor::Math::MatrixHelper::getPerspectiveMatrix(1.55, 5, 1500, 1.0));        
     // cam->setProjectionMatrix(perspectiveMatrix);
     cam->setProjectionMatrixAsPerspective(osg::PI/3, 1.0, 5.0, 1500);
     auto projection = cam->getProjectionMatrix();

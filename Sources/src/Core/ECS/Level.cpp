@@ -124,10 +124,6 @@ std::shared_ptr<Object> Level::createObjectInLevel(const std::string& name,const
     if (parentID == -1) {
         return getSceneObjectById(objectId);
     }
-    // auto transform = object->addComponent<Transform>();
-    // transform->loadResource(object);
-    // object->setName(name);
-    // m_objects[objectId] = object;
     
     const auto& parentObject = getSceneObjectById(parentID);
     parentObject->getTransformComponent().addChild(*transform);
@@ -152,6 +148,26 @@ const std::string& Level::getLevelResUrl() const {
 
 std::shared_ptr<CSEditor::ResourceType::Level> Level::getLevelResource(){
     return m_levelResource;
+}
+
+void Level::setSelectedObjectID(ObjectID id){    
+    selectedObjectID = id;
+}
+
+ObjectID Level::getSelectedObjectID() const{
+    return selectedObjectID;
+}
+
+std::shared_ptr<CSEditor::ECS::Object> Level::getSelectedObject(){
+    if(m_objects.find(selectedObjectID) == m_objects.end()){
+        spdlog::error("Object not found with id: {}", selectedObjectID);
+        return nullptr;
+    }
+    return m_objects[selectedObjectID];
+}
+
+bool Level::isObjectSelected() const{
+    return selectedObjectID != -1;
 }
 // const LevelObjectsMap& Level::getAllGObjects() const { 
 //     return m_gobjects; 

@@ -1,6 +1,8 @@
 #pragma once
 #include "Event.h"
+#include "osgViewer/Viewer"
 #include <map>
+#include <memory>
 #include <string>
 #include <variant>
 namespace CSEditor::Core {
@@ -14,5 +16,6 @@ namespace CSEditor::Core {
 
     private:        
         std::map<const std::string, EventType> m_eventMap;
+        osg::ref_ptr<osgViewer::Viewer> m_viewer;
     };
 }

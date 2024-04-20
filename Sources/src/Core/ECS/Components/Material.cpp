@@ -98,6 +98,7 @@ void Material::loadResource(std::shared_ptr<Object> parentObject){
         osg::ref_ptr<osg::Uniform> intUniform = new osg::Uniform(uniform.first.c_str(), uniform.second);
         m_stateSet->addUniform(intUniform.get());
     }    
+    onComponentAdded();
 }
 
 Material::Material(){}
