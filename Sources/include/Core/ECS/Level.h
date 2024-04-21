@@ -61,7 +61,7 @@ public:
     ObjectID getSelectedObjectID() const;
     std::shared_ptr<ECS::Object> getSelectedObject();
     bool isObjectSelected() const;
-    std::unordered_map<osg::Node*, std::shared_ptr<Object>> m_nodeToObjectID;
+    std::unordered_map<osg::Node*, std::shared_ptr<Object>> nodeToObjectID;
 protected:
     void clear();
 

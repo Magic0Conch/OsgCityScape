@@ -1,9 +1,11 @@
 // EditorInputManager.cpp
 #include "Editor/Core/EditorInputManager.h"
 #include "Editor/Core/RuntimeContext.h"
+#include "Core/ECS/Level.h"
+#include "Core/ECS/WorldManager.h"
 #include "osg/Vec3d"
 #include <osg/Matrixd>
-
+#include <osgFX/Outline>
 using namespace CSEditor::Core;
 
 EditorInputManager::EditorInputManager(osg::Camera* camera)
@@ -24,17 +26,26 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                 osgUtil::LineSegmentIntersector::Intersections intersections;
                 osg::ref_ptr<osg::Node> node = new osg::Node();
                 osg::ref_ptr<osg::Group> parent = new osg::Group();
-                if (m_viewer->computeIntersections(ea.getX(), ea.getY(), intersections))
+                auto x = ea.getX();
+                auto y = ea.getY();
+                if (m_viewer->computeIntersections(ea, intersections))
                 {
                     //得到选择的节点
                     osgUtil::LineSegmentIntersector::Intersection intersection = *intersections.begin();
                     osg::NodePath& nodePath = intersection.nodePath;	
                     node = nodePath.back();
+                    auto drawable = intersection.drawable;
+                    auto parents = drawable->getParents();
                     
-                    osg::ref_ptr<osg::Group> group =dynamic_cast<osg::Group*>( nodePath[2]);							
-
+                    while(!parents.empty()){
+                        auto node = parents.back();
+                        parents.pop_back();
+                    }
+                    osg::ref_ptr<osg::Group> group =dynamic_cast<osg::Group*>( nodePath[2]);	
+                    auto nodeToObjectID = g_runtimeContext.worldManager->getCurrentActiveLevel()->nodeToObjectID;
+                    auto objectID = nodeToObjectID[node];
                     //点击节点切换高亮
-                    parent = dynamic_cast<osg::Group*> (nodePath[nodePath.size() - 2]);//当前选择节点的父节点
+                    auto parent = nodePath[nodePath.size() - 2];//当前选择节点的父节点
                     // osgFX::Outline *ot = dynamic_cast<osgFX::Outline*>(parent.get());
                     // if (!ot) //若ot不存在（未高亮） (node->parent)=>(node->outline->parent)
                     // {
