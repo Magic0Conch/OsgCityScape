@@ -68,7 +68,7 @@ osg::ref_ptr<osg::PositionAttitudeTransform> Transform::getNode(){
 }
 void Transform::setNode(osg::ref_ptr<osg::PositionAttitudeTransform> node){
     m_node = node;
-    CSEditor::Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->m_nodeToObjectID[m_node] = m_parentObject.lock();
+    CSEditor::Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->nodeToObjectID[m_node] = m_parentObject.lock();
 }
 
 void Transform::loadResource(std::shared_ptr<Object> parentObject){
@@ -81,7 +81,12 @@ void Transform::loadResource(std::shared_ptr<Object> parentObject){
 }
 
 void Transform::onComponentAdded(){
-    Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->m_nodeToObjectID[m_node] = m_parentObject.lock();
+    if(Core::g_runtimeContext.worldManager==nullptr||m_parentObject.lock() == nullptr)
+        return;
+    auto level = Core::g_runtimeContext.worldManager->getCurrentActiveLevel();
+    if(level->getIsLoaded()){
+        level->nodeToObjectID[m_node] = m_parentObject.lock();
+    }
 }
 
 void Transform::addChild(Transform& childTransform){

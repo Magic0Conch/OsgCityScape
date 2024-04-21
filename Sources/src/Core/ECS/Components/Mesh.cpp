@@ -64,9 +64,9 @@ osg::ref_ptr<osg::Node> Mesh::getMeshNode() const {
 // Setter for m_meshNode
 void Mesh::setMeshNode(osg::ref_ptr<osg::Node> node) {
     m_meshNode = node;
-    Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->m_nodeToObjectID[m_meshNode] = m_parentObject.lock();
+    Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->nodeToObjectID[m_meshNode] = m_parentObject.lock();
 }
 
 void Mesh::onComponentAdded(){
-    Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->m_nodeToObjectID[m_meshNode] = m_parentObject.lock();
+    Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->nodeToObjectID[m_meshNode] = m_parentObject.lock();
 }

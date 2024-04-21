@@ -83,6 +83,9 @@ private:
     std::string _slaveCameraName;
 };
 
+
+
+
 class RenderSystem{
 public:
     RenderSystem(){
@@ -96,7 +99,19 @@ public:
     ~RenderSystem(){
 
     };
+    void printNode(const osg::Node* node, int indent = 0) {
+        for (int i = 0; i < indent; ++i) {
+            std::cout << "  ";
+        }
+        std::cout << node->getName() << " (Type: " << node->className() << ")" << std::endl;
 
+        const osg::Group* group = node->asGroup();
+        if (group) {
+            for (unsigned int i = 0; i < group->getNumChildren(); ++i) {
+                printNode(group->getChild(i), indent + 1);
+            }
+        }
+    }
     void initialize(){
         using namespace CSEditor::Math;
         auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
@@ -130,6 +145,7 @@ public:
             m_level->getRootObject()->addChild(thisTransform);
         }
         m_level->setIsLoaded(true);
+        printNode(rootSceneNode, 0);
 
         //render pass
         //depth pass
