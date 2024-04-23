@@ -70,6 +70,18 @@ bool Level::load(const std::string& levelResourceUrl){
     m_levelResourceUrl = levelResourceUrl;
     
     Core::g_runtimeContext.assetManager->loadAsset(levelResourceUrl, *m_levelResource);
+    auto rootSceneNode = getRootObject()->getTransformComponent().getNode().get();
+    rootSceneNode->setNodeMask(0x1);
+    Core::g_runtimeContext.viewer->setSceneData(rootSceneNode);
+    auto objects = m_levelResource->getObjects();
+    for (const ResourceType::ObjectInstance& objectInstanceRes:objects) {
+        auto curObjectId = loadObjectInstance(objectInstanceRes);
+        auto thisTransform = getSceneObjectById(curObjectId)->getTransformComponent();
+        getRootObject()->addChild(thisTransform);
+        registerNode2IDMap(thisTransform.getNode().get(), curObjectId);
+    }
+    setIsLoaded(true);
+
     return true;
 }
 
@@ -128,6 +140,16 @@ std::shared_ptr<Object> Level::createObjectInLevel(const std::string& name,const
     const auto& parentObject = getSceneObjectById(parentID);
     parentObject->getTransformComponent().addChild(*transform);
     return object;
+}
+
+void Level::registerNode2IDMap(osg::Node* node,ECS::ObjectID id){
+    nodeToObjectID[node] = id;
+    osg::Group* group = node->asGroup();
+    if (group) {
+        for (unsigned int i = 0; i < group->getNumChildren(); ++i) {
+            registerNode2IDMap(group->getChild(i), id);
+        }
+    }
 }
 
 // void Level::unload(){

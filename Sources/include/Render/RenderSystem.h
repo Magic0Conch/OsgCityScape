@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/ECS/Components/Mesh.h"
 #include "Core/ECS/Level.h"
+#include "Core/ECS/ObjectIDAllocator.h"
 #include "Core/Math/MatrixHelper.h"
 #include "Editor/Core/RuntimeContext.h"
 #include "Render/LowRender/DisplayTexture.h"
@@ -112,6 +113,16 @@ public:
             }
         }
     }
+
+    void registerNode2IDMap(const osg::Node* node,ECS::ObjectID id){
+        const osg::Group* group = node->asGroup();
+        if (group) {
+            for (unsigned int i = 0; i < group->getNumChildren(); ++i) {
+                registerNode2IDMap(group->getChild(i), id);
+            }
+        }
+    }
+
     void initialize(){
         using namespace CSEditor::Math;
         auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
@@ -136,15 +147,7 @@ public:
 
         // initialize the level resource
         auto rootSceneNode = m_level->getRootObject()->getTransformComponent().getNode().get();
-        rootSceneNode->setNodeMask(0x1);
-        viewer->setSceneData(rootSceneNode);
-        auto objects = m_levelResource->getObjects();
-        for (const ResourceType::ObjectInstance& objectInstanceRes:objects) {
-            auto curObjectId = m_level->loadObjectInstance(objectInstanceRes);
-            auto thisTransform = m_level->getSceneObjectById(curObjectId)->getTransformComponent();
-            m_level->getRootObject()->addChild(thisTransform);
-        }
-        m_level->setIsLoaded(true);
+        
         printNode(rootSceneNode, 0);
 
         //render pass
