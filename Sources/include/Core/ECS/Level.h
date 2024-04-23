@@ -61,7 +61,7 @@ public:
     ObjectID getSelectedObjectID() const;
     std::shared_ptr<ECS::Object> getSelectedObject();
     bool isObjectSelected() const;
-    std::unordered_map<osg::Node*, std::shared_ptr<Object>> nodeToObjectID;
+    std::unordered_map<osg::Node*, ObjectID> nodeToObjectID;
 protected:
     void clear();
 
@@ -72,6 +72,7 @@ protected:
     std::shared_ptr<Object> m_sceneObject;
     std::shared_ptr<ResourceType::Level> m_levelResource;
 private:
+    void registerNode2IDMap(osg::Node* node,ECS::ObjectID id);
     ObjectID selectedObjectID = -1;
     std::shared_ptr<Object> m_selectedObject = nullptr;
 };
