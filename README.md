@@ -8,3 +8,5 @@ Implementing some effects based on openscenegraph.
 ## How to start
 1. Install the 3rd dll and shader file to the bin dir.
 2. Build all(debug mode) using cmake tools in vscode.
+
+
