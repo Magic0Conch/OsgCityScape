@@ -16,7 +16,7 @@ namespace osgFX
      * camera->setClearMask(clearMask | GL_STENCIL_BUFFER_BIT);
      * camera->setClearStencil(0);
      */
-    class OSGFX_EXPORT OutlineFX : public Effect
+    class OutlineFX : public Effect
     {
     public:
         /// Constructor.

@@ -9,7 +9,11 @@
 #include <osg/LineWidth>
 #include <osg/Material>
 #include <osg/Texture1D>
-
+#include "Resources/ResourceManagement/ConfigManager.h"
+#include "Render/Pass/TextureProjectionPass.h"
+#include "Editor/Core/RuntimeContext.h"
+#include "Windowing/Window.h"
+#include "Resources/Loaders/ShaderLoader.h"
 
 namespace
 {
@@ -31,8 +35,7 @@ namespace osgFX
     public:
         /// Constructor.
         OutlineFXTechnique() : Technique(),
-            _lineWidth(), _width(2),
-            _material(), _color(1,1,1,1) {
+            _width(2), _color(1,1,1,1) {
         }
 
         /// Validate.
@@ -43,21 +46,13 @@ namespace osgFX
         /// Set outline width.
         void setWidth(float w) {
             _width = w;
-            if (_lineWidth.valid()) {
-                _lineWidth->setWidth(w);
-            }
+            outlineState->getUniform("_Outline")->set(w);
         }
 
         /// Set outline color.
         void setColor(const osg::Vec4& color) {
             _color = color;
-            if (_material.valid()) {
-                const osg::Material::Face face = osg::Material::FRONT_AND_BACK;
-                _material->setAmbient(face, osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-                _material->setDiffuse(face, osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-                _material->setSpecular(face, osg::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
-                _material->setEmission(face, color);
-            }
+            outlineState->getUniform("_OutlineColor")->set(color);
         }
 
     protected:
@@ -79,7 +74,10 @@ namespace osgFX
                                       osg::Stencil::KEEP,
                                       osg::Stencil::REPLACE);
                 state->setAttributeAndModes(stencil, Override_On);
-
+                const std::string& vertPath = (CSEditor::Core::g_runtimeContext.configManager->getShaderFolder() / "common/triangle.vert").string();
+                const std::string& fragPath = (CSEditor::Core::g_runtimeContext.configManager->getShaderFolder() / "common/triangle.frag").string();
+                osg::ref_ptr<osg::Program> program = CSEditor::Resources::ShaderLoader::create(vertPath, fragPath);                   
+                state->setAttributeAndModes(program.get(), osg::StateAttribute::ON);
                 addPass(state);
             }
 
@@ -91,7 +89,7 @@ namespace osgFX
              * - disable depth-test, lighting & texture
              */
             {
-                osg::StateSet* state = new osg::StateSet;
+                outlineState = new osg::StateSet;
 
                 // stencil op
                 osg::Stencil* stencil  = new osg::Stencil;
@@ -99,48 +97,34 @@ namespace osgFX
                 stencil->setOperation(osg::Stencil::KEEP,
                                       osg::Stencil::KEEP,
                                       osg::Stencil::REPLACE);
-                state->setAttributeAndModes(stencil, Override_On);
+                outlineState->setAttributeAndModes(stencil, Override_On);
 
                 // cull front-facing polys
                 osg::CullFace* cullFace = new osg::CullFace;
                 cullFace->setMode(osg::CullFace::FRONT);
-                state->setAttributeAndModes(cullFace, Override_On);
-
-                // draw back-facing polygon lines
-                osg::PolygonMode* polyMode = new osg::PolygonMode;
-                polyMode->setMode(osg::PolygonMode::BACK, osg::PolygonMode::LINE);
-                state->setAttributeAndModes(polyMode, Override_On);
-
-                // outline width
-                _lineWidth = new osg::LineWidth;
-                setWidth(_width);
-                state->setAttributeAndModes(_lineWidth.get(), Override_On);
-
-                // outline color/material
-                _material = new osg::Material;
-                _material->setColorMode(osg::Material::OFF);
-                setColor(_color);
-                state->setAttributeAndModes(_material.get(), Override_On);
+                outlineState->setAttributeAndModes(cullFace, Override_On);
 
                 // disable modes
-                state->setMode(GL_BLEND, Override_Off);
+                outlineState->setMode(GL_BLEND, Override_Off);
                 //state->setMode(GL_DEPTH_TEST, Override_Off);
-                state->setTextureMode(0, GL_TEXTURE_1D, Override_Off);
-                state->setTextureMode(0, GL_TEXTURE_2D, Override_Off);
-                state->setTextureMode(0, GL_TEXTURE_3D, Override_Off);
+                outlineState->setTextureMode(0, GL_TEXTURE_1D, Override_Off);
+                outlineState->setTextureMode(0, GL_TEXTURE_2D, Override_Off);
+                outlineState->setTextureMode(0, GL_TEXTURE_3D, Override_Off);
+                outlineState->addUniform(new osg::Uniform("_Outline", _width));
+                outlineState->addUniform(new osg::Uniform("_OutlineColor", _color));
 
-                addPass(state);
+                const std::string& vertPath = (CSEditor::Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/Outline.vert").string();
+                const std::string& fragPath = (CSEditor::Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/Outline.frag").string();
+                osg::ref_ptr<osg::Program> program = CSEditor::Resources::ShaderLoader::create(vertPath, fragPath);
+                outlineState->setAttributeAndModes(program.get(), osg::StateAttribute::ON);
+                addPass(outlineState);
             }
         }
 
     private:
-        /// Outline width.
-        osg::ref_ptr<osg::LineWidth> _lineWidth;
         float _width;
-
-        /// Outline Material.
-        osg::ref_ptr<osg::Material> _material;
         osg::Vec4 _color;
+        osg::StateSet* outlineState = new osg::StateSet;
     };
 
 
