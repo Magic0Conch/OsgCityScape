@@ -20,7 +20,6 @@
 #include "osg/Texture2DArray"
 #include "osg/ref_ptr"
 #include "osgDB/ReadFile"
-#include "osgGA/TrackballManipulator"
 #include "Windowing/Window.h"
 #include "Core/ECS/WorldManager.h"
 #include <memory>
@@ -110,15 +109,6 @@ public:
         if (group) {
             for (unsigned int i = 0; i < group->getNumChildren(); ++i) {
                 printNode(group->getChild(i), indent + 1);
-            }
-        }
-    }
-
-    void registerNode2IDMap(const osg::Node* node,ECS::ObjectID id){
-        const osg::Group* group = node->asGroup();
-        if (group) {
-            for (unsigned int i = 0; i < group->getNumChildren(); ++i) {
-                registerNode2IDMap(group->getChild(i), id);
             }
         }
     }
