@@ -85,6 +85,7 @@ namespace osgFX
                                       osg::Stencil::KEEP,
                                       osg::Stencil::REPLACE);
                 outlineState->setAttributeAndModes(stencil, Override_On);
+                
 
                 // disable modes
                 outlineState->setMode(GL_BLEND, Override_Off);
