@@ -10,11 +10,22 @@ uniform float _Outline;
 // out normal;
 void main()
 {
-    vec3 pos = osg_Vertex.xyz + normalize(osg_Normal) * _Outline;
+    // mat3 scaleMatrix = mat3(
+    //     1.2,  0.0, 0.0,
+    //     0.0, 1.2,  0.0,
+    //     0.0, 0.0, 1.2
+    // );
+    vec3 normal = normalize(osg_NormalMatrix * osg_Normal);
+    normal.z = -0.5;
+    vec4 pos = osg_ModelViewMatrix * osg_Vertex;
+    pos = pos + vec4(normalize(normal), 0.0) * _Outline;
+    gl_Position = osg_ProjectionMatrix * pos;
+    // vec3 pos = osg_Vertex.xyz + normalize(osg_Normal) * _Outline;
+    // vec3 pos =  osg_Vertex.xyz * scaleMatrix;
     // vec4 pos = osg_ModelViewMatrix * scaleMatrix * osg_Vertex;
     // texCoord = osg_MultiTexCoord0.xy;
     // vec3 normal = normalize(osg_NormalMatrix * osg_Normal);
     // normal.z = -0.5;
     // pos = pos + vec4(normalize(normal), 0.0) * _Outline;
-    gl_Position = osg_ModelViewProjectionMatrix * vec4(pos,1.0);
+    // gl_Position = osg_ModelViewProjectionMatrix * vec4(pos,1.0);
 }
