@@ -1,8 +1,3 @@
-// -*-c++-*-
-
-/*
- * Draw an outline around a model.
- */
 
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
@@ -11,7 +6,7 @@
 #include <osgViewer/Viewer>
 
 #include <osgFX/Outline>
-
+#include "Render/Effects/OutlineFX.h"
 
 int main(int argc, char** argv)
 {
@@ -37,7 +32,7 @@ int main(int argc, char** argv)
 
     {
         // create outline effect
-        osg::ref_ptr<osgFX::Outline> outline = new osgFX::Outline;
+        osg::ref_ptr<osgFX::OutlineFX> outline = new osgFX::OutlineFX;
         root->addChild(outline);
 
         outline->setWidth(8);
