@@ -61,7 +61,13 @@ public:
     ObjectID getSelectedObjectID() const;
     std::shared_ptr<ECS::Object> getSelectedObject();
     bool isObjectSelected() const;
+    void setLastSelectedObjectID(ObjectID id);
+    ObjectID getLastSelectedObjectID() const;
+    std::shared_ptr<ECS::Object> getLastSelectedObject();
     std::unordered_map<osg::Node*, ObjectID> nodeToObjectID;
+    bool hasLastSelectedObject() const;
+    void setSelectedObjectDirty(bool dirty);
+    bool isSelectedObjectDirty() const;
 protected:
     void clear();
 
@@ -74,7 +80,10 @@ protected:
 private:
     void registerNode2IDMap(osg::Node* node,ECS::ObjectID id);
     ObjectID selectedObjectID = -1;
+    ObjectID lastSelectedObjectID = -1;
+
     std::shared_ptr<Object> m_selectedObject = nullptr;
+    bool m_isSelectedObjectDirty = false;
 };
 
 }

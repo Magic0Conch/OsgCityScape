@@ -5,17 +5,7 @@
 
 namespace osgFX
 {
-    /**
-     * Outline effect.
-     * This effect draws a stencil buffer-based outline around an object.
-     * Color and width of the outline can be modified.
-     * To function correctly the context must be setup with a stencil buffer
-     * and the stencil buffer must be cleared to zero before each render.
-     *
-     * osg::DisplaySettings::instance()->setMinimumNumStencilBits(1);
-     * camera->setClearMask(clearMask | GL_STENCIL_BUFFER_BIT);
-     * camera->setClearStencil(0);
-     */
+
     class OutlineFX : public Effect
     {
     public:

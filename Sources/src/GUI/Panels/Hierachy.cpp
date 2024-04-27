@@ -6,11 +6,11 @@
 
 using namespace CSEditor::GUI;
 
-Hierachy::Hierachy():m_objectsMap(Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->getSceneObjectsMap()){
+Hierachy::Hierachy():m_level(Core::g_runtimeContext.worldManager->getCurrentActiveLevel()),m_objectsMap(m_level->getSceneObjectsMap()){
 }
 
 void Hierachy::drawHierachyNodeRecursively(ECS::ObjectID objectID){
-    const auto& curObject = m_objectsMap[objectID];
+    const auto& curObject = m_level->getSceneObjectById(objectID);
     ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick ;
     if (curObject->getID() == m_nodeClicked){
         nodeFlags |= ImGuiTreeNodeFlags_Selected;
@@ -20,7 +20,10 @@ void Hierachy::drawHierachyNodeRecursively(ECS::ObjectID objectID){
     }
     bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)objectID, nodeFlags, "%s", &curObject->getName()[0]);
     if (ImGui::IsItemClicked()){
-        m_nodeClicked = objectID;   
+        m_nodeClicked = objectID;
+        auto lastObjectID = m_level->getSelectedObjectID();
+        m_level->setLastSelectedObjectID(lastObjectID);
+        m_level->setSelectedObjectID(objectID);
         UIEveneManager::getInstance().selectHierachyEvent.invoke(m_nodeClicked);
     }
     if(nodeOpen){
@@ -55,8 +58,11 @@ void Hierachy::drawImpl(){
                     ImGui::BulletText("Blah blah\nBlah Blah");
                     ImGui::TreePop();
                 }
-                if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+                if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()){
                     m_nodeClicked = objectID;                
+                    Core::g_runtimeContext.worldManager->getCurrentActiveLevel();
+                }
+                
             }
         }
         else {

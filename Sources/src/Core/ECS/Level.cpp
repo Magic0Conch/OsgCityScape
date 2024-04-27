@@ -152,6 +152,13 @@ void Level::registerNode2IDMap(osg::Node* node,ECS::ObjectID id){
     }
 }
 
+void Level::setSelectedObjectDirty(bool dirty){
+    m_isSelectedObjectDirty = dirty;
+}
+bool Level::isSelectedObjectDirty() const{
+    return m_isSelectedObjectDirty;
+}
+
 // void Level::unload(){
 
 // }
@@ -172,8 +179,10 @@ std::shared_ptr<CSEditor::ResourceType::Level> Level::getLevelResource(){
     return m_levelResource;
 }
 
-void Level::setSelectedObjectID(ObjectID id){    
+void Level::setSelectedObjectID(ObjectID id){
     selectedObjectID = id;
+    if(id != -1 && id != 0)
+        setSelectedObjectDirty(true);
 }
 
 ObjectID Level::getSelectedObjectID() const{
@@ -189,8 +198,29 @@ std::shared_ptr<CSEditor::ECS::Object> Level::getSelectedObject(){
 }
 
 bool Level::isObjectSelected() const{
-    return selectedObjectID != -1;
+    return selectedObjectID != -1 && selectedObjectID != 0;
 }
+
+void Level::setLastSelectedObjectID(ObjectID id){
+    lastSelectedObjectID = id;
+}
+
+ObjectID Level::getLastSelectedObjectID() const{
+    return lastSelectedObjectID;
+}
+
+std::shared_ptr<CSEditor::ECS::Object> Level::getLastSelectedObject(){
+    if(m_objects.find(selectedObjectID) == m_objects.end()){
+        spdlog::error("Object not found with id: {}", selectedObjectID);
+        return nullptr;
+    }
+    return m_objects[selectedObjectID];
+}
+
+bool Level::hasLastSelectedObject() const{
+    return lastSelectedObjectID != -1 && lastSelectedObjectID != 0;
+}
+
 // const LevelObjectsMap& Level::getAllGObjects() const { 
 //     return m_gobjects; 
 // }

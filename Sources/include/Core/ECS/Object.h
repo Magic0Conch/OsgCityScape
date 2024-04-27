@@ -73,6 +73,8 @@ namespace CSEditor::ECS{
         void addChild(Transform& childTransform);
         const bool isLeaf();
         const std::vector<int>& getChildIndex() const;
+        void setIsSelected(bool isSelected);
+        const bool getIsSelected() const;
     protected:
         ObjectID m_id ;
         std::string m_name;
@@ -80,5 +82,6 @@ namespace CSEditor::ECS{
         std::vector<std::pair<std::string,std::shared_ptr<Component>>> m_components;
         std::shared_ptr<Transform> m_transform;
         ObjectID m_parentId;
+        bool m_isSelected = false;
     };
 } 

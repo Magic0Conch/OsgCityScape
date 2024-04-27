@@ -4,6 +4,7 @@
 #include "Core/ECS/ObjectIDAllocator.h"
 #include "Core/Math/MatrixHelper.h"
 #include "Editor/Core/RuntimeContext.h"
+#include "Render/Effects/OutlineFX.h"
 #include "Render/LowRender/DisplayTexture.h"
 #include "Render/LowRender/RenderColorToTexture.h"
 #include "Render/LowRender/RenderDepthToTexture.h"
@@ -103,7 +104,7 @@ public:
         for (int i = 0; i < indent; ++i) {
             std::cout << "  ";
         }
-        std::cout << node->getName() << " (Type: " << node->className() << ")" << std::endl;
+        std::cout << node->getName() << " (Type: " << node->className() << ")" << node << std::endl;
 
         const osg::Group* group = node->asGroup();
         if (group) {
@@ -137,7 +138,7 @@ public:
 
         // initialize the level resource
         auto rootSceneNode = m_level->getRootObject()->getTransformComponent().getNode().get();
-        
+
         printNode(rootSceneNode, 0);
 
         //render pass
@@ -183,16 +184,22 @@ public:
     };
 
     void tick(float deltaTime){
-        if(m_level->isObjectSelected()){
+        if(m_level->isSelectedObjectDirty()){
             auto selectedObject = m_level->getSelectedObject();
             auto transform = selectedObject->getTransformComponent();
-            auto position = transform.getPosition();
-            auto rotation = transform.getRotation();
-            auto scale = transform.getScale();
             auto mesh = selectedObject->getComponent<ECS::Mesh>();
-            auto meshNode = mesh->getMeshNode();
-            osg::ref_ptr<osgFX::Outline> pOutLine = new osgFX::Outline;
-
+            auto meshGroupNode = mesh->getMeshNode()->asGroup();
+            auto geodeNode = meshGroupNode->getChild(0);
+            // if(m_level->isSelectedObjectDirty()){
+            {
+                osg::ref_ptr<osgFX::OutlineFX> pOutLine = new osgFX::OutlineFX;
+                pOutLine->setWidth(0.1);
+                pOutLine->setColor(osg::Vec4(1,1,0,1));
+                pOutLine->addChild(geodeNode);
+                meshGroupNode->replaceChild(geodeNode, pOutLine);
+                m_level->setSelectedObjectDirty(false);                
+            }
+            // }
             
             // auto meshTransform = new osg::MatrixTransform;
             // meshTransform->setMatrix(osg::Matrix::translate(position) * osg::Matrix::rotate(rotation) * osg::Matrix::scale(scale));

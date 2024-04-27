@@ -19,7 +19,7 @@ int main(int argc, char** argv)
     while (arguments.read("--testOcclusion")) { testOcclusion = true; }
 
     // load outlined object
-    std::string modelFilename = arguments.argc() > 1 ? arguments[1] : "C:/suizhou/GovFacility/Data/Tile_+004_+004/Tile_+004_+004.ive";
+    std::string modelFilename = arguments.argc() > 1 ? arguments[1] : "C:/Data/suizhou/conv/Tile_+004_+004.ive";
     osg::ref_ptr<osg::Node> outlineModel = osgDB::readRefNodeFile(modelFilename);
     if (!outlineModel)
     {
@@ -35,38 +35,39 @@ int main(int argc, char** argv)
         osg::ref_ptr<osgFX::OutlineFX> outline = new osgFX::OutlineFX;
         root->addChild(outline);
 
-        outline->setWidth(8);
+        outline->setWidth(1.5);
         outline->setColor(osg::Vec4(1,1,0,1));
         outline->addChild(outlineModel);
+        // root->addChild(outlineModel);
     }
 
-    if (testOcclusion)
-    {
-        // load occluder
-        std::string occludedModelFilename = "cow.osgt";
-        osg::ref_ptr<osg::Node> occludedModel = osgDB::readRefNodeFile(occludedModelFilename);
-        if (!occludedModel)
-        {
-            osg::notify(osg::FATAL) << "Unable to load model '" << occludedModelFilename << "'\n";
-            return -1;
-        }
+    // if (testOcclusion)
+    // {
+    //     // load occluder
+    //     std::string occludedModelFilename = "cow.osgt";
+    //     osg::ref_ptr<osg::Node> occludedModel = osgDB::readRefNodeFile(occludedModelFilename);
+    //     if (!occludedModel)
+    //     {
+    //         osg::notify(osg::FATAL) << "Unable to load model '" << occludedModelFilename << "'\n";
+    //         return -1;
+    //     }
 
-        // occluder offset
-        const osg::BoundingSphere& bsphere = outlineModel->getBound();
-        const osg::Vec3 occluderOffset = osg::Vec3(0,1,0) * bsphere.radius() * 1.2f;
+    //     // occluder offset
+    //     const osg::BoundingSphere& bsphere = outlineModel->getBound();
+    //     const osg::Vec3 occluderOffset = osg::Vec3(0,1,0) * bsphere.radius() * 1.2f;
 
-        // occluder behind outlined model
-        osg::ref_ptr<osg::PositionAttitudeTransform> modelTransform0 = new osg::PositionAttitudeTransform;
-        modelTransform0->setPosition(bsphere.center() + occluderOffset);
-        modelTransform0->addChild(occludedModel);
-        root->addChild(modelTransform0);
+    //     // occluder behind outlined model
+    //     osg::ref_ptr<osg::PositionAttitudeTransform> modelTransform0 = new osg::PositionAttitudeTransform;
+    //     modelTransform0->setPosition(bsphere.center() + occluderOffset);
+    //     modelTransform0->addChild(occludedModel);
+    //     root->addChild(modelTransform0);
 
-        // occluder in front of outlined model
-        osg::ref_ptr<osg::PositionAttitudeTransform> modelTransform1 = new osg::PositionAttitudeTransform;
-        modelTransform1->setPosition(bsphere.center() - occluderOffset);
-        modelTransform1->addChild(occludedModel);
-        root->addChild(modelTransform1);
-    }
+    //     // occluder in front of outlined model
+    //     osg::ref_ptr<osg::PositionAttitudeTransform> modelTransform1 = new osg::PositionAttitudeTransform;
+    //     modelTransform1->setPosition(bsphere.center() - occluderOffset);
+    //     modelTransform1->addChild(occludedModel);
+    //     root->addChild(modelTransform1);
+    // }
 
     // must have stencil buffer...
     osg::DisplaySettings::instance()->setMinimumNumStencilBits(1);
@@ -74,7 +75,7 @@ int main(int argc, char** argv)
     // construct the viewer
     osgViewer::Viewer viewer;
     viewer.setSceneData(root);
-
+    viewer.setUpViewInWindow(100, 100, 400, 300);
     // must clear stencil buffer...
     unsigned int clearMask = viewer.getCamera()->getClearMask();
     viewer.getCamera()->setClearMask(clearMask | GL_STENCIL_BUFFER_BIT);
