@@ -86,17 +86,8 @@ namespace osgFX
                                       osg::Stencil::REPLACE);
                 outlineState->setAttributeAndModes(stencil, Override_On);
 
-                // cull front-facing polys
-                osg::CullFace* cullFace = new osg::CullFace;
-                cullFace->setMode(osg::CullFace::FRONT);
-                outlineState->setAttributeAndModes(cullFace, Override_On);
-
                 // disable modes
                 outlineState->setMode(GL_BLEND, Override_Off);
-                //state->setMode(GL_DEPTH_TEST, Override_Off);
-                outlineState->setTextureMode(0, GL_TEXTURE_1D, Override_Off);
-                outlineState->setTextureMode(0, GL_TEXTURE_2D, Override_Off);
-                outlineState->setTextureMode(0, GL_TEXTURE_3D, Override_Off);
                 outlineState->addUniform(new osg::Uniform("_Outline", _width));
                 outlineState->addUniform(new osg::Uniform("_OutlineColor", _color));
 
@@ -114,10 +105,6 @@ namespace osgFX
         osg::StateSet* outlineState = new osg::StateSet;
     };
 
-
-    /**
-     * Outline effect.
-     */
     OutlineFX::OutlineFX() : Effect(), _width(2), _color(1,1,1,1), _technique(0)
     {
     }

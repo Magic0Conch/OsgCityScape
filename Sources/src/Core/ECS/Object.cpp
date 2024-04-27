@@ -100,3 +100,13 @@ const bool Object::isLeaf() {
 const std::vector<int>& Object::getChildIndex() const{
     return m_transform->getChildIndex();
 }
+
+void Object::setIsSelected(bool isSelected){
+    m_isSelected = isSelected;
+    if(isSelected){
+        
+    }
+}
+const bool Object::getIsSelected() const{
+    return m_isSelected;
+}
