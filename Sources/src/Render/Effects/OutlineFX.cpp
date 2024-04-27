@@ -7,7 +7,6 @@
 #include <osg/CullFace>
 #include <osg/PolygonMode>
 #include <osg/LineWidth>
-#include <osg/Material>
 #include <osg/Texture1D>
 #include "Resources/ResourceManagement/ConfigManager.h"
 #include "Render/Pass/TextureProjectionPass.h"
@@ -27,9 +26,6 @@ namespace osgFX
     /// Register prototype.
     Registry::Proxy proxy(new OutlineFX);
 
-    /**
-     * Outline technique.
-     */
     class OutlineFX::OutlineFXTechnique : public Technique
     {
     public:
@@ -46,24 +42,22 @@ namespace osgFX
         /// Set outline width.
         void setWidth(float w) {
             _width = w;
-            outlineState->getUniform("_Outline")->set(w);
+            auto uniform = outlineState->getUniform("_Outline");
+            if(uniform)
+                uniform->set(w);
         }
 
         /// Set outline color.
         void setColor(const osg::Vec4& color) {
             _color = color;
-            outlineState->getUniform("_OutlineColor")->set(color);
+            auto uniform = outlineState->getUniform("_OutlineColor");
+            if(uniform)
+                uniform->set(color);
         }
 
     protected:
         /// Define render passes.
         void define_passes() {
-
-            /*
-             * draw
-             * - set stencil buffer to ref=1 where draw occurs
-             * - clear stencil buffer to 0 where test fails
-             */
             {
                 osg::StateSet* state = new osg::StateSet;
 
@@ -76,18 +70,11 @@ namespace osgFX
                 state->setAttributeAndModes(stencil, Override_On);
                 const std::string& vertPath = (CSEditor::Core::g_runtimeContext.configManager->getShaderFolder() / "common/triangle.vert").string();
                 const std::string& fragPath = (CSEditor::Core::g_runtimeContext.configManager->getShaderFolder() / "common/triangle.frag").string();
-                osg::ref_ptr<osg::Program> program = CSEditor::Resources::ShaderLoader::create(vertPath, fragPath);                   
+                osg::ref_ptr<osg::Program> program = CSEditor::Resources::ShaderLoader::create(vertPath, fragPath);
                 state->setAttributeAndModes(program.get(), osg::StateAttribute::ON);
                 addPass(state);
             }
 
-            /*
-             * post-draw
-             * - only draw where draw didn't set the stencil buffer
-             * - draw only back-facing polygons
-             * - draw back-facing polys as lines
-             * - disable depth-test, lighting & texture
-             */
             {
                 outlineState = new osg::StateSet;
 
@@ -113,10 +100,10 @@ namespace osgFX
                 outlineState->addUniform(new osg::Uniform("_Outline", _width));
                 outlineState->addUniform(new osg::Uniform("_OutlineColor", _color));
 
-                const std::string& vertPath = (CSEditor::Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/Outline.vert").string();
-                const std::string& fragPath = (CSEditor::Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/Outline.frag").string();
-                osg::ref_ptr<osg::Program> program = CSEditor::Resources::ShaderLoader::create(vertPath, fragPath);
-                outlineState->setAttributeAndModes(program.get(), osg::StateAttribute::ON);
+                const std::string& outlineVertPath = (CSEditor::Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/Outline.vert").string();
+                const std::string& outlineFragPath = (CSEditor::Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/Outline.frag").string();
+                osg::ref_ptr<osg::Program> outlineProgram = CSEditor::Resources::ShaderLoader::create(outlineVertPath, outlineFragPath);
+                outlineState->setAttributeAndModes(outlineProgram.get(), osg::StateAttribute::ON);
                 addPass(outlineState);
             }
         }
