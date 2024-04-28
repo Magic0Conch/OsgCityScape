@@ -193,7 +193,7 @@ public:
             // if(m_level->isSelectedObjectDirty()){
             {
                 osg::ref_ptr<osgFX::OutlineFX> pOutLine = new osgFX::OutlineFX;
-                pOutLine->setWidth(0.1);
+                pOutLine->setWidth(1);
                 pOutLine->setColor(osg::Vec4(1,1,0,1));
                 pOutLine->addChild(geodeNode);
                 meshGroupNode->replaceChild(geodeNode, pOutLine);

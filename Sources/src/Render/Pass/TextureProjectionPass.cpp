@@ -5,6 +5,7 @@
 #include "Editor/Core/RuntimeContext.h"
 #include "Windowing/Window.h"
 #include "Resources/Loaders/ShaderLoader.h"
+#include "osg/Image"
 
 using namespace CSEditor::Render;
 using namespace CSEditor;
@@ -17,7 +18,7 @@ void createTextureProjectionShader(osg::StateSet* ss) {
 }
 
 TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m_camera(camera) {
-    m_camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    m_camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     m_camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
     m_camera->setRenderOrder(osg::Camera::PRE_RENDER);
     m_camera->setName("RenderColor");
@@ -26,8 +27,15 @@ TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m
     _texture->setWrap(osg::Texture2D::WrapParameter::WRAP_T,osg::Texture2D::WrapMode::REPEAT);
     _texture->setWrap(osg::Texture2D::WrapParameter::WRAP_S,osg::Texture2D::WrapMode::REPEAT);
     _texture->setSourceFormat(GL_RGBA);
-    _texture->setInternalFormat(GL_RGBA32F_ARB);
+    _texture->setInternalFormat(GL_RGBA8);
     _texture->setSourceType(GL_FLOAT);
+
+    _depthStencilTexture = new osg::Texture2D();
+    _depthStencilTexture->setWrap(osg::Texture2D::WrapParameter::WRAP_T,osg::Texture2D::WrapMode::REPEAT);
+    _depthStencilTexture->setWrap(osg::Texture2D::WrapParameter::WRAP_S,osg::Texture2D::WrapMode::REPEAT);
+    _depthStencilTexture->setSourceFormat(GL_DEPTH_STENCIL);
+    _depthStencilTexture->setInternalFormat(GL_DEPTH_STENCIL);
+    _depthStencilTexture->setSourceType(GL_UNSIGNED_INT_24_8);    
 
     auto stateSet = m_camera->getOrCreateStateSet();
     m_camera->setRenderOrder(osg::Camera::POST_RENDER);
@@ -40,6 +48,8 @@ TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m
     stateSet->addUniform(m_lightSpaceMatrixUniform);
 
     m_camera->attach(osg::Camera::COLOR_BUFFER0, _texture);
+    
+    m_camera->attach(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, _depthStencilTexture);
     Core::g_runtimeContext.windowSystem->setScreenTexture(_texture);
 }
 

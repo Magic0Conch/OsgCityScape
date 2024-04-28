@@ -9,7 +9,7 @@
 #include <memory>
 #include <string>
 #include <thread>
-
+#include <osgUtil/SmoothingVisitor>
 using namespace CSEditor::ECS;
 
 void Mesh::serialize(Json &jsonObject){
@@ -39,6 +39,17 @@ void Mesh::loadResourceAsync(std::shared_ptr<Object> parentObject){
 
 void Mesh::loadResource(std::shared_ptr<Object> parentObject){
     m_meshNode = osgDB::readNodeFile(m_meshPath);
+    auto geodeGroup = m_meshNode->asGroup()->getChild(0)->asGeode();
+    if(geodeGroup){
+        const auto childrenCount = geodeGroup->getNumChildren();
+        for (int i = 0;i<childrenCount;i++) {
+            auto geom = geodeGroup->getChild(i)->asGeometry();
+            if(geom){
+                osgUtil::SmoothingVisitor::smooth(*geom);
+            }
+        }
+    }
+
     m_parentObject = parentObject;
     m_parentObject.lock()->getTransformComponent().getNode()->addChild(m_meshNode);
     for(const auto& materialPath:m_materialPaths){
