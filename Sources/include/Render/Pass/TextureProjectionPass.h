@@ -19,6 +19,7 @@ private:
     osg::ref_ptr<osg::Texture2DArray> m_colorMap;
     osg::ref_ptr<osg::Uniform> m_lightSpaceMatrixUniform;
     osg::ref_ptr<osg::Texture2D> _texture;
+    osg::ref_ptr<osg::Texture2D> _depthStencilTexture;
      unsigned int m_mapIndex = 0;
 };
 }
