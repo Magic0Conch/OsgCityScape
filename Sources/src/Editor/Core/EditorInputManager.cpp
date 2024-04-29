@@ -79,6 +79,7 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                 
                 osg::Vec3d eye, center, up;
                 m_camera->getViewMatrixAsLookAt(eye, center, up);
+                up = osg::Vec3d(0, 0, 1);
                 osg::Vec3d lookDir = center - eye;
                 osg::Vec3d sideDir = lookDir ^ up;
 
@@ -86,13 +87,10 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                 osg::Quat yaw(-m_mouseSensitivity * mouseDelta.x(), up);
                 osg::Quat rotation = pitch * yaw;
 
-                // osg::Matrixd rotationMatrix;
-                // rotation.get(rotationMatrix);
-                
                 osg::Vec3d newLookDir =  rotation*lookDir;
                 osg::Vec3d newUp = rotation*up;
 
-                m_camera->setViewMatrixAsLookAt(eye, eye + newLookDir, newUp);
+                m_camera->setViewMatrixAsLookAt(eye, eye + newLookDir, up);
 
                 return true; // 返回true表示事件已被处理
             }

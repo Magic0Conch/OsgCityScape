@@ -180,6 +180,8 @@ std::shared_ptr<CSEditor::ResourceType::Level> Level::getLevelResource(){
 }
 
 void Level::setSelectedObjectID(ObjectID id){
+    if(selectedObjectID == id)
+        return;
     selectedObjectID = id;
     if(id != -1 && id != 0)
         setSelectedObjectDirty(true);
@@ -210,11 +212,11 @@ ObjectID Level::getLastSelectedObjectID() const{
 }
 
 std::shared_ptr<CSEditor::ECS::Object> Level::getLastSelectedObject(){
-    if(m_objects.find(selectedObjectID) == m_objects.end()){
-        spdlog::error("Object not found with id: {}", selectedObjectID);
+    if(m_objects.find(lastSelectedObjectID) == m_objects.end()){
+        spdlog::error("Object not found with id: {}", lastSelectedObjectID);
         return nullptr;
     }
-    return m_objects[selectedObjectID];
+    return m_objects[lastSelectedObjectID];
 }
 
 bool Level::hasLastSelectedObject() const{

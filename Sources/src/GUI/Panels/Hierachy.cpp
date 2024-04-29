@@ -22,7 +22,6 @@ void Hierachy::drawHierachyNodeRecursively(ECS::ObjectID objectID){
     if (ImGui::IsItemClicked()){
         m_nodeClicked = objectID;
         auto lastObjectID = m_level->getSelectedObjectID();
-        m_level->setLastSelectedObjectID(lastObjectID);
         m_level->setSelectedObjectID(objectID);
         UIEveneManager::getInstance().selectHierachyEvent.invoke(m_nodeClicked);
     }

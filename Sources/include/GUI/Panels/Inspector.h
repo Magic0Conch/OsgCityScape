@@ -22,6 +22,7 @@ private:
     std::vector<float> m_scale;
     std::string m_meshPath;
     ECS::Object m_curSceneObject;
-    bool m_useEuler = true;
+    bool m_useEuler = false;
+    bool m_previousUseEuler = false;
 };
 }
