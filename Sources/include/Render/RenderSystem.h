@@ -190,15 +190,29 @@ public:
             auto mesh = selectedObject->getComponent<ECS::Mesh>();
             auto meshGroupNode = mesh->getMeshNode()->asGroup();
             auto geodeNode = meshGroupNode->getChild(0);
-            // if(m_level->isSelectedObjectDirty()){
-            {
-                osg::ref_ptr<osgFX::OutlineFX> pOutLine = new osgFX::OutlineFX;
-                pOutLine->setWidth(1);
-                pOutLine->setColor(osg::Vec4(1,1,0,1));
-                pOutLine->addChild(geodeNode);
-                meshGroupNode->replaceChild(geodeNode, pOutLine);
-                m_level->setSelectedObjectDirty(false);                
+            
+            if(m_level->hasLastSelectedObject()){
+                auto lastSeletedObject = m_level->getLastSelectedObject();
+                auto lastMesh = lastSeletedObject->getComponent<ECS::Mesh>();
+                auto lastMeshGroupNode = lastMesh->getMeshNode()->asGroup();
+                auto outlineNode = lastMeshGroupNode->getChild(0);
+                auto lastGeodeNode = dynamic_cast<osgFX::OutlineFX*>(outlineNode)->getChild(0);
+                lastMeshGroupNode->replaceChild(outlineNode, lastGeodeNode);
+
             }
+            m_lastSelectedObjectID = m_level->getSelectedObjectID();
+            m_level->setLastSelectedObjectID(m_lastSelectedObjectID);
+            
+
+            osg::ref_ptr<osgFX::OutlineFX> pOutLine = new osgFX::OutlineFX;
+            pOutLine->setWidth(1);
+            pOutLine->setColor(osg::Vec4(1,1,0,1));
+            pOutLine->addChild(geodeNode);
+            meshGroupNode->replaceChild(geodeNode, pOutLine);
+            m_level->setSelectedObjectDirty(false);
+
+
+        
             // }
             
             // auto meshTransform = new osg::MatrixTransform;
@@ -219,5 +233,6 @@ private:
     std::vector<osg::Matrixd*> m_lightMatrices;
     osg::ref_ptr<Render::RenderDepthToTexture> m_depthPass;
     std::unique_ptr<Render::TextureProjectionPass> m_textureProjectionPass;
+    ECS::ObjectID m_lastSelectedObjectID = -1;
 };
 }
