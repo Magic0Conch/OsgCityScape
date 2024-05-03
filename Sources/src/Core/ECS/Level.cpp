@@ -39,6 +39,7 @@ bool Level::importObjFromFolderRecursively(const std::string& folderPath,const s
                 continue;
             }
             auto loadedModelObject = createObjectInLevel(file, m_sceneObject->getID());
+            auto transform = &loadedModelObject->getTransformComponent();
             auto pat = loadedModelObject->getTransformComponent().getNode();
             osg::Quat rotation;
             osg::Matrix rotationMatrix(1, 0, 0, 0,
@@ -46,7 +47,7 @@ bool Level::importObjFromFolderRecursively(const std::string& folderPath,const s
                                         0, 1, 0, 0,
                                         0, 0, 0, 1);
             rotation = rotationMatrix.getRotate();
-            pat->setAttitude(rotation);
+            transform->setRotation(rotation);
             auto mesh = loadedModelObject->addComponent<Mesh>();
             mesh->m_meshPath = fullPath;            
             std::thread workTread(&Mesh::loadResource,mesh,loadedModelObject);

@@ -5,7 +5,9 @@
 #include "Editor/Core/RuntimeContext.h"
 #include "Windowing/Window.h"
 #include "Resources/Loaders/ShaderLoader.h"
+#include <osg/CullFace>
 #include "osg/Image"
+#include "osg/StateAttribute"
 
 using namespace CSEditor::Render;
 using namespace CSEditor;
@@ -47,10 +49,15 @@ TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m
     m_lightSpaceMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "lightSpaceMatrix", 16);
     stateSet->addUniform(m_lightSpaceMatrixUniform);
 
+    m_camera->setNodeMask(0x1);
+    m_camera->setCullingMode(m_camera->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
     m_camera->attach(osg::Camera::COLOR_BUFFER0, _texture);
     
     m_camera->attach(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, _depthStencilTexture);
     Core::g_runtimeContext.windowSystem->setScreenTexture(_texture);
+    auto cullFace = new osg::CullFace;
+    cullFace->setMode(osg::CullFace::BACK);
+    stateSet->setAttributeAndModes(cullFace, osg::StateAttribute::ON);
 }
 
 
@@ -62,7 +69,8 @@ void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> de
     int cnt = colorTexVec.size();
     m_colorMap->setTextureSize(colorTexVec[0]->getTextureWidth(), colorTexVec[0]->getTextureHeight(), cnt);
     m_colorMap->setInternalFormat(colorTexVec[0]->getInternalFormat());
-
+    // m_colorMap->setInternalFormatMode(osg::Texture2D::USE_S3TC_DXT1_COMPRESSION);
+    // m_colorMap->setUnRefImageDataAfterApply(true);
     for (int i = 0; i < cnt; i++) {
         m_colorMap->setImage(i, colorTexVec[i]->getImage());
     }

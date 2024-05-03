@@ -35,6 +35,28 @@ void Mesh::loadResourceAsync(std::shared_ptr<Object> parentObject){
         auto matertial = Resources::MaterialManager::getInstance().getMaterial(materialPath);
         matertial->loadResource(parentObject);
     }
+    commpressTexture();
+}
+
+void Mesh::commpressTexture(){
+    auto geodeGroup = m_meshNode->asGroup()->getChild(0)->asGeode();
+    if(geodeGroup){
+        const auto childrenCount = geodeGroup->getNumChildren();
+        for (int i = 0;i<childrenCount;i++) {
+            auto geom = geodeGroup->getChild(i)->asGeometry();
+            auto stateset = geom->getOrCreateStateSet();
+            osg::StateSet::TextureAttributeList& texAttribList = stateset->getTextureAttributeList();
+            for (int unit = 0; unit < texAttribList.size(); unit++) {
+                osg::Texture2D* tex2D = dynamic_cast<osg::Texture2D*>(stateset->getTextureAttribute(i, osg::StateAttribute::TEXTURE));
+                if (tex2D) {
+                    tex2D->setInternalFormat(GL_COMPRESSED_RGB_S3TC_DXT1_EXT);
+                }
+            }
+            if(geom){
+                osgUtil::SmoothingVisitor::smooth(*geom);
+            }
+        }
+    }
 }
 
 void Mesh::loadResource(std::shared_ptr<Object> parentObject){
@@ -49,13 +71,13 @@ void Mesh::loadResource(std::shared_ptr<Object> parentObject){
             }
         }
     }
-
     m_parentObject = parentObject;
     m_parentObject.lock()->getTransformComponent().getNode()->addChild(m_meshNode);
     for(const auto& materialPath:m_materialPaths){
         auto matertial = Resources::MaterialManager::getInstance().getMaterial(materialPath);
         matertial->loadResource(parentObject);
     }
+    commpressTexture();
     onComponentAdded();
 }
 
@@ -75,6 +97,7 @@ osg::ref_ptr<osg::Node> Mesh::getMeshNode() const {
 // Setter for m_meshNode
 void Mesh::setMeshNode(osg::ref_ptr<osg::Node> node) {
     m_meshNode = node;
+    commpressTexture();
     // Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->nodeToObjectID[m_meshNode] = m_parentObject.lock()->getID();
 }
 

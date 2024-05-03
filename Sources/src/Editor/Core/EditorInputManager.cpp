@@ -90,7 +90,7 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                 osg::Vec3d newLookDir =  rotation*lookDir;
                 osg::Vec3d newUp = rotation*up;
 
-                m_camera->setViewMatrixAsLookAt(eye, eye + newLookDir, up);
+                m_camera->setViewMatrixAsLookAt(eye, eye + newLookDir, newUp);
 
                 return true; // 返回true表示事件已被处理
             }

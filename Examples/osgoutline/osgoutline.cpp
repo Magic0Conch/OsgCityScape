@@ -34,7 +34,6 @@ int main(int argc, char** argv)
         // create outline effect
         osg::ref_ptr<osgFX::OutlineFX> outline = new osgFX::OutlineFX;
         root->addChild(outline);
-
         outline->setWidth(1.5);
         outline->setColor(osg::Vec4(1,1,0,1));
         outline->addChild(outlineModel);

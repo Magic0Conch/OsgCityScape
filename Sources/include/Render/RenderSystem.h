@@ -4,6 +4,7 @@
 #include "Core/ECS/ObjectIDAllocator.h"
 #include "Core/Math/MatrixHelper.h"
 #include "Editor/Core/RuntimeContext.h"
+#include "GL/glcorearb.h"
 #include "Render/Effects/OutlineFX.h"
 #include "Render/LowRender/DisplayTexture.h"
 #include "Render/LowRender/RenderColorToTexture.h"
@@ -12,11 +13,14 @@
 #include "Resources/ResourceType/Common/Level.h"
 #include "glm/fwd.hpp"
 #include "glm/matrix.hpp"
+#include "osg/Callback"
 #include "osg/Camera"
+#include "osg/FrameBufferObject"
 #include "osg/Group"
 #include "osg/Math"
 #include "osg/Matrix"
 #include "osg/Matrixd"
+#include "osg/StateAttribute"
 #include "osg/Texture2D"
 #include "osg/Texture2DArray"
 #include "osg/ref_ptr"
@@ -33,7 +37,7 @@
 #include <osg/CullFace>
 #include "Core/Math/Math.h"
 #include <osgFX/Outline>
-
+#include <gl/gl.h>
 namespace CSEditor::Render {
 
 class GeometryTextureSetterVisitor : public osg::NodeVisitor
@@ -92,14 +96,55 @@ public:
     RenderSystem(){
         m_level = Core::g_runtimeContext.worldManager->getCurrentActiveLevel();
         m_levelResource = m_level->getLevelResource();
-        std::cout.ios_base::imbue(std::locale::classic());
-        std::ios::sync_with_stdio();
+        m_mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
         initialize();
     };
 
     ~RenderSystem(){
 
     };
+
+    void createLightMatrices(){
+        using namespace CSEditor::Math;
+        float fovy = CSEditor::Math::Math::focal2fovEuler(1.55);
+        auto viewMatrix = MatrixHelper::glmToOsgMatrix(glm::dmat4(0.671205,-0.474751,0.569293,0,0.740948,0.452385,-0.496331,0,-0.021905,0.754957,0.655409,0,-39.120093,-26.573260,-168.144351,1));
+        m_mainCamera->setProjectionMatrixAsPerspective(fovy, 1.33333, 5, 1500);
+        m_mainCamera->setViewMatrix(viewMatrix);
+        auto perspectiveMatrix = m_mainCamera->getProjectionMatrix();
+        auto viewProjectionMatrix = viewMatrix * perspectiveMatrix;
+        osg::Matrixd rotationMatrix(1, 0, 0, 0,
+                                    0, 0, -1, 0,
+                                    0, 1, 0, 0,
+                                    0, 0, 0, 1);
+        auto lightMatrix = rotationMatrix * viewMatrix * perspectiveMatrix;
+        m_lightMatrices.emplace_back(&lightMatrix);
+    }
+
+    void createResources(){
+        m_depthArray = new osg::Texture2DArray;
+        m_depthArray->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
+        m_depthArray->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
+        m_depthArray->setInternalFormat(GL_DEPTH_COMPONENT);
+        m_depthArray->setSourceFormat(GL_DEPTH_COMPONENT);
+        m_depthArray->setSourceType(GL_FLOAT);
+        m_depthArray->setTextureSize(width, height, 16);
+
+        //create projection color texture
+        osg::Texture2D* projectionTexture = new osg::Texture2D;
+        const auto texturePath = (Core::g_runtimeContext.configManager->getMaterialFolder()/ "DJI_0314.JPG").string();
+        auto projectionImage = osgDB::readImageFile(texturePath);
+        projectionImage->scaleImage(width, height, 1);
+        projectionTexture->setImage(projectionImage);
+        m_colorTextureVector.emplace_back(projectionTexture);
+        auto rootSceneNode = m_level->getRootObject()->getTransformComponent().getNode().get();
+        printNode(rootSceneNode, 0);
+        
+        // auto ss = rootSceneNode->getOrCreateStateSet();
+        // auto colorMask = new osg::ColorMask;
+        // colorMask->setMask(false, false, false, false);
+        // ss->setAttributeAndModes(colorMask, osg::StateAttribute::ON);
+    }
+
     void printNode(const osg::Node* node, int indent = 0) {
         for (int i = 0; i < indent; ++i) {
             std::cout << "  ";
@@ -114,73 +159,28 @@ public:
         }
     }
 
-    void initialize(){
-        using namespace CSEditor::Math;
-        auto mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
-        auto viewMatrix = MatrixHelper::glmToOsgMatrix(glm::dmat4(0.671205,-0.474751,0.569293,0,0.740948,0.452385,-0.496331,0,-0.021905,0.754957,0.655409,0,-39.120093,-26.573260,-168.144351,1));
-        float fovy = CSEditor::Math::Math::focal2fovEuler(1.55);
-        mainCamera->setProjectionMatrixAsPerspective(fovy, 1.33333, 5, 1500);
-        mainCamera->setViewMatrix(viewMatrix);
-        auto perspectiveMatrix = mainCamera->getProjectionMatrix();
-        auto viewProjectionMatrix = viewMatrix * perspectiveMatrix;
-        osg::Matrixd rotationMatrix(1, 0, 0, 0,
-                                    0, 0, -1, 0,
-                                    0, 1, 0, 0,
-                                    0, 0, 0, 1);
-        auto lightMatrix = rotationMatrix * viewMatrix * perspectiveMatrix;
-        
+    void setupRenderPasses(){
         //setup 
         auto viewer = Core::g_runtimeContext.viewer;
         auto graphicsContext = Core::g_runtimeContext.windowSystem->getGraphicsContext();
 
-        const int width = 1200;
-        const int height = 900;
-
-        // initialize the level resource
-        auto rootSceneNode = m_level->getRootObject()->getTransformComponent().getNode().get();
-
-        printNode(rootSceneNode, 0);
-
-        //render pass
-        //depth pass
-        m_depthArray = new osg::Texture2DArray;
-        m_depthArray->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
-        m_depthArray->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
-        m_depthArray->setInternalFormat(GL_DEPTH_COMPONENT);
-        m_depthArray->setSourceFormat(GL_DEPTH_COMPONENT);
-        m_depthArray->setSourceType(GL_FLOAT);
-        m_depthArray->setTextureSize(width, height, 16);
-
+        //depth pass        
         m_depthPass = new Render::RenderDepthToTexture;
         m_depthPass->setGraphicsContext(graphicsContext);
-        m_depthPass->setNodeMask(0x1);
         m_depthPass->setViewport(0,0,width,height);
-        m_depthPass->setViewProjectionMatrix(lightMatrix);
-        m_depthPass->attach(osg::Camera::DEPTH_BUFFER,m_depthArray.get(),0,0);
+        m_depthPass->setViewProjectionMatrix(*m_lightMatrices[0]);
+        m_depthPass->attach(osg::Camera::DEPTH_BUFFER,m_depthArray.get(),0,0);        
         viewer->addSlave(m_depthPass);
 
-        //color
-        std::vector<osg::Texture2D *> colorTextureVector;
-        osg::ref_ptr<osg::Texture2D> projectionTexture = new osg::Texture2D;
-        const auto texturePath = (Core::g_runtimeContext.configManager->getMaterialFolder()/ "DJI_0314.JPG").string();
-        auto projectionImage = osgDB::readImageFile(texturePath);
-        projectionImage->scaleImage(width, height, 1);
-        projectionTexture->setImage(projectionImage);
-        colorTextureVector.emplace_back(projectionTexture);
+        //texture projection pass
+        m_textureProjectionPass = std::make_unique<Render::TextureProjectionPass>(m_mainCamera);
+        m_textureProjectionPass->setTextureArray(m_depthArray, m_colorTextureVector, m_lightMatrices);
+    }
 
-        // light projection matrix
-        m_lightMatrices.emplace_back(&lightMatrix);
-
-        m_textureProjectionPass = std::make_unique<Render::TextureProjectionPass>(mainCamera);
-        m_textureProjectionPass->setTextureArray(m_depthArray, colorTextureVector, m_lightMatrices);
-        mainCamera->setNodeMask(0x1);
-        mainCamera->setCullingMode(mainCamera->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
-        osg::ref_ptr<osg::CullFace> cullFace = new osg::CullFace;
-        cullFace->setMode(osg::CullFace::BACK);
-        mainCamera->getOrCreateStateSet()->setAttributeAndModes(cullFace, osg::StateAttribute::ON);
-
-        
-        
+    void initialize(){
+        createLightMatrices();
+        createResources();
+        setupRenderPasses();
     };
 
     void tick(float deltaTime){
@@ -210,15 +210,6 @@ public:
             pOutLine->addChild(geodeNode);
             meshGroupNode->replaceChild(geodeNode, pOutLine);
             m_level->setSelectedObjectDirty(false);
-
-
-        
-            // }
-            
-            // auto meshTransform = new osg::MatrixTransform;
-            // meshTransform->setMatrix(osg::Matrix::translate(position) * osg::Matrix::rotate(rotation) * osg::Matrix::scale(scale));
-            // meshTransform->addChild(meshNode);
-            // m_textureProjectionPass->setMeshNode(meshTransform);
         }
     };
     
@@ -234,5 +225,9 @@ private:
     osg::ref_ptr<Render::RenderDepthToTexture> m_depthPass;
     std::unique_ptr<Render::TextureProjectionPass> m_textureProjectionPass;
     ECS::ObjectID m_lastSelectedObjectID = -1;
+    std::vector<osg::Texture2D *> m_colorTextureVector;
+    osg::ref_ptr<osg::Camera> m_mainCamera;
+    const int width = 1200;
+    const int height = 900;
 };
 }

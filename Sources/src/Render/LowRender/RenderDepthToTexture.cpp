@@ -1,5 +1,7 @@
 #include "Render/LowRender/RenderDepthToTexture.h"
 #include "Editor/Core/RuntimeContext.h"
+#include "osg/CullFace"
+#include "osg/StateAttribute"
 #include "osg/StateSet"
 #include <string>
 #include <osg/Shader>
@@ -33,8 +35,15 @@ RenderDepthToTexture::RenderDepthToTexture()
     _texture->setInternalFormat(GL_DEPTH_COMPONENT);
     _texture->setSourceFormat(GL_DEPTH_COMPONENT);
     _texture->setSourceType(GL_FLOAT);
-    // attach(osg::Camera::DEPTH_BUFFER, _texture);
-    // createDepthVisualizationShader(0.1, 1000, getOrCreateStateSet());
+
+    setNodeMask(0x1);
+    ss->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+    auto colorMask = new osg::ColorMask;
+    colorMask->setMask(false, false, false, false);
+    ss->setAttributeAndModes(colorMask, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+    auto cullFace = new osg::CullFace;
+    cullFace->setMode(osg::CullFace::BACK);
+    ss->setAttributeAndModes(cullFace, osg::StateAttribute::ON);
 }
 
 osg::Texture2D* RenderDepthToTexture::getTexture() const
