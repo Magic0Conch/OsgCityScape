@@ -55,6 +55,7 @@ void Transform::setRotation(const osg::Vec4f& rotation) {
 }
 
 void Transform::setRotation(const osg::Quat& rotation) {    
+    m_rotation = osg::Vec4f(rotation.x(), rotation.y(), rotation.z(), rotation.w());
     m_node->setAttitude(rotation);
 }
 
