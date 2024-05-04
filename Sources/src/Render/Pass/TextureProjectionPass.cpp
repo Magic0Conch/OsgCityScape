@@ -59,7 +59,7 @@ TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m
 }
 
 
-void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> depthMapArray, std::vector<osg::Texture2D *> colorTexVec, std::vector<osg::Matrixd*> projectionMatrixVec) {
+void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> depthMapArray, std::vector<osg::Texture2D *> colorTexVec, std::vector<osg::Matrixd>& projectionMatrixVec) {
     if (!m_colorMap) {
         m_colorMap = new osg::Texture2DArray;
         m_colorMap->setInternalFormat(GL_RGBA);
@@ -77,7 +77,7 @@ void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> de
     stateSet->setTextureAttributeAndModes(2, m_colorMap, osg::StateAttribute::ON);
     stateSet->getUniform("mapSize")->set(cnt);
     for (int i = 0; i < cnt; ++i) {
-        auto& projectionMatrix = *projectionMatrixVec[i];
+        auto& projectionMatrix = projectionMatrixVec[i];
         m_lightSpaceMatrixUniform->setElement(i, projectionMatrix);
     }
 }
