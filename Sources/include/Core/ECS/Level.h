@@ -68,6 +68,9 @@ public:
     bool hasLastSelectedObject() const;
     void setSelectedObjectDirty(bool dirty);
     bool isSelectedObjectDirty() const;
+
+    void printNode(const osg::Node* node, int indent = 0) const;
+    void printSceneGraph();
 protected:
     void clear();
 

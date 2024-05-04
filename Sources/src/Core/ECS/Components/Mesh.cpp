@@ -35,10 +35,12 @@ void Mesh::loadResourceAsync(std::shared_ptr<Object> parentObject){
         auto matertial = Resources::MaterialManager::getInstance().getMaterial(materialPath);
         matertial->loadResource(parentObject);
     }
+    m_meshNode->setNodeMask(0x1);
     commpressTexture();
 }
 
 void Mesh::commpressTexture(){
+    // return;
     auto geodeGroup = m_meshNode->asGroup()->getChild(0)->asGeode();
     if(geodeGroup){
         const auto childrenCount = geodeGroup->getNumChildren();
@@ -77,6 +79,7 @@ void Mesh::loadResource(std::shared_ptr<Object> parentObject){
         auto matertial = Resources::MaterialManager::getInstance().getMaterial(materialPath);
         matertial->loadResource(parentObject);
     }
+    m_meshNode->setNodeMask(0x1);
     commpressTexture();
     onComponentAdded();
 }
@@ -97,6 +100,7 @@ osg::ref_ptr<osg::Node> Mesh::getMeshNode() const {
 // Setter for m_meshNode
 void Mesh::setMeshNode(osg::ref_ptr<osg::Node> node) {
     m_meshNode = node;
+    m_meshNode->setNodeMask(0x1);
     commpressTexture();
     // Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->nodeToObjectID[m_meshNode] = m_parentObject.lock()->getID();
 }

@@ -4,6 +4,8 @@
 #include "Core/ECS/Level.h"
 #include "Core/ECS/WorldManager.h"
 #include "osg/Vec3d"
+#include "spdlog/spdlog.h"
+#include <cstdlib>
 #include <osg/Matrixd>
 #include <osgFX/Outline>
 using namespace CSEditor::Core;
@@ -80,8 +82,10 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                 osg::Vec3d eye, center, up;
                 m_camera->getViewMatrixAsLookAt(eye, center, up);
                 up = osg::Vec3d(0, 0, 1);
-                osg::Vec3d lookDir = center - eye;
+                osg::Vec3d lookDir = (center - eye);
+                lookDir.normalize();
                 osg::Vec3d sideDir = lookDir ^ up;
+                sideDir.normalize();
 
                 osg::Quat pitch(m_mouseSensitivity * mouseDelta.y(), sideDir);
                 osg::Quat yaw(-m_mouseSensitivity * mouseDelta.x(), up);
@@ -90,6 +94,9 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                 osg::Vec3d newLookDir =  rotation*lookDir;
                 osg::Vec3d newUp = rotation*up;
 
+                if(abs(newLookDir * up) >= 0.95){
+                    return true;
+                }
                 m_camera->setViewMatrixAsLookAt(eye, eye + newLookDir, newUp);
 
                 return true; // 返回true表示事件已被处理

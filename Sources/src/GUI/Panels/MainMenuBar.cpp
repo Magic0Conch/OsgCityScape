@@ -94,6 +94,10 @@ void MainMenuBar::drawImpl(){
                 if (ImGui::MenuItem("Fly to...")){
                     m_showFlyToWindow = true;
                 }
+                if(ImGui::MenuItem("Print Scene Graph")){
+                    auto activeLevel = Core::g_runtimeContext.worldManager->getCurrentActiveLevel();
+                    activeLevel->printSceneGraph();
+                }
                 if (ImGui::BeginMenu("Add Object")){
                     if (ImGui::MenuItem("Add Camera")){
                     }

@@ -13,7 +13,8 @@ public:
 
     void setTexture(osg::Texture2D * tex);
     void setTextureArray(osg::ref_ptr<osg::Texture2DArray> depthMapArray, std::vector<osg::Texture2D *> colorTexVec, std::vector<osg::Matrixd*> projectionMatrix);
-    
+    osg::ref_ptr<osg::Texture2D> getColorTexture();
+    osg::ref_ptr<osg::Texture2D> getDepthStencilTexture();
 private:
     osg::ref_ptr<osg::Camera> m_camera;
     osg::ref_ptr<osg::Texture2DArray> m_colorMap;

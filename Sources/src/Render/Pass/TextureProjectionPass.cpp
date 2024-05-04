@@ -22,7 +22,6 @@ void createTextureProjectionShader(osg::StateSet* ss) {
 TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m_camera(camera) {
     m_camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     m_camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-    m_camera->setRenderOrder(osg::Camera::PRE_RENDER);
     m_camera->setName("RenderColor");
 
     _texture = new osg::Texture2D();
@@ -40,7 +39,6 @@ TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m
     _depthStencilTexture->setSourceType(GL_UNSIGNED_INT_24_8);    
 
     auto stateSet = m_camera->getOrCreateStateSet();
-    m_camera->setRenderOrder(osg::Camera::POST_RENDER);
     createTextureProjectionShader(stateSet);
     stateSet->addUniform(new osg::Uniform("depthMap", 1));
     stateSet->addUniform(new osg::Uniform("colorMap", 2));
@@ -49,7 +47,7 @@ TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m
     m_lightSpaceMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "lightSpaceMatrix", 16);
     stateSet->addUniform(m_lightSpaceMatrixUniform);
 
-    m_camera->setNodeMask(0x1);
+    // m_camera->setNodeMask(0x1);
     m_camera->setCullingMode(m_camera->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
     m_camera->attach(osg::Camera::COLOR_BUFFER0, _texture);
     
@@ -88,4 +86,11 @@ void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> de
 void TextureProjectionPass::setTexture(osg::Texture2D * tex) {
     auto stateSet = m_camera->getOrCreateStateSet();
     stateSet->setTextureAttributeAndModes(2, tex, osg::StateAttribute::ON);
+}
+
+osg::ref_ptr<osg::Texture2D> TextureProjectionPass::getColorTexture() {
+    return _texture; 
+}
+osg::ref_ptr<osg::Texture2D> TextureProjectionPass::getDepthStencilTexture() { 
+    return _depthStencilTexture; 
 }

@@ -25,7 +25,6 @@ RenderDepthToTexture::RenderDepthToTexture()
 {
     setClearMask(GL_DEPTH_BUFFER_BIT);
     setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-    setRenderOrder(osg::Camera::PRE_RENDER);
     setName("RenderDepth");
     auto ss = getStateSet();
     createDepthShader(ss);
@@ -36,7 +35,6 @@ RenderDepthToTexture::RenderDepthToTexture()
     _texture->setSourceFormat(GL_DEPTH_COMPONENT);
     _texture->setSourceType(GL_FLOAT);
 
-    setNodeMask(0x1);
     ss->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
     auto colorMask = new osg::ColorMask;
     colorMask->setMask(false, false, false, false);
