@@ -9,7 +9,8 @@ target_include_directories(
         ${OSG_INC_PATH}
         ${CITYSCAPEEDITOR_INC_PATH}
 )
-
+find_package(OpenGL REQUIRED)
+message(STATUS "OpenGL found: ${OPENGL_FOUND} " ${OPENGL_LIBRARIES})
 
 target_link_libraries(${TEST_NAME}
     PUBLIC
@@ -19,6 +20,7 @@ target_link_libraries(${TEST_NAME}
       spdlog
       json11
       glm
+      ${OPENGL_LIBRARIES}
 )
 
 install (TARGETS ${TEST_NAME}

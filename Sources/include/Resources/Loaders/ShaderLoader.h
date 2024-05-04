@@ -11,6 +11,7 @@ namespace CSEditor::Resources {
 class ShaderLoader{
 public:    
     static osg::ref_ptr<osg::Program> create(const std::string& vertFilePath,const std::string& fragFilePath);
+    static osg::ref_ptr<osg::Program> create(const std::string& vertFilePath);
 };
 }
 #endif
