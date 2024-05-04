@@ -13,7 +13,6 @@
 #include "Editor/Core/RuntimeContext.h"
 #include "Utils/OsgconvWrapper.h"
 #include "osg/Math"
-#pragma once
 #include "Core/ECS/Level.h"
 #include "Core/Math/MatrixHelper.h"
 #include "Editor/Core/RuntimeContext.h"
@@ -94,7 +93,7 @@ int main( int argc, char** argv )
     // std::string filename = "E:\\work\\github\\OsgCityScape\\resources\\objects\\texture\\default\\albedo.jpg";
     // osg::ref_ptr<osg::Image> image = osgDB::readImageFile(filename);
     // if (!image.valid()) {
-    //     // 处理加载失败的情况
+    //     // ��������ʧ�ܵ����
     //     std::cerr << "Failed to load image: " << filename << std::endl;
     //     int x;
     //     std::cin>>x;

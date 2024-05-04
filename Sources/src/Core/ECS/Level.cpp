@@ -72,7 +72,7 @@ bool Level::load(const std::string& levelResourceUrl){
     
     Core::g_runtimeContext.assetManager->loadAsset(levelResourceUrl, *m_levelResource);
     auto rootSceneNode = getRootObject()->getTransformComponent().getNode().get();
-    rootSceneNode->setNodeMask(0x1);
+    // rootSceneNode->setNodeMask(0x1);
     Core::g_runtimeContext.viewer->setSceneData(rootSceneNode);
     auto objects = m_levelResource->getObjects();
     for (const ResourceType::ObjectInstance& objectInstanceRes:objects) {
@@ -160,6 +160,31 @@ bool Level::isSelectedObjectDirty() const{
     return m_isSelectedObjectDirty;
 }
 
+
+void Level::printNode(const osg::Node* node, int indent) const{
+    auto& log = Core::g_runtimeContext.logSystem;
+    std::string msg;
+    for(int i = 0; i < indent; i++){
+        msg+="  ";
+    }
+    msg+=(node->getName());
+    msg+=(" (Type: ");
+    msg+=(node->className());
+    msg+=(")");
+    msg+=(std::to_string(node->getNodeMask()));
+    log->info(msg);
+    const osg::Group* group = node->asGroup();
+    if (group) {
+        for (unsigned int i = 0; i < group->getNumChildren(); ++i) {
+            printNode(group->getChild(i), indent + 1);
+        }
+    }
+}
+
+void Level::printSceneGraph(){
+    Core::g_runtimeContext.logSystem->info("Scene Graph:");
+    printNode(getRootObject()->getTransformComponent().getNode().get());
+}
 // void Level::unload(){
 
 // }

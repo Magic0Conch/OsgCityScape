@@ -13,6 +13,7 @@
 #include "Editor/Core/RuntimeContext.h"
 #include "Windowing/Window.h"
 #include "Resources/Loaders/ShaderLoader.h"
+#include "osg/Depth"
 
 namespace
 {
@@ -58,6 +59,8 @@ namespace osgFX
     protected:
         /// Define render passes.
         void define_passes() {
+            osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+
             {
                 osg::StateSet* state = new osg::StateSet;
 
@@ -68,6 +71,8 @@ namespace osgFX
                                       osg::Stencil::KEEP,
                                       osg::Stencil::REPLACE);
                 state->setAttributeAndModes(stencil, Override_On);
+                depth->setFunction(osg::Depth::ALWAYS);
+                state->setAttributeAndModes(depth, Override_On);
                 const std::string& vertPath = (CSEditor::Core::g_runtimeContext.configManager->getShaderFolder() / "common/triangle.vert").string();
                 const std::string& fragPath = (CSEditor::Core::g_runtimeContext.configManager->getShaderFolder() / "common/triangle.frag").string();
                 osg::ref_ptr<osg::Program> program = CSEditor::Resources::ShaderLoader::create(vertPath, fragPath);
@@ -85,7 +90,7 @@ namespace osgFX
                                       osg::Stencil::KEEP,
                                       osg::Stencil::REPLACE);
                 outlineState->setAttributeAndModes(stencil, Override_On);
-                
+                outlineState->setAttributeAndModes(depth, Override_On);
 
                 // disable modes
                 outlineState->setMode(GL_BLEND, Override_Off);

@@ -28,7 +28,6 @@
 #include "Windowing/Window.h"
 #include "Core/ECS/WorldManager.h"
 #include <memory>
-#include <locale>
 #include <iostream>
 #include <osgDB/WriteFile>
 #include <vector>
@@ -37,7 +36,7 @@
 #include <osg/CullFace>
 #include "Core/Math/Math.h"
 #include <osgFX/Outline>
-#include <gl/gl.h>
+
 namespace CSEditor::Render {
 
 class GeometryTextureSetterVisitor : public osg::NodeVisitor
@@ -135,28 +134,7 @@ public:
         auto projectionImage = osgDB::readImageFile(texturePath);
         projectionImage->scaleImage(width, height, 1);
         projectionTexture->setImage(projectionImage);
-        m_colorTextureVector.emplace_back(projectionTexture);
-        auto rootSceneNode = m_level->getRootObject()->getTransformComponent().getNode().get();
-        printNode(rootSceneNode, 0);
-        
-        // auto ss = rootSceneNode->getOrCreateStateSet();
-        // auto colorMask = new osg::ColorMask;
-        // colorMask->setMask(false, false, false, false);
-        // ss->setAttributeAndModes(colorMask, osg::StateAttribute::ON);
-    }
-
-    void printNode(const osg::Node* node, int indent = 0) {
-        for (int i = 0; i < indent; ++i) {
-            std::cout << "  ";
-        }
-        std::cout << node->getName() << " (Type: " << node->className() << ")" << node << std::endl;
-
-        const osg::Group* group = node->asGroup();
-        if (group) {
-            for (unsigned int i = 0; i < group->getNumChildren(); ++i) {
-                printNode(group->getChild(i), indent + 1);
-            }
-        }
+        m_colorTextureVector.emplace_back(projectionTexture);        
     }
 
     void setupRenderPasses(){
@@ -170,11 +148,29 @@ public:
         m_depthPass->setViewport(0,0,width,height);
         m_depthPass->setViewProjectionMatrix(*m_lightMatrices[0]);
         m_depthPass->attach(osg::Camera::DEPTH_BUFFER,m_depthArray.get(),0,0);        
+        m_depthPass->setCullMask(0x1);
+        m_depthPass->setRenderOrder(osg::Camera::PRE_RENDER, 0);
         viewer->addSlave(m_depthPass);
 
         //texture projection pass
         m_textureProjectionPass = std::make_unique<Render::TextureProjectionPass>(m_mainCamera);
         m_textureProjectionPass->setTextureArray(m_depthArray, m_colorTextureVector, m_lightMatrices);
+        m_mainCamera->setCullMask(0x1);
+        m_mainCamera->setRenderOrder(osg::Camera::PRE_RENDER, 1);
+        m_mainColorTexture = m_textureProjectionPass->getColorTexture();
+        m_mainDepthStencilTexture = m_textureProjectionPass->getDepthStencilTexture();
+
+        //opaque effect pass
+        m_opaqueEffectPass = new osg::Camera;
+        m_opaqueEffectPass->setGraphicsContext(graphicsContext);
+        m_opaqueEffectPass->setViewport(0,0,1080,720);
+        m_opaqueEffectPass->setCullMask(0x2);
+        m_opaqueEffectPass->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+        m_opaqueEffectPass->attach(osg::Camera::COLOR_BUFFER0, m_mainColorTexture);
+        m_opaqueEffectPass->attach(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, m_mainDepthStencilTexture);
+        m_opaqueEffectPass->setClearMask(GL_NONE);
+        m_opaqueEffectPass->setRenderOrder(osg::Camera::PRE_RENDER,2);
+        viewer->addSlave(m_opaqueEffectPass);
     }
 
     void initialize(){
@@ -198,7 +194,7 @@ public:
                 auto outlineNode = lastMeshGroupNode->getChild(0);
                 auto lastGeodeNode = dynamic_cast<osgFX::OutlineFX*>(outlineNode)->getChild(0);
                 lastMeshGroupNode->replaceChild(outlineNode, lastGeodeNode);
-
+                lastMeshGroupNode->setNodeMask(0x1);
             }
             m_lastSelectedObjectID = m_level->getSelectedObjectID();
             m_level->setLastSelectedObjectID(m_lastSelectedObjectID);
@@ -209,15 +205,14 @@ public:
             pOutLine->setColor(osg::Vec4(1,1,0,1));
             pOutLine->addChild(geodeNode);
             meshGroupNode->replaceChild(geodeNode, pOutLine);
+            meshGroupNode->setNodeMask(0x2);
             m_level->setSelectedObjectDirty(false);
         }
     };
     
 private:
-    //Camera 
-    //Scene
-    //Resource
-    //pipeline
+    const int width = 1200;
+    const int height = 900;
     std::shared_ptr<ResourceType::Level> m_levelResource;
     std::shared_ptr<ECS::Level> m_level;
     osg::ref_ptr<osg::Texture2DArray> m_depthArray;
@@ -227,7 +222,9 @@ private:
     ECS::ObjectID m_lastSelectedObjectID = -1;
     std::vector<osg::Texture2D *> m_colorTextureVector;
     osg::ref_ptr<osg::Camera> m_mainCamera;
-    const int width = 1200;
-    const int height = 900;
+    osg::ref_ptr<osg::Camera> m_opaqueEffectPass;
+    osg::ref_ptr<osg::Texture2D> m_mainColorTexture;
+    osg::ref_ptr<osg::Texture2D> m_mainDepthStencilTexture;
+
 };
 }

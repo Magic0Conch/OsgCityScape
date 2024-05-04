@@ -11,6 +11,9 @@ namespace CSEditor::Helpers{
 class LogSystem{
 public:
     LogSystem();
+    void info(std::string&);
+    void error(std::string&);
+    void warn(std::string&);
     void info(std::string&&);
     void error(std::string&&);
     void warn(std::string&&);

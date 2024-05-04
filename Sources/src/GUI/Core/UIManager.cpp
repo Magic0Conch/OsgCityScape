@@ -368,9 +368,11 @@ bool UIManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter
     if (!initialized_)
     {
         auto view = aa.asView();
+        auto lastIndex = view->getNumSlaves() - 1;
+        auto lastCamera = view->getSlave(lastIndex)._camera;
         if (view)
         {
-            setCameraCallbacks(view->getCamera());
+            setCameraCallbacks(lastCamera);
             initialized_ = true;
         }
     }
