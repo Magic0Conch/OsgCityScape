@@ -119,7 +119,7 @@ public:
         auto lightMatrix = rotationMatrix * viewMatrix * perspectiveMatrix;
         m_lightMatrices.emplace_back(lightMatrix);
 
-        m_depthPass->setViewMatrix(viewMatrix);
+        m_depthPass->setViewMatrix(lightMatrix);
         m_depthPass->setProjectionMatrix(perspectiveMatrix);
 
     }
@@ -149,7 +149,6 @@ public:
 
         //depth pass        
         m_depthPass->setGraphicsContext(graphicsContext);
-        m_depthPass->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
         m_depthPass->setViewport(0,0,width,height);
         m_depthPass->attach(osg::Camera::DEPTH_BUFFER,m_depthArray.get(),0,0);        
         m_depthPass->setCullMask(0x1);

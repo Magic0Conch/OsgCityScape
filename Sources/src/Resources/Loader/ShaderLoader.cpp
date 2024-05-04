@@ -11,3 +11,10 @@ osg::ref_ptr<osg::Program> ShaderLoader::create(const std::string& vertFilePath,
     program->addShader(fragShader);
     return program;
 }
+
+osg::ref_ptr<osg::Program> ShaderLoader::create(const std::string& vertFilePath){
+    auto vertShader = osgDB::readRefShaderFile(osg::Shader::VERTEX,vertFilePath);
+    osg::ref_ptr<osg::Program> program = new osg::Program;
+    program->addShader(vertShader);
+    return program;
+}
