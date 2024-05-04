@@ -12,7 +12,7 @@ public:
     TextureProjectionPass(osg::ref_ptr<osg::Camera> camera);
 
     void setTexture(osg::Texture2D * tex);
-    void setTextureArray(osg::ref_ptr<osg::Texture2DArray> depthMapArray, std::vector<osg::Texture2D *> colorTexVec, std::vector<osg::Matrixd*> projectionMatrix);
+    void setTextureArray(osg::ref_ptr<osg::Texture2DArray> depthMapArray, std::vector<osg::Texture2D *> colorTexVec, std::vector<osg::Matrixd>& projectionMatrix);
     osg::ref_ptr<osg::Texture2D> getColorTexture();
     osg::ref_ptr<osg::Texture2D> getDepthStencilTexture();
 private:

@@ -96,11 +96,12 @@ public:
         m_level = Core::g_runtimeContext.worldManager->getCurrentActiveLevel();
         m_levelResource = m_level->getLevelResource();
         m_mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
+        m_depthPass = new Render::RenderDepthToTexture;
+        m_opaqueEffectPass = new osg::Camera;
         initialize();
     };
 
     ~RenderSystem(){
-
     };
 
     void createLightMatrices(){
@@ -116,7 +117,11 @@ public:
                                     0, 1, 0, 0,
                                     0, 0, 0, 1);
         auto lightMatrix = rotationMatrix * viewMatrix * perspectiveMatrix;
-        m_lightMatrices.emplace_back(&lightMatrix);
+        m_lightMatrices.emplace_back(lightMatrix);
+
+        m_depthPass->setViewMatrix(viewMatrix);
+        m_depthPass->setProjectionMatrix(perspectiveMatrix);
+
     }
 
     void createResources(){
@@ -143,10 +148,9 @@ public:
         auto graphicsContext = Core::g_runtimeContext.windowSystem->getGraphicsContext();
 
         //depth pass        
-        m_depthPass = new Render::RenderDepthToTexture;
         m_depthPass->setGraphicsContext(graphicsContext);
+        m_depthPass->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
         m_depthPass->setViewport(0,0,width,height);
-        m_depthPass->setViewProjectionMatrix(*m_lightMatrices[0]);
         m_depthPass->attach(osg::Camera::DEPTH_BUFFER,m_depthArray.get(),0,0);        
         m_depthPass->setCullMask(0x1);
         m_depthPass->setRenderOrder(osg::Camera::PRE_RENDER, 0);
@@ -161,7 +165,6 @@ public:
         m_mainDepthStencilTexture = m_textureProjectionPass->getDepthStencilTexture();
 
         //opaque effect pass
-        m_opaqueEffectPass = new osg::Camera;
         m_opaqueEffectPass->setGraphicsContext(graphicsContext);
         m_opaqueEffectPass->setViewport(0,0,1080,720);
         m_opaqueEffectPass->setCullMask(0x2);
@@ -216,7 +219,7 @@ private:
     std::shared_ptr<ResourceType::Level> m_levelResource;
     std::shared_ptr<ECS::Level> m_level;
     osg::ref_ptr<osg::Texture2DArray> m_depthArray;
-    std::vector<osg::Matrixd*> m_lightMatrices;
+    std::vector<osg::Matrixd> m_lightMatrices;
     osg::ref_ptr<Render::RenderDepthToTexture> m_depthPass;
     std::unique_ptr<Render::TextureProjectionPass> m_textureProjectionPass;
     ECS::ObjectID m_lastSelectedObjectID = -1;
