@@ -1,5 +1,6 @@
 #pragma once
 
+#include "osg/Matrixd"
 #include <osgFX/Export>
 #include <osgFX/Effect>
 
@@ -35,7 +36,7 @@ namespace osgFX
 
         /// Set outline color.
         void setColor(const osg::Vec4& color);
-
+        void setProjectionMatrix(const osg::Matrixd& projectionMatrix);
         /// Get outline color.
         const osg::Vec4& getColor() const {
             return _color;
@@ -55,6 +56,7 @@ namespace osgFX
 
         /// Outline color.
         osg::Vec4 _color;
+        osg::Matrixd _projectionMatrix;
 
         /// Technique.
         class OutlineFXTechnique;

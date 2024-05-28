@@ -10,7 +10,7 @@ class TextureProjectionPass
 {
 public:
     TextureProjectionPass(osg::ref_ptr<osg::Camera> camera);
-
+    void setProjectionMatrix(const osg::Matrixd& projectionMatrix);
     void setTexture(osg::Texture2D * tex);
     void setTextureArray(osg::ref_ptr<osg::Texture2DArray> depthMapArray, std::vector<osg::Texture2D *> colorTexVec, std::vector<osg::Matrixd>& projectionMatrix);
     osg::ref_ptr<osg::Texture2D> getColorTexture();
@@ -21,6 +21,7 @@ private:
     osg::ref_ptr<osg::Uniform> m_lightSpaceMatrixUniform;
     osg::ref_ptr<osg::Texture2D> _texture;
     osg::ref_ptr<osg::Texture2D> _depthStencilTexture;
-     unsigned int m_mapIndex = 0;
+    osg::Uniform* projectionUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4,"_ProjectionMatrix");
+    unsigned int m_mapIndex = 0;
 };
 }

@@ -171,7 +171,7 @@ void Level::printNode(const osg::Node* node, int indent) const{
     msg+=(" (Type: ");
     msg+=(node->className());
     msg+=(")");
-    msg+=(std::to_string(node->getNodeMask()));
+    msg+=(std::to_string(reinterpret_cast<uintptr_t>(node)));
     log->info(msg);
     const osg::Group* group = node->asGroup();
     if (group) {

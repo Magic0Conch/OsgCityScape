@@ -4,10 +4,15 @@
 #include "Core/ECS/Level.h"
 #include "Core/ECS/WorldManager.h"
 #include "osg/Vec3d"
+#include "spdlog/fmt/bundled/format.h"
 #include "spdlog/spdlog.h"
+#include <cmath>
 #include <cstdlib>
 #include <osg/Matrixd>
 #include <osgFX/Outline>
+#include <format>
+#include <iostream>
+#include <string>
 using namespace CSEditor::Core;
 
 EditorInputManager::EditorInputManager(osg::Camera* camera)
@@ -28,9 +33,12 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                 osgUtil::LineSegmentIntersector::Intersections intersections;
                 osg::ref_ptr<osg::Node> node = new osg::Node();
                 osg::ref_ptr<osg::Group> parent = new osg::Group();
+                auto& log = Core::g_runtimeContext.logSystem;
                 auto x = ea.getX();
                 auto y = ea.getY();
-                if (m_viewer->computeIntersections(ea, intersections))
+                osgUtil::Intersector::CoordinateFrame cf = osgUtil::Intersector::WINDOW;
+                log->info(fmt::format("Mouse Clicked at: {},{}",x,y));          
+                if (m_viewer->computeIntersections(m_camera, cf,x, y,intersections))
                 {
                     //得到选择的节点
                     osgUtil::LineSegmentIntersector::Intersection intersection = *intersections.begin();
@@ -38,16 +46,19 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                     node = nodePath.back();
                     auto drawable = intersection.drawable;
                     auto parents = drawable->getParents();
+                    auto nodeToObjectID = g_runtimeContext.worldManager->getCurrentActiveLevel()->nodeToObjectID;
+                    auto objectID = nodeToObjectID[node];
+                    //点击节点切换高亮
+                    auto parent = nodePath[nodePath.size() - 2];//当前选择节点的父节点
+                    std::string ptrString = std::to_string(reinterpret_cast<uintptr_t>(node.get()));
+                    std::string formattedString = fmt::format("Selected Node: {}, Ptr: {}, Position:{},{}.",objectID,ptrString,x,y);
+                    log->info(formattedString);
                     
                     while(!parents.empty()){
                         auto node = parents.back();
                         parents.pop_back();
                     }
                     osg::ref_ptr<osg::Group> group =dynamic_cast<osg::Group*>( nodePath[2]);	
-                    auto nodeToObjectID = g_runtimeContext.worldManager->getCurrentActiveLevel()->nodeToObjectID;
-                    auto objectID = nodeToObjectID[node];
-                    //点击节点切换高亮
-                    auto parent = nodePath[nodePath.size() - 2];//当前选择节点的父节点
                     // osgFX::Outline *ot = dynamic_cast<osgFX::Outline*>(parent.get());
                     // if (!ot) //若ot不存在（未高亮） (node->parent)=>(node->outline->parent)
                     // {

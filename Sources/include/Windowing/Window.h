@@ -4,6 +4,7 @@
 #include "osg/Camera"
 #include "osg/Group"
 #include "osg/Texture2D"
+#include "osg/Viewport"
 #include "osgViewer/View"
 #include "osg/ref_ptr"
 #include <memory>
@@ -29,6 +30,7 @@ public:
     void updateViewportSize(int width,int height);
     osg::ref_ptr<osg::GraphicsContext> getGraphicsContext() const;
     osg::ref_ptr<osg::Camera> getMainCamera() const;
+    osg::ref_ptr<osg::Viewport> getViewport() const;
 private:
     std::string m_title;
     std::pair<uint16_t, uint16_t> m_size;
