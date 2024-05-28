@@ -319,8 +319,8 @@ void UIManager::newFrame(osg::RenderInfo& renderInfo){
     // if (!panels_.size()) return;
     ImGui_ImplOpenGL3_NewFrame();
     ImGuiIO& io = ImGui::GetIO();
-
-    osg::Viewport* viewport = renderInfo.getCurrentCamera()->getViewport();
+    
+    auto viewport = Core::g_runtimeContext.windowSystem->getViewport();
     io.DisplaySize = ImVec2(viewport->width(), viewport->height());
 
 
@@ -427,7 +427,9 @@ bool UIManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter
         }
         case (osgGA::GUIEventAdapter::RESIZE):
         {
-            onScenePanelSizeChanged->invoke(ea.getWindowWidth(), ea.getWindowHeight());
+            auto width = ea.getWindowWidth();
+            auto height = ea.getWindowHeight();
+            onScenePanelSizeChanged->invoke(width, height);
             return false;
         }
         default:

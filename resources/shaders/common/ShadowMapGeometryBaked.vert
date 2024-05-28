@@ -1,4 +1,4 @@
-#version 330 core
+#version 450 compatibility
 in vec4 osg_Vertex;
 in vec4 osg_MultiTexCoord0;
 uniform mat4 osg_ModelViewProjectionMatrix;

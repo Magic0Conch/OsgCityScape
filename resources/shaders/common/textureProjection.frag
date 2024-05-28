@@ -1,4 +1,4 @@
-#version 440 core
+#version 450 compatibility
 #ifdef GL_ES
     precision highp float;
 #endif
@@ -47,5 +47,5 @@ void main(void)
     vec4 projColor = projectTexture();
     // fragColor = projColor.x == 0?col:projColor;
     fragColor = col/2 + projectTexture()/2;
-    // fragColor.a = 1.0;
+    fragColor.a = 1.0;
 }

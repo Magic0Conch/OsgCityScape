@@ -98,6 +98,7 @@ public:
         m_mainCamera = Core::g_runtimeContext.windowSystem->getMainCamera();
         m_depthPass = new Render::RenderDepthToTexture;
         m_opaqueEffectPass = new osg::Camera;
+        m_textureProjectionPass = std::make_unique<Render::TextureProjectionPass>(m_mainCamera);
         initialize();
     };
 
@@ -109,19 +110,22 @@ public:
         float fovy = CSEditor::Math::Math::focal2fovEuler(1.55);
         auto viewMatrix = MatrixHelper::glmToOsgMatrix(glm::dmat4(0.671205,-0.474751,0.569293,0,0.740948,0.452385,-0.496331,0,-0.021905,0.754957,0.655409,0,-39.120093,-26.573260,-168.144351,1));
         m_mainCamera->setProjectionMatrixAsPerspective(fovy, 1.33333, 5, 1500);
+        const auto projectionMatrix = m_mainCamera->getProjectionMatrix();
+        m_mainProjectionMatrix = projectionMatrix;
         m_mainCamera->setViewMatrix(viewMatrix);
-        auto perspectiveMatrix = m_mainCamera->getProjectionMatrix();
-        auto viewProjectionMatrix = viewMatrix * perspectiveMatrix;
+        auto viewProjectionMatrix = viewMatrix * m_mainProjectionMatrix;
         osg::Matrixd rotationMatrix(1, 0, 0, 0,
                                     0, 0, -1, 0,
                                     0, 1, 0, 0,
                                     0, 0, 0, 1);
-        auto lightMatrix = rotationMatrix * viewMatrix * perspectiveMatrix;
+        auto lightMatrix = rotationMatrix * viewMatrix * m_mainProjectionMatrix;
         m_lightMatrices.emplace_back(lightMatrix);
 
         m_depthPass->setViewMatrix(lightMatrix);
-        m_depthPass->setProjectionMatrix(perspectiveMatrix);
+        m_depthPass->setProjectionMatrix(projectionMatrix);
 
+        m_opaqueEffectPass->setProjectionMatrix(projectionMatrix);
+        m_textureProjectionPass->setProjectionMatrix(projectionMatrix);
     }
 
     void createResources(){
@@ -156,7 +160,7 @@ public:
         viewer->addSlave(m_depthPass);
 
         //texture projection pass
-        m_textureProjectionPass = std::make_unique<Render::TextureProjectionPass>(m_mainCamera);
+
         m_textureProjectionPass->setTextureArray(m_depthArray, m_colorTextureVector, m_lightMatrices);
         m_mainCamera->setCullMask(0x1);
         m_mainCamera->setRenderOrder(osg::Camera::PRE_RENDER, 1);
@@ -167,6 +171,7 @@ public:
         m_opaqueEffectPass->setGraphicsContext(graphicsContext);
         m_opaqueEffectPass->setViewport(0,0,1080,720);
         m_opaqueEffectPass->setCullMask(0x2);
+        m_opaqueEffectPass->setCullingMode(m_mainCamera->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
         m_opaqueEffectPass->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         m_opaqueEffectPass->attach(osg::Camera::COLOR_BUFFER0, m_mainColorTexture);
         m_opaqueEffectPass->attach(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, m_mainDepthStencilTexture);
@@ -193,9 +198,10 @@ public:
                 auto lastSeletedObject = m_level->getLastSelectedObject();
                 auto lastMesh = lastSeletedObject->getComponent<ECS::Mesh>();
                 auto lastMeshGroupNode = lastMesh->getMeshNode()->asGroup();
-                auto outlineNode = lastMeshGroupNode->getChild(0);
-                auto lastGeodeNode = dynamic_cast<osgFX::OutlineFX*>(outlineNode)->getChild(0);
-                lastMeshGroupNode->replaceChild(outlineNode, lastGeodeNode);
+                // auto outlineNode = lastMeshGroupNode->getChild(0);
+                // auto lastGeodeNode = dynamic_cast<osgFX::OutlineFX*>(outlineNode)->getChild(0);
+                lastMeshGroupNode->removeChild(1);
+                // lastMeshGroupNode->replaceChild(outlineNode, lastGeodeNode);
                 lastMeshGroupNode->setNodeMask(0x1);
             }
             m_lastSelectedObjectID = m_level->getSelectedObjectID();
@@ -203,10 +209,12 @@ public:
             
 
             osg::ref_ptr<osgFX::OutlineFX> pOutLine = new osgFX::OutlineFX;
+            pOutLine->setProjectionMatrix(m_mainProjectionMatrix);
             pOutLine->setWidth(1);
             pOutLine->setColor(osg::Vec4(1,1,0,1));
             pOutLine->addChild(geodeNode);
-            meshGroupNode->replaceChild(geodeNode, pOutLine);
+            // meshGroupNode->replaceChild(geodeNode, pOutLine);
+            meshGroupNode->addChild(pOutLine);
             meshGroupNode->setNodeMask(0x2);
             m_level->setSelectedObjectDirty(false);
         }
@@ -219,6 +227,7 @@ private:
     std::shared_ptr<ECS::Level> m_level;
     osg::ref_ptr<osg::Texture2DArray> m_depthArray;
     std::vector<osg::Matrixd> m_lightMatrices;
+    osg::Matrixd m_mainProjectionMatrix;
     osg::ref_ptr<Render::RenderDepthToTexture> m_depthPass;
     std::unique_ptr<Render::TextureProjectionPass> m_textureProjectionPass;
     ECS::ObjectID m_lastSelectedObjectID = -1;

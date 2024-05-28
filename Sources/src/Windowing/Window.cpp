@@ -117,6 +117,9 @@ osg::ref_ptr<osg::Camera> WindowSystem::getMainCamera() const{
     return m_mainCamera;
 }
 
+osg::ref_ptr<osg::Viewport> WindowSystem::getViewport() const{
+    return m_viewport;
+}
 // osg::ref_ptr<osg::Group> WindowSystem::getRootNode(){
 //     return m_rootNode;
 // }

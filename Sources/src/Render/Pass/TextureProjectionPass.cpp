@@ -1,5 +1,6 @@
 #include <osg/Camera>
 #include <osg/Program>
+#include "GL/glcorearb.h"
 #include "Resources/ResourceManagement/ConfigManager.h"
 #include "Render/Pass/TextureProjectionPass.h"
 #include "Editor/Core/RuntimeContext.h"
@@ -35,7 +36,7 @@ TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m
     _depthStencilTexture->setWrap(osg::Texture2D::WrapParameter::WRAP_T,osg::Texture2D::WrapMode::REPEAT);
     _depthStencilTexture->setWrap(osg::Texture2D::WrapParameter::WRAP_S,osg::Texture2D::WrapMode::REPEAT);
     _depthStencilTexture->setSourceFormat(GL_DEPTH_STENCIL);
-    _depthStencilTexture->setInternalFormat(GL_DEPTH_STENCIL);
+    _depthStencilTexture->setInternalFormat(GL_DEPTH24_STENCIL8);
     _depthStencilTexture->setSourceType(GL_UNSIGNED_INT_24_8);    
 
     auto stateSet = m_camera->getOrCreateStateSet();
@@ -46,6 +47,7 @@ TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m
     stateSet->addUniform(new osg::Uniform("mapSize", 0));
     m_lightSpaceMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "lightSpaceMatrix", 16);
     stateSet->addUniform(m_lightSpaceMatrixUniform);
+    stateSet->addUniform(projectionUniform);
 
     // m_camera->setNodeMask(0x1);
     m_camera->setCullingMode(m_camera->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
@@ -93,4 +95,8 @@ osg::ref_ptr<osg::Texture2D> TextureProjectionPass::getColorTexture() {
 }
 osg::ref_ptr<osg::Texture2D> TextureProjectionPass::getDepthStencilTexture() { 
     return _depthStencilTexture; 
+}
+
+void TextureProjectionPass::setProjectionMatrix(const osg::Matrixd& projectionMatrix) {
+    projectionUniform->set(projectionMatrix);
 }
