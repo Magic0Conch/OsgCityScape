@@ -5,6 +5,5 @@ namespace CSEditor::GUI {
 class UIEveneManager{
 public:
     static UIEveneManager& getInstance();
-    Core::Event<ECS::ObjectID> selectHierachyEvent;
 };
 }

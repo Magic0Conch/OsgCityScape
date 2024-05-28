@@ -10,6 +10,7 @@
 #include <memory>
 #include <stdint.h>
 #include <osg/GraphicsContext>
+#include <utility>
 #include "Resources/RenderTexture.h"
 
 namespace CSEditor::Windowing {
@@ -31,6 +32,7 @@ public:
     osg::ref_ptr<osg::GraphicsContext> getGraphicsContext() const;
     osg::ref_ptr<osg::Camera> getMainCamera() const;
     osg::ref_ptr<osg::Viewport> getViewport() const;
+    std::pair<uint16_t, uint16_t> getSize() const;
 private:
     std::string m_title;
     std::pair<uint16_t, uint16_t> m_size;

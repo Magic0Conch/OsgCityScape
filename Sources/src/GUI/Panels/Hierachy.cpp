@@ -6,7 +6,9 @@
 
 using namespace CSEditor::GUI;
 
-Hierachy::Hierachy():m_level(Core::g_runtimeContext.worldManager->getCurrentActiveLevel()),m_objectsMap(m_level->getSceneObjectsMap()){
+Hierachy::Hierachy():m_level(Core::g_runtimeContext.worldManager->getCurrentActiveLevel()),m_objectsMap(m_level->getSceneObjectsMap()){    
+    auto& event = Core::g_runtimeContext.eventManager->getOrCreateEvent<Core::Event<int>>("SelectedObjectChanged");
+    onSelectedObjectChanged.reset(&event);        
 }
 
 void Hierachy::drawHierachyNodeRecursively(ECS::ObjectID objectID){
@@ -20,10 +22,9 @@ void Hierachy::drawHierachyNodeRecursively(ECS::ObjectID objectID){
     }
     bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)objectID, nodeFlags, "%s", &curObject->getName()[0]);
     if (ImGui::IsItemClicked()){
-        m_nodeClicked = objectID;
-        auto lastObjectID = m_level->getSelectedObjectID();
-        m_level->setSelectedObjectID(objectID);
-        UIEveneManager::getInstance().selectHierachyEvent.invoke(m_nodeClicked);
+        onSelectedObjectChanged->invoke(objectID);
+        // setNodeClicked(objectID);
+        // m_level->setSelectedObjectID(objectID);        
     }
     if(nodeOpen){
         for (const auto& id : curObject->getChildIndex()) {
@@ -70,4 +71,8 @@ void Hierachy::drawImpl(){
     }
     ImGui::End();
     ImGui::ShowDemoWindow();
+}
+
+void Hierachy::setNodeClicked(int nodeClicked){
+    m_nodeClicked = nodeClicked;
 }
