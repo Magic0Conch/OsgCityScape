@@ -1,5 +1,4 @@
 #pragma once
-#include "RuntimeContext.h"
 
 namespace CSEditor::Core {
 class Editor{

@@ -14,6 +14,7 @@ namespace CSEditor::GUI {
 class Hierachy : public Panel{
 public:
     Hierachy();
+    void setNodeClicked(int nodeClicked);;
 protected:
     void drawHierachyNodeRecursively(ECS::ObjectID objectID);
     virtual void drawImpl() override;
@@ -22,6 +23,6 @@ private:
     std::shared_ptr<ECS::Level> m_level;
     std::unordered_map<ECS::ObjectID, std::shared_ptr<ECS::Object>>& m_objectsMap;
     int m_nodeClicked = -1;
-
+    std::shared_ptr<Core::Event<int>> onSelectedObjectChanged;
 };
 }

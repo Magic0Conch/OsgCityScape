@@ -30,8 +30,7 @@ m_rotationEurler{0,0,0},
 m_scale{1.0,1.0,1.0},
 m_meshPath(128,'\0'),
 m_curSceneObject(){
-    Core::Event<ECS::ObjectID>::Callback onClickedIndexChangedCallback = std::bind(&Inspector::onClickedIndexChanged,this,std::placeholders::_1);
-    UIEveneManager::getInstance().selectHierachyEvent+=onClickedIndexChangedCallback;
+
 }
 
 void Inspector::onClickedIndexChanged(ECS::ObjectID clickedID){

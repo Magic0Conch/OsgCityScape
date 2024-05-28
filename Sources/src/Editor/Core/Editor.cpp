@@ -42,6 +42,7 @@ using namespace CSEditor::Core;
 
 Editor::Editor(){
     setUpUI();
+    g_runtimeContext.eventManager->setupEvents();
 }
 
 Editor::~Editor(){

@@ -150,6 +150,7 @@ public:
         //setup 
         auto viewer = Core::g_runtimeContext.viewer;
         auto graphicsContext = Core::g_runtimeContext.windowSystem->getGraphicsContext();
+        auto mainViewport = Core::g_runtimeContext.windowSystem->getViewport();
 
         //depth pass        
         m_depthPass->setGraphicsContext(graphicsContext);
@@ -166,10 +167,10 @@ public:
         m_mainCamera->setRenderOrder(osg::Camera::PRE_RENDER, 1);
         m_mainColorTexture = m_textureProjectionPass->getColorTexture();
         m_mainDepthStencilTexture = m_textureProjectionPass->getDepthStencilTexture();
-
+        
         //opaque effect pass
         m_opaqueEffectPass->setGraphicsContext(graphicsContext);
-        m_opaqueEffectPass->setViewport(0,0,1080,720);
+        m_opaqueEffectPass->setViewport(mainViewport);
         m_opaqueEffectPass->setCullMask(0x2);
         m_opaqueEffectPass->setCullingMode(m_mainCamera->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
         m_opaqueEffectPass->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);

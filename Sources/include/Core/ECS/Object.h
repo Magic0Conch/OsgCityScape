@@ -6,10 +6,8 @@
 #include "Resources/ResourceType/Common/Object.h"
 #include "Core/ECS/Components/ComponentFactory.h"
 #include "ObjectIDAllocator.h"
-#include "osg/ref_ptr"
 #include <memory>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 namespace CSEditor::ECS{

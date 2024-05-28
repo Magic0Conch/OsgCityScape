@@ -30,6 +30,8 @@ WindowSystem::~WindowSystem(){
 void WindowSystem::setSize(uint16_t width,uint16_t height){
     m_size = {width,height};
     m_viewport->setViewport(m_position.first,m_position.second, width, height);
+    m_screenTexture->setTextureSize(width, height);
+
 }
 void WindowSystem::setPosition(uint16_t x,uint16_t y){
     m_position = {x,y};
@@ -90,8 +92,7 @@ void WindowSystem::createWindow(Settings::WindowSettings& windowSettings){
 }
 
 void WindowSystem::updateViewportSize(int width,int height){
-    m_viewport->setViewport(m_position.first, m_position.second, width, height);
-    m_screenTexture->setTextureSize(width, height);
+    setSize(width, height);
 }
 
 void WindowSystem::setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow){
@@ -119,6 +120,10 @@ osg::ref_ptr<osg::Camera> WindowSystem::getMainCamera() const{
 
 osg::ref_ptr<osg::Viewport> WindowSystem::getViewport() const{
     return m_viewport;
+}
+
+std::pair<uint16_t, uint16_t> WindowSystem::getSize() const{
+    return m_size;
 }
 // osg::ref_ptr<osg::Group> WindowSystem::getRootNode(){
 //     return m_rootNode;

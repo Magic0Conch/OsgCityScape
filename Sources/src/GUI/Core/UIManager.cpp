@@ -1,9 +1,12 @@
 #include "GUI/Core/UIManager.h"
+#include "Core/Event.h"
 #include "Editor/Core/RuntimeContext.h"
 #include "Windowing/Window.h"
 #include "osgGA/GUIEventAdapter"
 #include <imgui.h>
-#include<iostream>
+#include <iostream>
+#include "Core/Helpers/LogSystem.h"
+#include "spdlog/fmt/bundled/format.h"
 namespace CSEditor::GUI{
 
 struct UIManager::ImGuiNewFrameCallback : public osg::Camera::DrawCallback
@@ -42,8 +45,7 @@ private:
 
 
 UIManager::UIManager(): time_(0.0f), mousePressed_{false,false,false}, mouseWheel_(0.0f), initialized_(false){
-    auto& eventOriType = Core::g_runtimeContext.eventManager->getOrCreateEvent("ScenePanelSizeChanged");
-    auto& event = std::get<Core::Event<int,int>>(eventOriType);
+    auto& event = Core::g_runtimeContext.eventManager->getOrCreateEvent<Core::Event<int,int>>("ScenePanelSizeChanged");
     onScenePanelSizeChanged.reset(&event);        
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -412,6 +414,7 @@ bool UIManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter
             mousePressed_[0] = ea.getButtonMask() & osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON;
             mousePressed_[1] = ea.getButtonMask() & osgGA::GUIEventAdapter::RIGHT_MOUSE_BUTTON;
             mousePressed_[2] = ea.getButtonMask() & osgGA::GUIEventAdapter::MIDDLE_MOUSE_BUTTON;
+
             return wantCaptureMouse;
         }
         case (osgGA::GUIEventAdapter::DRAG):

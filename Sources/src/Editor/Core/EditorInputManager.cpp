@@ -1,5 +1,6 @@
 // EditorInputManager.cpp
 #include "Editor/Core/EditorInputManager.h"
+#include "Core/EventManager.h"
 #include "Editor/Core/RuntimeContext.h"
 #include "Core/ECS/Level.h"
 #include "Core/ECS/WorldManager.h"
@@ -11,15 +12,28 @@
 #include <osg/Matrixd>
 #include <osgFX/Outline>
 #include <format>
-#include <iostream>
+#include "Windowing/Window.h"
 #include <string>
+#include "Core/EventManager.h"
+
 using namespace CSEditor::Core;
 
 EditorInputManager::EditorInputManager(osg::Camera* camera)
     : m_camera(camera), m_mouseSensitivity(0.002), m_movementSpeed(0.5), m_rightMouseButtonPressed(false) {
     g_runtimeContext.viewer->addEventHandler(this);
     m_viewer = g_runtimeContext.viewer;
+    auto& selectedObjectChangedEvent = g_runtimeContext.eventManager->getOrCreateEvent<Core::Event<int>>("SelectedObjectChanged");
+    m_selectedObjectChangedEvent.reset(&selectedObjectChangedEvent);
+
 }
+
+void EditorInputManager::setScenePosition(const osg::Vec2f& position){
+    m_scenePosition = position;
+}
+osg::Vec2f EditorInputManager::getScenePosition() const{
+    return m_scenePosition;
+}
+
 
 bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) {
     switch (ea.getEventType()) {
@@ -34,11 +48,14 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                 osg::ref_ptr<osg::Node> node = new osg::Node();
                 osg::ref_ptr<osg::Group> parent = new osg::Group();
                 auto& log = Core::g_runtimeContext.logSystem;
-                auto x = ea.getX();
-                auto y = ea.getY();
-                osgUtil::Intersector::CoordinateFrame cf = osgUtil::Intersector::WINDOW;
+                auto x = m_scenePosition.x();
+                auto y = m_scenePosition.y();
+                const auto& windowSize = Core::g_runtimeContext.windowSystem->getSize();
+                x = x * windowSize.first;
+                y = y * windowSize.second;
+                osgUtil::Intersector::CoordinateFrame cf = osgUtil::Intersector::WINDOW;                
                 log->info(fmt::format("Mouse Clicked at: {},{}",x,y));          
-                if (m_viewer->computeIntersections(m_camera, cf,x, y,intersections))
+                if (x>0&&y>0&&m_viewer->computeIntersections(m_camera, cf,x, y,intersections))
                 {
                     //得到选择的节点
                     osgUtil::LineSegmentIntersector::Intersection intersection = *intersections.begin();
@@ -48,6 +65,7 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                     auto parents = drawable->getParents();
                     auto nodeToObjectID = g_runtimeContext.worldManager->getCurrentActiveLevel()->nodeToObjectID;
                     auto objectID = nodeToObjectID[node];
+                    m_selectedObjectChangedEvent->invoke(objectID);
                     //点击节点切换高亮
                     auto parent = nodePath[nodePath.size() - 2];//当前选择节点的父节点
                     std::string ptrString = std::to_string(reinterpret_cast<uintptr_t>(node.get()));
