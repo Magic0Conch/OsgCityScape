@@ -71,6 +71,7 @@ public:
 
     void printNode(const osg::Node* node, int indent = 0) const;
     void printSceneGraph();
+    void registerNode2IDMap(osg::Node* node,ECS::ObjectID id);
 protected:
     void clear();
 
@@ -81,7 +82,6 @@ protected:
     std::shared_ptr<Object> m_sceneObject;
     std::shared_ptr<ResourceType::Level> m_levelResource;
 private:
-    void registerNode2IDMap(osg::Node* node,ECS::ObjectID id);
     ObjectID selectedObjectID = -1;
     ObjectID lastSelectedObjectID = -1;
 

@@ -13,6 +13,7 @@ public:
     virtual void deserialize(Json& jsonObject) override;
     virtual void loadResource(std::shared_ptr<Object> parentObject) override;    
     virtual void onComponentAdded() override;
+    void loadResourceAsync(std::shared_ptr<Object> parentObject);
 
     osg::ref_ptr<osg::Node> getMeshNode() const;
 
@@ -24,7 +25,6 @@ public:
     std::string m_meshPath;
 
 private:
-    void loadResourceAsync(std::shared_ptr<Object> parentObject);
     void commpressTexture();
     osg::ref_ptr<osg::Node> m_meshNode;
     std::vector<std::string> m_materialPaths;
