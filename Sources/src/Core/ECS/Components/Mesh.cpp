@@ -6,6 +6,7 @@
 #include "Resources/ResourceManagement/ConfigManager.h"
 #include "Core/ECS/Level.h"
 #include "Core/ECS/WorldManager.h"
+#include <functional>
 #include <memory>
 #include <string>
 #include <thread>
@@ -28,15 +29,9 @@ void Mesh::deserialize(Json &jsonObject){
 }
 
 void Mesh::loadResourceAsync(std::shared_ptr<Object> parentObject){
-    m_meshNode = osgDB::readNodeFile(m_meshPath);
-    m_parentObject = parentObject;
-    m_parentObject.lock()->getTransformComponent().getNode()->addChild(m_meshNode);
-    for(const auto& materialPath:m_materialPaths){
-        auto matertial = Resources::MaterialManager::getInstance().getMaterial(materialPath);
-        matertial->loadResource(parentObject);
-    }
-    m_meshNode->setNodeMask(0x1);
-    commpressTexture();
+    loadResource(parentObject);
+    auto objectID = m_parentObject.lock()->getID();
+    Core::g_runtimeContext.worldManager->getCurrentActiveLevel()->registerNode2IDMap(m_meshNode, objectID);
 }
 
 void Mesh::commpressTexture(){

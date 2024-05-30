@@ -50,8 +50,11 @@ bool Level::importObjFromFolderRecursively(const std::string& folderPath,const s
             transform->setRotation(rotation);
             auto mesh = loadedModelObject->addComponent<Mesh>();
             mesh->m_meshPath = fullPath;            
-            std::thread workTread(&Mesh::loadResource,mesh,loadedModelObject);
+            std::thread workTread(&Mesh::loadResourceAsync,mesh,loadedModelObject);
             workTread.detach();
+
+            nodeToObjectID[transform->getNode()] = loadedModelObject->getID();
+            nodeToObjectID[transform->getNode()] = loadedModelObject->getID();
             std::cout << "Loaded: " << fullPath << std::endl;
         }
     }
