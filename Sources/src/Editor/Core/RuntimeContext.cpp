@@ -9,6 +9,7 @@
 #include "GUI/Panels/Hierachy.h"
 #include "Windowing/Window.h"
 #include "osg/ref_ptr"
+#include <iostream>
 #include <memory>
 #include <filesystem>
 namespace CSEditor::Core{
@@ -20,7 +21,10 @@ RuntimeContext::RuntimeContext(){
     //cam->setGraphicsContext(gc.get());
 
     //setup window
-    auto rootPath = std::filesystem::current_path().parent_path().parent_path();
+    char buffer[MAX_PATH];
+    GetModuleFileNameA(nullptr, buffer, MAX_PATH);
+    auto rootPath = std::filesystem::path(buffer).parent_path().parent_path().parent_path();
+    std::cout<<rootPath<<std::endl; 
     auto configPath =  rootPath / "resources"/"configs"/"global_config.ini";
     configManager = std::make_unique<Resources::ConfigManager>(configPath);
     

@@ -19,6 +19,7 @@ namespace CSEditor::Resources
             auto assetPath = getFullPath(jsonUrl);
             std::ifstream assetJsonFile(assetPath);
             if(!assetJsonFile){
+                spdlog::error("Open file: " + jsonUrl + " failed!");
                 spdlog::error("Open file: " + assetPath.generic_string() + " failed!");
                 assert(0);
             }
