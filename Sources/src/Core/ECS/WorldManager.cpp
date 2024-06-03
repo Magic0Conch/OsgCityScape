@@ -21,6 +21,7 @@ WorldManager::~WorldManager() {
 void WorldManager::initialize(){
     m_isWorldLoaded   = false;
     m_currentWorldUrl = Core::g_runtimeContext.configManager->getDefaultWorldUrl().string();
+    spdlog::info("Loading world : " + m_currentWorldUrl + ".");
     loadWorld(m_currentWorldUrl);
 }
 

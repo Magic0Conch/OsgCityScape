@@ -223,7 +223,7 @@ public:
             meshGroupNode->setNodeMask(0x2);
             auto bound = meshGroupNode->computeBound();
             auto center = bound.center();
-            osg::Vec3f arrowStart = osg::Vec3f(center.x(), center.y(), center.z());
+            osg::Vec3f arrowStart = osg::Vec3f(0, 0, 0);
             float arrowSize = 5;
             ArrowGizmo* arrowX = new ArrowGizmo(arrowStart, arrowStart + osg::Vec3(arrowSize,0,0), osg::Vec4(1,0,0,1));
             ArrowGizmo* arrowY = new ArrowGizmo(arrowStart, arrowStart + osg::Vec3(0,arrowSize,0), osg::Vec4(0,1,0,1));
