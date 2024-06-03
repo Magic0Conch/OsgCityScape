@@ -20,9 +20,11 @@
 #include "osg/Math"
 #include "osg/Matrix"
 #include "osg/Matrixd"
+#include "osg/NodeVisitor"
 #include "osg/StateAttribute"
 #include "osg/Texture2D"
 #include "osg/Texture2DArray"
+#include "osg/Vec3f"
 #include "osg/ref_ptr"
 #include "osgDB/ReadFile"
 #include "Windowing/Window.h"
@@ -36,6 +38,7 @@
 #include <osg/CullFace>
 #include "Core/Math/Math.h"
 #include <osgFX/Outline>
+#include "Render/Entities/ArrowGizmo.h"
 
 namespace CSEditor::Render {
 
@@ -202,6 +205,7 @@ public:
                 // auto outlineNode = lastMeshGroupNode->getChild(0);
                 // auto lastGeodeNode = dynamic_cast<osgFX::OutlineFX*>(outlineNode)->getChild(0);
                 lastMeshGroupNode->removeChild(1);
+                lastMeshGroupNode->removeChildren(1,4);
                 // lastMeshGroupNode->replaceChild(outlineNode, lastGeodeNode);
                 lastMeshGroupNode->setNodeMask(0x1);
             }
@@ -217,6 +221,16 @@ public:
             // meshGroupNode->replaceChild(geodeNode, pOutLine);
             meshGroupNode->addChild(pOutLine);
             meshGroupNode->setNodeMask(0x2);
+            auto bound = meshGroupNode->computeBound();
+            auto center = bound.center();
+            osg::Vec3f arrowStart = osg::Vec3f(center.x(), center.y(), center.z());
+            float arrowSize = 5;
+            ArrowGizmo* arrowX = new ArrowGizmo(arrowStart, arrowStart + osg::Vec3(arrowSize,0,0), osg::Vec4(1,0,0,1));
+            ArrowGizmo* arrowY = new ArrowGizmo(arrowStart, arrowStart + osg::Vec3(0,arrowSize,0), osg::Vec4(0,1,0,1));
+            ArrowGizmo* arrowZ = new ArrowGizmo(arrowStart, arrowStart + osg::Vec3(0,0,arrowSize), osg::Vec4(0,0,1,1));
+            meshGroupNode->addChild(arrowX);            
+            meshGroupNode->addChild(arrowY);            
+            meshGroupNode->addChild(arrowZ);            
             m_level->setSelectedObjectDirty(false);
         }
     };
