@@ -4,6 +4,11 @@
 #include <osg/ShapeDrawable>
 #include <osg/Vec3>
 #include <osg/Vec4>
+#include "Editor/Core/RuntimeContext.h"
+#include "Resources/Loaders/ShaderLoader.h"
+#include "Resources/ResourceManagement/ConfigManager.h"
+
+namespace CSEditor::Render {
 class ArrowGizmo : public osg::Geometry
 {
 public:
@@ -68,5 +73,13 @@ private:
 
         addPrimitiveSet(new osg::DrawArrays(GL_LINES, 0, 2)); // Arrow body
         addPrimitiveSet(new osg::DrawArrays(GL_TRIANGLES, 2, segments * 3)); // Arrow head
+
+        auto ss = getOrCreateStateSet();
+        const std::string& vertPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "common/Unlit.vert").string();
+        const std::string& fragPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "common/Unlit.frag").string();
+        osg::ref_ptr<osg::Program> program = Resources::ShaderLoader::create(vertPath, fragPath);   
+        
+        ss->setAttributeAndModes(program.get(), osg::StateAttribute::ON);
     }
 };
+}
