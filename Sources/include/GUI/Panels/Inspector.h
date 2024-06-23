@@ -13,6 +13,9 @@ public:
 protected:
     virtual void drawImpl() override;
 private:
+    std::vector<float> eurlerToQuat();
+    std::vector<float> quatToEurler();
+
     std::shared_ptr<ECS::Level> m_level;
     std::unordered_map<ECS::ObjectID, std::shared_ptr<ECS::Object>>& m_objectsMap;
     ECS::ObjectID m_selectedObjectID = -1;
@@ -21,7 +24,7 @@ private:
     std::vector<float> m_rotationEurler;
     std::vector<float> m_scale;
     std::string m_meshPath;
-    ECS::Object m_curSceneObject;
+    std::shared_ptr<ECS::Object> m_curSceneObject;
     bool m_useEuler = false;
     bool m_previousUseEuler = false;
 };

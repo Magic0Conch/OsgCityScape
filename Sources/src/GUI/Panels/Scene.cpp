@@ -35,7 +35,7 @@ void Scene::drawImpl(){
         ImVec2 leftCorner = ImGui::GetCursorScreenPos();
         ImVec2 mousePos = ImGui::GetMousePos();
         osg::Vec2f scenePos = osg::Vec2f((mousePos.x - leftCorner.x)*1.0/width,(height - mousePos.y + leftCorner.y)*1.0/height);
-        if(scenePos.x() < 0 || scenePos.y() < 0 || scenePos.x() > width || scenePos.y() > height){
+        if(scenePos.x() < 0 || scenePos.y() < 0 || scenePos.x() > 1.0 || scenePos.y() > 1.0){
             scenePos = osg::Vec2f(-1,-1);
         }
         Core::g_runtimeContext.editorInputManager->setScenePosition(scenePos);

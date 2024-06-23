@@ -99,6 +99,10 @@ void MainMenuBar::drawImpl(){
                     activeLevel->printSceneGraph();
                 }
                 if (ImGui::BeginMenu("Add Object")){
+                    if (ImGui::MenuItem("Add Empty Object")){
+                        auto activeLevel = Core::g_runtimeContext.worldManager->getCurrentActiveLevel();
+                        activeLevel->createObjectInLevel("Object",activeLevel->getRootObject()->getID());
+                    }
                     if (ImGui::MenuItem("Add Camera")){
                     }
                     if (ImGui::MenuItem("Add Rectifier")){

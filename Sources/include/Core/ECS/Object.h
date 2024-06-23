@@ -32,7 +32,7 @@ namespace CSEditor::ECS{
             auto n = tmpname.rfind("::");
             auto componentType = tmpname.substr(n+2);
             for (auto& i:m_components){
-                if (componentType==i.first){
+                if (componentType==i.first||(componentType=="Mesh"&&(i.first=="ModelMesh"||i.first=="ProceduralMesh"))){
                     return std::static_pointer_cast<T>(i.second);
                 }
             }       
@@ -44,14 +44,17 @@ namespace CSEditor::ECS{
             std::string tmpname=typeid(T).name();
             auto n = tmpname.rfind("::");
             auto componentType = tmpname.substr(n+2);
+            if(componentType == "Camera"){
+                setShowTransform(false);
+            }
             auto found = getComponent<T>();
             if(found)
                 return found;
-            std::shared_ptr<T> comp = std::dynamic_pointer_cast<T>(ComponentFactory::createComponent(componentType));
+            std::shared_ptr<T> comp = ComponentFactory::createComponent<T>(std::forward<ArgsType>(args)...);
             m_components.push_back(
                 std::make_pair(componentType, comp) 
             );
-            comp->onComponentAdded();
+            comp->onComponentAdded(shared_from_this());
             return comp;
         }
 
@@ -73,6 +76,8 @@ namespace CSEditor::ECS{
         const std::vector<int>& getChildIndex() const;
         void setIsSelected(bool isSelected);
         const bool getIsSelected() const;
+        void setShowTransform(bool showTransform);
+        const bool getShowTransform() const;
     protected:
         ObjectID m_id ;
         std::string m_name;
@@ -81,5 +86,6 @@ namespace CSEditor::ECS{
         std::shared_ptr<Transform> m_transform;
         ObjectID m_parentId;
         bool m_isSelected = false;
+        bool m_showTransform = true;
     };
 } 

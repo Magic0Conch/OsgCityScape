@@ -21,7 +21,8 @@ in VS_OUT{
 
 
 float plotGrid(vec2 uv,float width){
-    vec2 uv_anim = vec2(mix(0.0,1.0,uv.x+width/2/_PatternDensity + osg_FrameTime * _AnimSpeed), mix(0.0,1.0,uv.y+ width/2/_PatternDensity + osg_FrameTime*_AnimSpeed));    vec2 f_uv = vec2(fract(uv_anim.x*_PatternDensity),fract(uv_anim.y*_PatternDensity));
+    vec2 uv_anim = vec2(mix(0.0,1.0,uv.x+width/2/_PatternDensity + osg_FrameTime * _AnimSpeed), mix(0.0,1.0,uv.y+ width/2/_PatternDensity + osg_FrameTime*_AnimSpeed));
+    vec2 f_uv = vec2(fract(uv_anim.x*_PatternDensity),fract(uv_anim.y*_PatternDensity));
     float top = step(width,f_uv.x);
     float right = step(width,f_uv.y);
     return 1-step(0.5,top*right);

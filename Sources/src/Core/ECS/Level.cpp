@@ -1,10 +1,11 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include "Core/ECS/Components/Mesh.h"
+#include "Core/ECS/Components/ModelMesh.h"
 #include "Core/ECS/Components/Transform.h"
 #include "Core/ECS/Object.h"
 #include "Core/ECS/ObjectIDAllocator.h"
+#include "Core/Helpers/LogSystem.h"
 #include "Resources/ResourceType/Common/Object.h"
 #include "Editor/Core/RuntimeContext.h"
 #include "Resources/ResourceType/Common/Level.h"
@@ -19,6 +20,7 @@ using namespace CSEditor::ECS;
 
 Level::Level(){
     m_levelResource = std::make_shared<ResourceType::Level>();
+    spdlog::info("Level created");
 }
 
 /// The main class to manage all game objects
@@ -40,7 +42,6 @@ bool Level::importObjFromFolderRecursively(const std::string& folderPath,const s
             }
             auto loadedModelObject = createObjectInLevel(file, m_sceneObject->getID());
             auto transform = &loadedModelObject->getTransformComponent();
-            auto pat = loadedModelObject->getTransformComponent().getNode();
             osg::Quat rotation;
             osg::Matrix rotationMatrix(1, 0, 0, 0,
                                         0, 0, -1, 0,
@@ -48,13 +49,11 @@ bool Level::importObjFromFolderRecursively(const std::string& folderPath,const s
                                         0, 0, 0, 1);
             rotation = rotationMatrix.getRotate();
             transform->setRotation(rotation);
-            auto mesh = loadedModelObject->addComponent<Mesh>();
-            mesh->m_meshPath = fullPath;            
-            std::thread workTread(&Mesh::loadResourceAsync,mesh,loadedModelObject);
+            
+            auto mesh = std::make_shared<ModelMesh>(fullPath);
+            loadedModelObject->getComponents().push_back(std::make_pair("ModelMesh", mesh));
+            std::thread workTread(&ModelMesh::loadResourceAsync,mesh,loadedModelObject);
             workTread.detach();
-
-            nodeToObjectID[transform->getNode()] = loadedModelObject->getID();
-            nodeToObjectID[transform->getNode()] = loadedModelObject->getID();
             std::cout << "Loaded: " << fullPath << std::endl;
         }
     }
@@ -63,13 +62,7 @@ bool Level::importObjFromFolderRecursively(const std::string& folderPath,const s
 
 bool Level::load(const std::string& levelResourceUrl){
     //setup scene root
-    m_sceneObject = createObjectInLevel("Scene",-1);
-    // auto loadedModelObject = createObjectInLevel("cow", m_sceneObject->getID());
-    // auto cowMesh = loadedModelObject->addComponent<Mesh>();
-    // cowMesh->setMeshPath("resources/models/cow.osg");
-    // cowMesh->loadResource(loadedModelObject);
-    //load level resource
-    
+    m_sceneObject = createObjectInLevel("Scene",-1);    
     spdlog::info("Loading level: {}", levelResourceUrl);
     m_levelResourceUrl = levelResourceUrl;
     
@@ -131,10 +124,7 @@ std::unordered_map<ObjectID, std::shared_ptr<Object>>& Level::getSceneObjectsMap
 std::shared_ptr<Object> Level::createObjectInLevel(const std::string& name,const ObjectID& parentID){
     auto objectId = ObjectIDAllocator::alloc();
     auto object = std::make_shared<ECS::Object>(objectId,parentID);
-
-    std::shared_ptr<Transform> transform = std::make_shared<Transform>();
-    transform->loadResource(object);
-    object->setTransform(transform);
+    auto transform = object->addComponent<Transform>();
     object->setName(name);
     m_objects[objectId] = object;
     if (parentID == -1) {
@@ -187,6 +177,13 @@ void Level::printNode(const osg::Node* node, int indent) const{
 void Level::printSceneGraph(){
     Core::g_runtimeContext.logSystem->info("Scene Graph:");
     printNode(getRootObject()->getTransformComponent().getNode().get());
+}
+
+void Level::addProjectionCamera(std::shared_ptr<ECS::Camera> camera){
+    m_cameras.emplace_back(camera);
+}
+std::vector<std::shared_ptr<Camera>> Level::getCameras() const{
+    return m_cameras;
 }
 // void Level::unload(){
 

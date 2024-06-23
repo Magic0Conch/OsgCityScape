@@ -28,8 +28,8 @@ public:
 
     virtual void tick(float delta_time) {};
 
-    virtual void onComponentAdded();
-
+    virtual void onComponentAdded(std::shared_ptr<Object> parentObject);
+    virtual void drawImGui();
     std::string returnTypeName();
     void setTypeName(std::string typeName);
     // bool isDirty() const { return m_is_dirty; }

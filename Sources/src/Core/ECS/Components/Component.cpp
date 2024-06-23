@@ -13,10 +13,10 @@ void Component::deserialize(Json& jsonObject){
 
 void Component::loadResource(std::shared_ptr<Object> parentObject){
     m_parentObject = parentObject;
-    onComponentAdded();
+    onComponentAdded(parentObject);
 }
 
-void Component::onComponentAdded(){
+void Component::onComponentAdded(std::shared_ptr<Object> parentObject){
 
 }
 
@@ -26,4 +26,8 @@ std::string Component::returnTypeName(){
 
 void Component::setTypeName(std::string typeName){
     m_typename = typeName;
+}
+
+void Component::drawImGui(){
+
 }

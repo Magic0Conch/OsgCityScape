@@ -12,23 +12,23 @@
 
 namespace CSEditor::ECS {
 
-class Transform:public Component{
+class Transform:public Component, public std::enable_shared_from_this<Transform>{
 public:
     Transform();
 
     virtual void serialize(Json& jsonObject) override;
     virtual void deserialize(Json& jsonObject) override;
     virtual void loadResource(std::shared_ptr<Object> parentObject) override;
-    virtual void onComponentAdded() override;
+    virtual void onComponentAdded(std::shared_ptr<Object> parentObject) override;
 
     osg::Vec3f getPosition() const;
     osg::Vec4f getRotation() const;
     osg::Vec3f getScale() const;
     osg::ref_ptr<osg::PositionAttitudeTransform> getNode();
 
-    void setPosition(const osg::Vec3f& position);
-    void setRotation(const osg::Vec4f& rotation);
-    void setRotation(const osg::Quat& rotation);
+    virtual void setPosition(const osg::Vec3f& position);
+    virtual void setRotation(const osg::Vec4f& rotation);
+    virtual void setRotation(const osg::Quat& rotation);
     void setScale(const osg::Vec3f& scale);
     void setNode(osg::ref_ptr<osg::PositionAttitudeTransform> node);
     void addChild(Transform& childTransform);
@@ -37,7 +37,7 @@ public:
     const bool isLeaf() const;
     const std::vector<int>& getChildIndex() const; 
 
-private:
+protected:
     osg::Vec3f m_position = osg::Vec3f(0,0,0);
     osg::Vec4f m_rotation = osg::Vec4f(0,0,0,1);
     osg::Vec3f m_scale = osg::Vec3f(1,1,1);

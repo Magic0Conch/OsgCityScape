@@ -8,6 +8,7 @@ uniform sampler2D mainTexture;
 uniform int mapSize;
 in vec2 texCoord;
 in vec4 lightSpacePos[16];
+uniform bool _EnableProjection[16];
 out vec4 fragColor;
 
 bool flag[16];
@@ -32,7 +33,7 @@ vec4 projectTexture() {
     if(validCnt == 0)
         return outColor;
     for(int i = 0;i<mapSize;i++){
-        if(flag[i]){
+        if(flag[i]&&_EnableProjection[i]){
             vec3 projCoords = lightSpacePos[i].xyz / lightSpacePos[i].w;
             projCoords = projCoords * 0.5 + 0.5;
             outColor += texture(colorMap, vec3(projCoords.xy, i)) / (validCnt*1.0);
@@ -41,11 +42,11 @@ vec4 projectTexture() {
     return outColor;
 }
 
-void main(void)
+void main()
 {
     vec4 col = texture(mainTexture, texCoord);
     vec4 projColor = projectTexture();
-    // fragColor = projColor.x == 0?col:projColor;
-    fragColor = col/2 + projectTexture()/2;
+    fragColor = projColor.x == 0?col:projColor;
+    // fragColor = col/2 + projectTexture()/2;
     fragColor.a = 1.0;
 }
