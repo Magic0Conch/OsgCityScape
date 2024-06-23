@@ -20,8 +20,6 @@ public:
     void setRadius(float rhs);
 
     void update() override;
-private:
-    float m_radius;
     
 };
 }

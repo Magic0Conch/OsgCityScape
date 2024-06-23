@@ -27,7 +27,6 @@
 #include <osgUtil/IntersectionVisitor>
 #include <osgUtil/Statistics>
 #include <imgui.h>
-#include <utility>
 #include "GUI/Panels/Hierachy.h"
 #include "GUI/Panels/Inspector.h"
 #include "GUI/Panels/Console.h"

@@ -78,10 +78,11 @@ void Object::setTransform(Transform* transform){
 }
 
 void Object::setTransform(std::shared_ptr<Transform> other){
-    if(m_transform == nullptr){
-        auto p = std::make_pair("Transform", other);
-        m_components.emplace_back(p);
-    }
+    // if(m_transform == nullptr){
+    //     // auto p = std::make_pair("Transform", other);
+    //     // m_components.emplace_back(p);
+    //     addComponent<Transform>();
+    // }
     m_transform = other;    
 }
 
@@ -109,4 +110,13 @@ void Object::setIsSelected(bool isSelected){
 }
 const bool Object::getIsSelected() const{
     return m_isSelected;
+}
+
+void Object::setShowTransform(bool showTransform){
+    m_showTransform = showTransform;
+
+}
+
+const bool Object::getShowTransform() const{
+    return m_showTransform;
 }

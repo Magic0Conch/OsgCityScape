@@ -2,6 +2,8 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
+#include "Core/ECS/Components/Camera.h"
 #include "Core/ECS/Object.h"
 #include "ObjectIDAllocator.h"
 #include "Core/ECS/Level.h"
@@ -68,6 +70,9 @@ public:
     bool hasLastSelectedObject() const;
     void setSelectedObjectDirty(bool dirty);
     bool isSelectedObjectDirty() const;
+    
+    void addProjectionCamera(std::shared_ptr<ECS::Camera> camera);
+    std::vector<std::shared_ptr<ECS::Camera>> getCameras() const;
 
     void printNode(const osg::Node* node, int indent = 0) const;
     void printSceneGraph();
@@ -79,6 +84,7 @@ protected:
     std::string m_levelResourceUrl;
 
     std::unordered_map<ObjectID, std::shared_ptr<Object>> m_objects;
+    std::vector<std::shared_ptr<ECS::Camera>> m_cameras;
     std::shared_ptr<Object> m_sceneObject;
     std::shared_ptr<ResourceType::Level> m_levelResource;
 private:

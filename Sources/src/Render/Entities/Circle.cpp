@@ -3,36 +3,37 @@
 using namespace CSEditor::Render;
 
 
-Circle::Circle(float radius,int segment):m_radius(radius),BaseGeometry(segment){}
+Circle::Circle(float radius,int segment):BaseGeometry(segment){
+    setRadius(radius);
+}
 
 void Circle::setRadius(float rhs){
-    if(rhs!=m_radius){
-        m_radius = rhs;       
-        m_isDirty = true; 
-    }
+    setFloatProperty("_Radius", rhs);
 }
 
 void Circle::update(){
     if(m_isDirty){
+        float radius = std::any_cast<float>(m_properties["_Radius"]);
+        int segments = std::any_cast<int>(m_properties["_Segments"]);
         osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array();
-        vertices->resizeArray(m_segments+1);
+        vertices->resizeArray(segments+1);
         osg::ref_ptr<osg::Vec2Array> texCoords = new osg::Vec2Array();
-        texCoords->resizeArray(m_segments+1);
+        texCoords->resizeArray(segments+1);
         osg::ref_ptr<osg::DrawElementsUInt> indices = new osg::DrawElementsUInt(osg::PrimitiveSet::TRIANGLES, 0);
-        indices->resize(m_segments*3);
+        indices->resize(segments*3);
         osg::Vec3 center = osg::Vec3(0,0,0);
         (*vertices)[0] = center;
         float angle = 0.0f;
-        float angleStep = 2.0f * M_PI / m_segments;
+        float angleStep = 2.0f * M_PI / segments;
 
-        for (int i = 1; i<=m_segments; i++) {
-            float x = sin(angle) * m_radius + center.x();
+        for (int i = 1; i<=segments; i++) {
+            float x = sin(angle) * radius + center.x();
             float y = center.y();
-            float z = cos(angle) * m_radius + center.z();
+            float z = cos(angle) * radius + center.z();
 
             (*vertices)[i] = osg::Vec3(x, y, z);
             (*texCoords)[i] = osg::Vec2(1,1);
-            if (i < m_segments)
+            if (i < segments)
             {
                 (*indices)[(i - 1) * 3] = 0;
                 (*indices)[(i - 1) * 3 + 1] = i;

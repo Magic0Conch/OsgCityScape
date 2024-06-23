@@ -1,6 +1,11 @@
 #pragma once
 #include "osg/Math"
+#include "osg/Quat"
+#include "osg/Vec2"
+#include "osg/Vec3"
+#include "osg/Vec4"
 #include <glm/fwd.hpp>
+#include <vector>
 
 
 namespace CSEditor::Math {
@@ -18,6 +23,27 @@ namespace CSEditor::Math {
             return  double(fov * 180.0 / osg::PI);
         }
 
+        static osg::Vec3 rotateVector(const osg::Quat& q, const osg::Vec3& v) {
+            osg::Quat vecQuat(v.x(), v.y(), v.z(),0.0f);
+            osg::Quat resultQuat = q * vecQuat * q.conj();
+            return osg::Vec3(resultQuat.x(), resultQuat.y(), resultQuat.z());
+        }
+        static std::vector<float> convertToVector(float val) {
+            return {val};
+        }
+        static std::vector<float> convertToVector(const std::vector<float>& vec) {
+            return vec;
+        }
+        static std::vector<float> convertToVector(const osg::Vec2& vec) {
+            return {vec.x(), vec.y()};
+        }
+        static std::vector<float> convertToVector(const osg::Vec3& vec) {
+            return {vec.x(), vec.y(), vec.z()};
+        }
+
+        static std::vector<float> convertToVector(const osg::Vec4& vec) {
+            return {vec.x(), vec.y(), vec.z(), vec.w()};
+        }
     };
 
 }

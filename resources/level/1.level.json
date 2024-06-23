@@ -33,7 +33,7 @@
             "context": {
                 "modelPath":"objects/environment/wall/barricada.obj"
             },
-            "typeName": "Mesh"
+            "typeName": "ModelMesh"
           }
         ],
         "definition": "objects/environment/wall/barricada.obj"
@@ -67,7 +67,7 @@
                 "modelPath":"objects/environment/wall/barricada.obj",
                 "materials":["wall.json"]
             },
-            "typeName": "Mesh"
+            "typeName": "ModelMesh"
           }
         ],
         "definition": "objects/environment/wall/barricada.obj"
@@ -101,7 +101,7 @@
             "context": {
                 "modelPath":"objects/environment/fence/fence.obj"
             },
-            "typeName": "Mesh"
+            "typeName": "ModelMesh"
           }
         ]
       }

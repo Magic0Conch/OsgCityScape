@@ -1,8 +1,8 @@
 #version 330 core
 layout(location = 0) in vec4 aPos;
 layout(location = 1) in vec2 aTexCoords;
-uniform mat4 osg_ModelViewProjectionMatrix;
-uniform lowp float _Outline;
+uniform mat4 osg_ModelViewMatrix;
+uniform mat4 _ProjectionMatrix;
 
 out VS_OUT{
     lowp vec2 uv;
@@ -10,7 +10,7 @@ out VS_OUT{
 }vs_out;
 
 void main(){
-    gl_Position = osg_ModelViewProjectionMatrix*aPos;
+    gl_Position = _ProjectionMatrix*osg_ModelViewMatrix*aPos;
     vs_out.uv = aTexCoords;
     vs_out.localPos = aPos.xyz;
 }

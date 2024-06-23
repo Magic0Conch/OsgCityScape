@@ -1,4 +1,5 @@
 #include "Resources/Material.h"
+#include "osg/Geometry"
 #include "osg/StateSet"
 using namespace CSEditor::Resources;
 
@@ -26,6 +27,7 @@ osg::ref_ptr<osg::StateSet> Material::getStateSet() const{
 
 void Material::bind(osg::ref_ptr<osg::Geode> geode){
     geode->setStateSet(m_stateSet);
+    osg::ref_ptr<osg::Geometry> geom;
 }
 
 

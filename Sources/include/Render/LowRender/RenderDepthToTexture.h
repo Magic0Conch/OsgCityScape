@@ -10,10 +10,11 @@ class RenderDepthToTexture : public osg::Camera
 {
 public:
     RenderDepthToTexture();
-    // virtual ~RenderDepthToTexture() {}
+    virtual ~RenderDepthToTexture();
 
     osg::Texture2D* getTexture() const;
     void setViewMatrix(const osg::Matrixd& viewMatrix);
+    void setProjectionMatrix(const osg::Matrixd& projectionMatrix);
 private:
     osg::ref_ptr<osg::Texture2D> _texture;
 };

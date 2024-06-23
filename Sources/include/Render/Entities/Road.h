@@ -31,8 +31,6 @@ public:
     void setPlaneNormal(const osg::Vec3f& planeNormal);
 private:
     osg::Vec3f m_planeNormal;
-    float m_pathWidth;
-    float m_innerRadius;
     std::unique_ptr<std::vector<osg::Vec3f>> m_pathKeyPoints;
 };
 }

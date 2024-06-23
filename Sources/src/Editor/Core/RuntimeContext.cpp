@@ -6,7 +6,6 @@
 #include "Editor/Core/EditorInputManager.h"
 #include "Render/RenderSystem.h"
 #include "Windowing/Settings/WindowSettings.h"
-#include "GUI/Panels/Hierachy.h"
 #include "Windowing/Window.h"
 #include "osg/ref_ptr"
 #include <iostream>

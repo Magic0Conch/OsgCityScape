@@ -9,6 +9,7 @@
 #include <osg/CullFace>
 #include "osg/Image"
 #include "osg/StateAttribute"
+#include "osg/ref_ptr"
 
 using namespace CSEditor::Render;
 using namespace CSEditor;
@@ -49,6 +50,9 @@ TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m
     stateSet->addUniform(m_lightSpaceMatrixUniform);
     stateSet->addUniform(projectionUniform);
 
+    m_enableProjectionUniform = new osg::Uniform(osg::Uniform::BOOL, "_EnableProjection", 16);
+    stateSet->addUniform(m_enableProjectionUniform);
+
     // m_camera->setNodeMask(0x1);
     m_camera->setCullingMode(m_camera->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
     m_camera->attach(osg::Camera::COLOR_BUFFER0, _texture);
@@ -61,7 +65,10 @@ TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m
 }
 
 
-void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> depthMapArray, std::vector<osg::Texture2D *> colorTexVec, std::vector<osg::Matrixd>& projectionMatrixVec) {
+void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> depthMapArray, std::vector<osg::ref_ptr<osg::Texture2D>> colorTexVec, std::vector<osg::Matrixd>& projectionMatrixVec) {
+    if(depthMapArray == nullptr || colorTexVec.empty() || colorTexVec[0] == nullptr || projectionMatrixVec.empty()) {
+        return;
+    }
     if (!m_colorMap) {
         m_colorMap = new osg::Texture2DArray;
         m_colorMap->setInternalFormat(GL_RGBA);
@@ -81,13 +88,22 @@ void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> de
     for (int i = 0; i < cnt; ++i) {
         auto& projectionMatrix = projectionMatrixVec[i];
         m_lightSpaceMatrixUniform->setElement(i, projectionMatrix);
+        m_enableProjectionUniform->setElement(i, true);
     }
 }
 
 
-void TextureProjectionPass::setTexture(osg::Texture2D * tex) {
+void TextureProjectionPass::setTexture(int index ,osg::ref_ptr<osg::Texture2D> tex){
     auto stateSet = m_camera->getOrCreateStateSet();
-    stateSet->setTextureAttributeAndModes(2, tex, osg::StateAttribute::ON);
+    osg::Image* image = tex->getImage();
+    m_colorMap->setImage(index, image);
+    stateSet->setTextureAttributeAndModes(2, m_colorMap, osg::StateAttribute::ON);
+}
+
+void TextureProjectionPass::setTexture(int index ,osg::ref_ptr<osg::Image> img){
+    auto stateSet = m_camera->getOrCreateStateSet();
+    m_colorMap->setImage(index, img);
+    stateSet->setTextureAttributeAndModes(2, m_colorMap, osg::StateAttribute::ON);
 }
 
 osg::ref_ptr<osg::Texture2D> TextureProjectionPass::getColorTexture() {
@@ -99,4 +115,19 @@ osg::ref_ptr<osg::Texture2D> TextureProjectionPass::getDepthStencilTexture() {
 
 void TextureProjectionPass::setProjectionMatrix(const osg::Matrixd& projectionMatrix) {
     projectionUniform->set(projectionMatrix);
+}
+
+void TextureProjectionPass::setLightSpaceMatrixUniform(int index,osg::Matrixd& lightSpaceMatrix){
+    auto ss = m_camera->getOrCreateStateSet();        
+    auto projectionMatrixUniform = ss->getUniform("lightSpaceMatrix");
+    if (!projectionMatrixUniform) {
+        // 创建并添加 uniform 如果不存在
+        projectionMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "lightSpaceMatrix");
+        ss->addUniform(projectionMatrixUniform);
+    }
+    projectionMatrixUniform->setElement(index, lightSpaceMatrix);
+}
+
+void TextureProjectionPass::setProjectionEnabled(int index, bool enable){
+    m_enableProjectionUniform->setElement(index, enable);
 }

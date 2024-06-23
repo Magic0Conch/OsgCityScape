@@ -1,5 +1,6 @@
 #include <memory>
 #include <windows.h>
+#include "Editor/Core/RuntimeContext.h"
 #include "GUI/Core/UIManager.h"
 #include "Render/Entities/Circle.h"
 #include "Render/Entities/Cylinder.h"
@@ -8,7 +9,7 @@
 #include "GUI/Helper/ImGuiInitOperation.h"
 #include "imgui.h"
 #include "osg/Geode"
-#include "osg/Geometry"
+#include "Resources/ResourceManagement/ConfigManager.h"
 #include "osg/StateAttribute"
 #include "osg/Vec2i"
 #include "osg/Vec4"
@@ -21,6 +22,7 @@
 #include <osg/CullFace>
 #include <osgViewer/GraphicsWindow>
 #include <osgViewer/View>
+#include "Core/ECS/Components/Material.h"
 const auto resolution = osg::Vec2i(1728,702);
 
 float radius=1.0f;
@@ -85,7 +87,6 @@ namespace CSEditor {
                     ImGui::TreePop();
                 }
                 if (ImGui::TreeNode("Bottom")){
-                    ImGui::SliderFloat("_Outline",&bottomOuterWidth, 0.0f, 1.0f);
                     ImGui::ColorEdit4("_InnerColor",reinterpret_cast<float*>(&bottomInnerTintColor));
                     ImGui::SliderFloat("_FlashFrequency",&bottomFlashFrequency, 0.0f, 20.0f);
                     ImGui::SliderFloat("_PatternDensity",&bottomPatternDensity, 0.0f, 10.0f);
@@ -138,54 +139,59 @@ namespace CSEditor {
     };
 
     auto setupScene(){
-        areaHighlightPipeline.reset(new Render::RenderPipelinePostProcess());
+        // areaHighlightPipeline.reset(new Render::RenderPipelinePostProcess());
         circle = new Render::Circle(1.0f);
-        osg::ref_ptr<osg::Geode> geodeCircle = new osg::Geode;
-        geodeCircle->addDrawable(circle);
+        // osg::ref_ptr<osg::Geode> geodeCircle = new osg::Geode;
+        // geodeCircle->addDrawable(circle);
+        const std::string& vertCirclePath = (Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/highlightCircle.vert").string();
+        const std::string& fragCirclePath = (Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/highlightCircle.frag").string();
 
-        auto materialCircle= std::make_unique<Render::Material>("resources/shaders/highlightCircle.vert", "resources/shaders/highlightCircle.frag");
-        materialCircle->bind(geodeCircle);
+        auto materialCircle= std::make_unique<ECS::Material>(vertCirclePath,fragCirclePath);
+        materialCircle->bind(static_cast<osg::ref_ptr<osg::Geometry>>(circle));
 
-        materialCircle->addUniform("_OutlineRatio",&bottomOuterWidth);
-        materialCircle->addUniform("_InnerColor",&bottomInnerTintColor);
-        materialCircle->addUniform("_FlashFrequency",&bottomFlashFrequency);
-        materialCircle->addUniform("_PatternDensity",&bottomPatternDensity);
-        materialCircle->addUniform("_PatternWidth",&bottomPatternWidth);
-        materialCircle->addUniform("_PatternColor",&bottomPatternColor);
-        materialCircle->addUniform("_PatternShape",&bottomPatternShape);
-        materialCircle->addUniform("_AnimSpeed",&bottomAnimSpeed);
-        materialCircle->addUniform("_OutlineColor",&bottomOuterTintColor);
+        materialCircle->setFloat("_OutlineRatio",bottomOuterWidth);
+        materialCircle->setVec4("_InnerColor",bottomInnerTintColor);
+        materialCircle->setFloat("_FlashFrequency",bottomFlashFrequency);
+        materialCircle->setFloat("_PatternDensity",bottomPatternDensity);
+        materialCircle->setFloat("_PatternWidth",bottomPatternWidth);
+        materialCircle->setVec4("_PatternColor",bottomPatternColor);
+        materialCircle->setInt("_PatternShape",bottomPatternShape);
+        materialCircle->setFloat("_AnimSpeed",bottomAnimSpeed);
+        materialCircle->setVec4("_OutlineColor",bottomOuterTintColor);
 
         geometryCylinder = new Render::Cylinder();
-        osg::ref_ptr<osg::Geode> geodeCylinder = new osg::Geode();
-        geodeCylinder->addDrawable(geometryCylinder);
-        std::unique_ptr<Render::Material> materialCylinder= std::make_unique<Render::Material>("resources/shaders/highlightCylinder.vert", "resources/shaders/highlightCylinder.frag");
-        materialCylinder->bind(geodeCylinder);
+        // osg::ref_ptr<osg::Geode> geodeCylinder = new osg::Geode();
+        // geodeCylinder->addDrawable(geometryCylinder);
+        const std::string& vertCylinderPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/highlightCylinder.vert").string();
+        const std::string& fragCylinderPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/highlightCylinder.frag").string();
 
-        materialCylinder->addUniform("_Color",&wallTintColor);
-        materialCylinder->addUniform("_PatternColor",&wallPatternColor);
-        materialCylinder->addUniform("_AnimSpeed",&wallAnimSpeed);
-        materialCylinder->addUniform("_PatternDensity",&wallTextureDensity);
-        materialCylinder->addUniform("_PatternWidth",&wallPatternWidth);
-        materialCylinder->addUniform("_FlashFrequency",&wallFlashFrequency);
-        materialCylinder->addUniform("_OuterWidth",&wallOuterWidth);
-        materialCylinder->addUniform("_PatternShape",&wallPatternShape);
-        materialCylinder->addUniform("_BackStyle",&wallBackStyle);
-        materialCylinder->addUniform("_Fade",&wallFade);
-        materialCylinder->addUniform("_Radius",&radius);
-        materialCylinder->addUniform("_Height",&height);
+        std::unique_ptr<ECS::Material> materialCylinder= std::make_unique<ECS::Material>(vertCylinderPath,fragCylinderPath);
+        materialCylinder->bind(static_cast<osg::ref_ptr<osg::Geometry>>(geometryCylinder));
+
+        materialCylinder->setVec4("_Color",wallTintColor);
+        materialCylinder->setVec4("_PatternColor",wallPatternColor);
+        materialCylinder->setFloat("_AnimSpeed",wallAnimSpeed);
+        materialCylinder->setFloat("_PatternDensity",wallTextureDensity);
+        materialCylinder->setFloat("_PatternWidth",wallPatternWidth);
+        materialCylinder->setFloat("_FlashFrequency",wallFlashFrequency);
+        materialCylinder->setFloat("_OuterWidth",wallOuterWidth);
+        materialCylinder->setInt("_PatternShape",wallPatternShape);
+        materialCylinder->setInt("_BackStyle",wallBackStyle);
+        materialCylinder->setInt("_Fade",wallFade);
+        materialCylinder->setFloat("_Radius",radius);
+        materialCylinder->setFloat("_Height",height);
         
         osg::ref_ptr<osg::Geode> highlightArea = new osg::Geode;
         
-        highlightArea->addChild(geodeCircle);
-        highlightArea->addChild(geodeCylinder);
-        geodeCircle->setUpdateCallback(new Render::UpdateUniformCallback(materialCircle.get()));
-        geodeCylinder->setUpdateCallback(new Render::UpdateUniformCallback(materialCylinder.get()));
+        highlightArea->addChild(geometryCylinder);
+        highlightArea->addChild(circle);
+        // geodeCircle->setUpdateCallback(new Render::UpdateUniformCallback(materialCircle.get()));
+        // geodeCylinder->setUpdateCallback(new Render::UpdateUniformCallback(materialCylinder.get()));
         
         osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc;
         osg::ref_ptr<osg::Depth> depth = new osg::Depth;
         depth->setWriteMask(false);
-        depth->setRange(0.0f, 0.0f);
+        // depth->setRange(0.0f, 0.0f);
         blend->setFunction(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE_MINUS_SRC_ALPHA);
 
         materialCircle->getStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
@@ -200,22 +206,22 @@ namespace CSEditor {
         
         //render geode to a screen texture
         osg::ref_ptr<Render::RenderTexture> screenTexture = new Render::RenderTexture(resolution.x(),resolution.y());
-        osg::ref_ptr<Render::RTTCamera> screenRenderPass = new Render::RTTCamera(screenTexture);
-        screenRenderPass->addChildToRTTCamera(geodeCircle);
-        screenRenderPass->addChildToRTTCamera(geodeCylinder);
-        areaHighlightPipeline->addRenderPass(screenRenderPass);
+        // osg::ref_ptr<Render::RTTCamera> screenRenderPass = new Render::RTTCamera(screenTexture);
+        // screenRenderPass->addChildToRTTCamera(geodeCircle);
+        // screenRenderPass->addChildToRTTCamera(geodeCylinder);
+        // areaHighlightPipeline->addRenderPass(screenRenderPass);
         
         //bloom from a screen texture
-        bloomPipeline = new Render::Bloom(screenTexture,nullptr,blurIterations,blurSpeed,&luminanceThreshold);
-        areaHighlightPipeline->addRenderPipeline(bloomPipeline);
+        // bloomPipeline = new Render::Bloom(screenTexture,nullptr,blurIterations,blurSpeed,&luminanceThreshold);
+        // areaHighlightPipeline->addRenderPipeline(bloomPipeline);
 
         osg::ref_ptr<osg::Group> scene = new osg::Group;
-        scene->setUpdateCallback(new BloomUniformCallback(areaHighlightPipeline));
+        // scene->setUpdateCallback(new BloomUniformCallback(areaHighlightPipeline));
 
         //display quad
-        scene->addChild(areaHighlightPipeline->getDestinationQuadGeode());
+        scene->addChild(highlightArea);
         //off-screen rendering
-        areaHighlightPipeline->addRenderPassesToOsgGroup(*scene);
+        // areaHighlightPipeline->addRenderPassesToOsgGroup(*scene);
         return scene;
     }
 
@@ -226,7 +232,7 @@ int main(){
     osgViewer::Viewer viewer;
     viewer.setUpViewInWindow(100, 100,resolution.x(),resolution.y());
     viewer.addEventHandler(new osgViewer::StatsHandler());
-    viewer.addEventHandler(new GUI::UIManager);
+    // viewer.addEventHandler(new GUI::UIManager);
     viewer.setRealizeOperation(new GUI::ImGuiInitOperation);
     auto scene = setupScene();
     

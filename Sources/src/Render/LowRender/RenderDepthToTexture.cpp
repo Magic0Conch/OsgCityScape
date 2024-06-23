@@ -51,9 +51,32 @@ osg::Texture2D* RenderDepthToTexture::getTexture() const
 
 void RenderDepthToTexture::setViewMatrix(const osg::Matrixd& viewMatrix){
     auto ss = getOrCreateStateSet();
-    osg::ref_ptr<osg::Uniform> viewProjectionMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4,"viewMatrix");
-    viewProjectionMatrixUniform->set(viewMatrix);
-    ss->addUniform(viewProjectionMatrixUniform);
+    osg::ref_ptr<osg::Uniform> viewMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4,"_ViewMatrix");
+    if (viewMatrixUniform) {
+        viewMatrixUniform->set(viewMatrix);
+    } else {
+        viewMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "_ViewMatrix");
+        viewMatrixUniform->set(viewMatrix);
+        ss->addUniform(viewMatrixUniform);
+    }
+    viewMatrixUniform->set(viewMatrix);
+    ss->addUniform(viewMatrixUniform);
+}
+
+void RenderDepthToTexture::setProjectionMatrix(const osg::Matrixd& projectionMatrix){
+    auto ss = getOrCreateStateSet();
+    osg::ref_ptr<osg::Uniform> projectionMatrixUniform = ss->getUniform("_ProjectionMatrix");
+    if (projectionMatrixUniform) {
+        projectionMatrixUniform->set(projectionMatrix);
+    } else {
+        projectionMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "_ProjectionMatrix");
+        projectionMatrixUniform->set(projectionMatrix);
+        ss->addUniform(projectionMatrixUniform);
+    }
+}
+
+RenderDepthToTexture::~RenderDepthToTexture(){
+    spdlog::info("RenderDepthToTexture destroyed");
 }
 
 }
