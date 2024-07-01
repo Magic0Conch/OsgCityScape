@@ -12,6 +12,8 @@
 #include <osg/GraphicsContext>
 #include <utility>
 #include "Resources/RenderTexture.h"
+#include <osgViewer/api/Win32/GraphicsWindowWin32>
+#include <windows.h>
 
 namespace CSEditor::Windowing {
 
@@ -23,6 +25,7 @@ public:
     void setPosition(uint16_t x,uint16_t y);
     void show() const;
     void setTitle(const std::string& title);
+    void setWindowIcon(osgViewer::GraphicsWindowWin32* gw, const std::string& iconPath);
     std::string getTitle() const;
     void setGraphicsWindow(osg::ref_ptr<osgViewer::GraphicsWindow> graphicsWindow);
     void setViewport(osg::ref_ptr<osg::Viewport> viewport);
