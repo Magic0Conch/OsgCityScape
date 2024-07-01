@@ -8,11 +8,31 @@
 #include <osgDB/ReadFile>
 #include <osgGA/TrackballManipulator>
 #include <osgViewer/Viewer>
-#include "Render/LowRender/RenderColorToTexture.h"
+#include "Resources/ResourceManagement/ConfigManager.h"
+
 
 using namespace CSEditor::Windowing;
 
 // extern CSEditor::Core::RuntimeContext g_runtimeContext;
+void WindowSystem::setWindowIcon(osgViewer::GraphicsWindowWin32* gw, const std::string& iconPath){
+    // Load the icon from file
+    HICON hIcon = (HICON)LoadImageA(NULL, iconPath.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE | LR_SHARED);
+    if (!hIcon) {
+        std::cerr << "Failed to load icon: " << iconPath << std::endl;
+        return;
+    }
+
+    // Get the HWND from the GraphicsWindowWin32
+    HWND hwnd = gw->getHWND();
+    if (hwnd) {
+        // Set the small and big icons for the window
+        SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+    } else {
+        std::cerr << "Failed to get HWND from GraphicsWindowWin32" << std::endl;
+    }
+}
+
 
 WindowSystem::WindowSystem(Settings::WindowSettings& windowSettings):
     m_title(windowSettings.title),
@@ -83,6 +103,12 @@ void WindowSystem::createWindow(Settings::WindowSettings& windowSettings){
     osgViewer::Viewer::Windows windows;
     CSEditor::Core::g_runtimeContext.viewer->getWindows(windows);
     m_graphicsWindow = windows.front();
+    
+    osgViewer::GraphicsWindowWin32* gw = dynamic_cast<osgViewer::GraphicsWindowWin32*>(m_graphicsContext.get());
+    if(gw){
+        auto iconPath = (Core::g_runtimeContext.configManager->getRootFolder() / "3DModel.ico").string();
+        setWindowIcon(gw,iconPath);
+    }
     // osg::setNotifyLevel(osg::FATAL);
 
     // Render::RenderColorToTexture *rtt = new Render::RenderColorToTexture();
