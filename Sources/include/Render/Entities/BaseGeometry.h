@@ -10,6 +10,7 @@ class BaseGeometry:public osg::Geometry{
 public:
     BaseGeometry(int segments);
     void setSegments(float rhs);
+    float getSegments();
     void setFloatProperty(const std::string& key,float value);
     void setIntProperty(const std::string& key,int value);
     std::unordered_map<std::string, std::any>& getProperties();
