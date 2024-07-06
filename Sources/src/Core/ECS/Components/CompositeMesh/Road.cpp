@@ -1,6 +1,8 @@
 #include "Core/ECS/Components/CompositeMesh/Road.h"
 #include "Core/ECS/Components/Material.h"
 #include "Editor/Core/RuntimeContext.h"
+#include "GUI/Core/Panel.h"
+#include "Render/Entities/BaseGeometry.h"
 #include "Render/Entities/Circle.h"
 #include "Render/Entities/Cylinder.h"
 #include "Resources/ResourceManagement/ConfigManager.h"
@@ -8,65 +10,53 @@
 #include "osg/Depth"
 #include <osg/CullFace>
 #include "Render/RenderSystem.h"
-
+#include "osg/ref_ptr"
+#include "Render/Entities/Road.h"
 using namespace CSEditor::ECS;
 
 void Road::loadResource(std::shared_ptr<Object> parentObject) {
     ProceduralMesh::loadResource(parentObject);
-    osg::ref_ptr<Render::BaseGeometry> circle = new Render::Circle(1.0f);
-    const std::string& vertCirclePath = (Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/highlightCircle.vert").string();
-    const std::string& fragCirclePath = (Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/highlightCircle.frag").string();
-    auto circleMat = std::make_shared<ECS::Material>(vertCirclePath, fragCirclePath);
-    addGeometry(circle, circleMat);
-
-    osg::ref_ptr<Render::BaseGeometry> geometryCylinder = new Render::Cylinder();
-    const std::string& vertCylinderPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/highlightCylinder.vert").string();
-    const std::string& fragCylinderPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/highlightCylinder.frag").string();
-    std::shared_ptr<ECS::Material> cylinderMat = std::make_shared<ECS::Material>(vertCylinderPath,fragCylinderPath);
-    addGeometry(geometryCylinder, cylinderMat);
+    auto pathKeyPoints = std::make_unique<std::vector<osg::Vec3f>>();
+    pathKeyPoints->emplace_back(osg::Vec3f(-2.0,0.0,4.0));
+    pathKeyPoints->emplace_back(osg::Vec3f(10.0,0.0,10.0));
+    pathKeyPoints->emplace_back(osg::Vec3f(10.0,0.0,-10.0));
+    pathKeyPoints->emplace_back(osg::Vec3f(20.0,0.0,-10.0));
+    pathKeyPoints->emplace_back(osg::Vec3f(24.0,0.0,15.0));
+    m_roadGeometry = new Render::Road(std::move(pathKeyPoints));
     
+    const std::string& vertRoadPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "common/triangle.vert").string();
+    const std::string& fragRoadPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "localEffects/roadFX.frag").string();
+    auto roadMat = std::make_shared<ECS::Material>(vertRoadPath, fragRoadPath);
+    addGeometry(m_roadGeometry, roadMat);
+
     osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc;
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(false);
     blend->setFunction(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE_MINUS_SRC_ALPHA);
 
-    circleMat->getStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-    circleMat->getStateSet()->setAttributeAndModes(blend.get(),osg::StateAttribute::ON);
-    circleMat->getStateSet()->setAttributeAndModes(depth.get(),osg::StateAttribute::ON);
-    circleMat->getStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
-    circleMat->getStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
-    circleMat->setFloat("_OutlineRatio",0.2);
-    circleMat->setVec4("_InnerColor",osg::Vec4(0,0.87,1.,0));
-    circleMat->setFloat("_FlashFrequency",1.7);
-    circleMat->setFloat("_PatternDensity",1.73);
-    circleMat->setFloat("_PatternWidth",.039);
-    circleMat->setVec4("_PatternColor",osg::Vec4(1.0,0.0,0.0,0.0));
-    circleMat->setInt("_PatternShape",1);
-    circleMat->setFloat("_AnimSpeed",0);
-    circleMat->setVec4("_OutlineColor",osg::Vec4(0,0.87,1.,1.0));
-    circleMat->setMatrix("_ProjectionMatrix",Core::g_runtimeContext.renderSystem->getMainProjectionMatrix());
-    
-
-    cylinderMat->getStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-    cylinderMat->getStateSet()->setAttributeAndModes(blend.get(),osg::StateAttribute::ON);
-    cylinderMat->getStateSet()->setAttributeAndModes(depth.get(),osg::StateAttribute::ON);
-    cylinderMat->getStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
-    cylinderMat->getStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
-    cylinderMat->setVec4("_Color",wallTintColor);
-    cylinderMat->setVec4("_PatternColor",wallPatternColor);
-    cylinderMat->setFloat("_AnimSpeed",wallAnimSpeed);
-    cylinderMat->setFloat("_PatternDensity",wallTextureDensity);
-    cylinderMat->setFloat("_PatternWidth",wallPatternWidth);
-    cylinderMat->setFloat("_FlashFrequency",wallFlashFrequency);
-    cylinderMat->setFloat("_OuterWidth",wallOuterWidth);
-    cylinderMat->setInt("_PatternShape",wallPatternShape);
-    cylinderMat->setInt("_BackStyle",wallBackStyle);
-    cylinderMat->setBool("_Fade",wallFade);
-    cylinderMat->setFloat("_Radius",1);
-    cylinderMat->setFloat("_Height",2);
-    cylinderMat->setMatrix("_ProjectionMatrix",Core::g_runtimeContext.renderSystem->getMainProjectionMatrix());    
+    roadMat->getStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+    roadMat->getStateSet()->setAttributeAndModes(blend.get(),osg::StateAttribute::ON);
+    roadMat->getStateSet()->setAttributeAndModes(depth.get(),osg::StateAttribute::ON);
+    roadMat->getStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
+    roadMat->getStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::OFF| osg::StateAttribute::OVERRIDE);
+    roadMat->setVec4("_BackColor",backColor);
+    roadMat->setFloat("_FlashFrequency",flashFrequency);
+    roadMat->setFloat("_OuterWidth",outerWidth);
+    roadMat->setFloat("_PatternDensity",patternDensity);
+    roadMat->setFloat("_PatternWidth",patternWidth);
+    roadMat->setVec4("_PatternColor",patternColor);
+    roadMat->setInt("_PatternShape",patternShape);
+    roadMat->setFloat("_AnimSpeed",animSpeed);
+    roadMat->setFloat("_PathWidth",pathWidth);
+    roadMat->setFloat("_OuterGradientLowerBound",outerGradientLowerBound);
+    roadMat->setVec4("_OuterColor",outerColor);
+    roadMat->setMatrix("_ProjectionMatrix",Core::g_runtimeContext.renderSystem->getMainProjectionMatrix());
 }
 
+// Road::Road(osg::Vec3f planeNormal,float pathWidth,float innerRadius,int segment):m_planeNormal(planeNormal){
+//     setPathWidth(pathWidth);
+//     setInnerRadius(innerRadius);
+// }
 // void HighlightArea::setRadius(const char* propertyName,float radius){
 //     m_materials[1]->setFloat(propertyName,radius);
 //     m_geometries[1]->setFloatProperty(propertyName, radius);
@@ -86,36 +76,52 @@ void Road::loadResource(std::shared_ptr<Object> parentObject) {
 //     return m_geometries[1]->getProperty<float>(propertyName);
 // }
 
+void Road::setPathWidth(const char* propertyName,float rhs){
+    m_materials[0]->setFloat(propertyName,rhs);
+    m_geometries[0]->setFloatProperty(propertyName, rhs);
+}
+
+void Road::setInnerRadius(const char* propertyName,float rhs){
+
+}
+
+void Road::setPlaneNormal(const char* propertyName,const osg::Vec3f& planeNormal){
+
+}
+
+float Road::getPathWidth(const char* propertyName) const{
+
+}
+
+float Road::getInnerRadius(const char* propertyName) const{
+
+}
+
+osg::Vec3f Road::getPlaneNormal(const char* propertyName) const{
+
+}
+
+
 void Road::drawImGui() {    
-    if (ImGui::CollapsingHeader("HighLight Area")){
-        // if (ImGui::TreeNode("Geometry")){
-        //     GUI::Panel::SliderFloatWithSetter("Radius","_Radius", *this, &HighlightArea::getRadius,&HighlightArea::setRadius, 0.1f,10.0f);
-        //     GUI::Panel::SliderFloatWithSetter("Height","_Height", *this, &HighlightArea::getHeight,&HighlightArea::setHeight, 0.1f,10.0f);
-        //     ImGui::TreePop();
-        // }
-        // if (ImGui::TreeNode("Bottom")){
-        //     GUI::Panel::EditColorWithSetter("Outer Tint Color","_OutlineColor", *m_materials[0], &Material::getProperty<osg::Vec4>,&Material::setVec4);        
-        //     GUI::Panel::EditColorWithSetter("Inner Tint Color","_InnerColor", *m_materials[0], &Material::getProperty<osg::Vec4>,&Material::setVec4);
-        //     GUI::Panel::EditColorWithSetter("Pattern Color","_PatternColor", *m_materials[0], &Material::getProperty<osg::Vec4>,&Material::setVec4);
-        //     GUI::Panel::SliderIntWithSetter("Pattern Shape","_PatternShape", *m_materials[0], &Material::getProperty<int>,&Material::setInt, 0,7);
-        //     GUI::Panel::SliderFloatWithSetter("Flash Frequency","_FlashFrequency", *m_materials[0], &Material::getProperty<float>,&Material::setFloat, 0.0f,10.0f);
-        //     GUI::Panel::SliderFloatWithSetter("Animation Speed","_AnimSpeed", *m_materials[0], &Material::getProperty<float>,&Material::setFloat, -1.0f,1.0f);
-        //     GUI::Panel::SliderFloatWithSetter("Pattern Density","_PatternDensity", *m_materials[0], &Material::getProperty<float>,&Material::setFloat, 0.0f,10.0f);
-        //     GUI::Panel::SliderFloatWithSetter("Pattern Width","_PatternWidth", *m_materials[0], &Material::getProperty<float>,&Material::setFloat, 0.0f,1.0f);
-        //     ImGui::TreePop();
-        // }
-        // if(ImGui::TreeNode("Wall")){
-        //     GUI::Panel::EditColorWithSetter("Tint Color","_Color", *m_materials[1], &Material::getProperty<osg::Vec4>,&Material::setVec4);
-        //     GUI::Panel::SliderFloatWithSetter("Texture Density","_PatternDensity", *m_materials[1], &Material::getProperty<float>,&Material::setFloat, 0.0f,10.0f);        
-        //     GUI::Panel::SliderFloatWithSetter("Animation Speed","_AnimSpeed", *m_materials[1], &Material::getProperty<float>,&Material::setFloat, -1.0f,1.0f);
-        //     GUI::Panel::SliderFloatWithSetter("Pattern Width","_PatternWidth", *m_materials[1], &Material::getProperty<float>,&Material::setFloat, 0.0f,1.0f);
-        //     GUI::Panel::EditColorWithSetter("Pattern Color","_PatternColor", *m_materials[1], &Material::getProperty<osg::Vec4>,&Material::setVec4);        
-        //     GUI::Panel::SliderFloatWithSetter("Flash Frequency","_FlashFrequency", *m_materials[1], &Material::getProperty<float>,&Material::setFloat, 0.0f,10.0f);        
-        //     GUI::Panel::SliderIntWithSetter("Back Style","_BackStyle", *m_materials[1], &Material::getProperty<int>,&Material::setInt, 0,1);
-        //     GUI::Panel::SliderIntWithSetter("Pattern Shape","_PatternShape", *m_materials[1], &Material::getProperty<int>,&Material::setInt, 0,3);
-        //     GUI::Panel::SliderFloatWithSetter("Outer Width","_OuterWidth", *m_materials[1], &Material::getProperty<float>,&Material::setFloat, 0.0f,1.0f);
-        //     GUI::Panel::checkBoxWithSetter("Fade","_Fade", *m_materials[1], &Material::getProperty<bool>,&Material::setBool);
-        //     ImGui::TreePop();
-        // }            
+    if (ImGui::CollapsingHeader("Road FX")){
+        if (ImGui::TreeNode("Geometry")){
+            GUI::Panel::SliderIntWithSetter("Segments", *m_roadGeometry, m_roadGeometry->getProperty<int>("_Segments"), &Render::BaseGeometry::setSegments, 3,32);
+            GUI::Panel::SliderFloatWithSetter("PathWidth","_PathWidth", *this, &Road::getPathWidth,&Road::setPathWidth, 0.1f,10.0f);
+            GUI::Panel::SliderFloatWithSetter("InnerRadius", *m_roadGeometry, &Road::getInnerRadius,&Road::setInnerRadius, 0.1f,10.0f);            
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("Bottom")){
+            GUI::Panel::SliderFloatWithSetter("outerWidth","_OuterWidth", *m_materials[0], &Material::getProperty<float>,&Material::setFloat, 0.0f,1.0f);
+            GUI::Panel::EditColorWithSetter("backColor","_BackColor", *m_materials[0], &Material::getProperty<osg::Vec4>,&Material::setVec4);
+            GUI::Panel::SliderFloatWithSetter("flashFrequency","_FlashFrequency", *m_materials[0], &Material::getProperty<float>,&Material::setFloat, 0.0f,25);            
+            GUI::Panel::EditColorWithSetter("outerColor","_OuterColor", *m_materials[0], &Material::getProperty<osg::Vec4>,&Material::setVec4);            
+            GUI::Panel::SliderFloatWithSetter("outerGradientLowerBound","_OuterGradientLowerBound", *m_materials[0], &Material::getProperty<float>,&Material::setFloat, 0.0f,1.0f);            
+            GUI::Panel::SliderFloatWithSetter("patternDensity","_PatternDensity", *m_materials[0], &Material::getProperty<float>,&Material::setFloat, 0.0f,5);            
+            GUI::Panel::SliderFloatWithSetter("patternWidth","_PatternWidth", *m_materials[0], &Material::getProperty<float>,&Material::setFloat, 0.0f,1);
+            GUI::Panel::EditColorWithSetter("patternColor","_PatternColor", *m_materials[0], &Material::getProperty<osg::Vec4>,&Material::setVec4);
+            GUI::Panel::SliderIntWithSetter("patternShape","_PatternShape", *m_materials[0], &Material::getProperty<int>,&Material::setInt, 0,2);
+            GUI::Panel::SliderFloatWithSetter("animSpeed","_AnimSpeed", *m_materials[0], &Material::getProperty<float>,&Material::setFloat, 0.0f,10.0f);
+            ImGui::TreePop();
+        }
     }
 }

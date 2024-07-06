@@ -8,50 +8,33 @@ public:
     virtual void loadResource(std::shared_ptr<Object> parentObject) override;    
     virtual void drawImGui() override;
     Road() = default;
-    Road(std::unique_ptr<std::vector<osg::Vec3f>> pathKeyPoints,osg::Vec3f planeNormal = osg::Vec3f(0,1,0),float pathWidth=2.0f,float innerRadius = 0.0f,int segment=8);
-    // void setRadius(const char* propertyName,float radius);
-    // float getRadius(const char* propertyName);
-    // void setHeight(const char* propertyName,float height);
-    // float getHeight(const char* propertyName);
-    void setPathWidth(float rhs);
-    void setInnerRadius(float rhs);
+    // Road(osg::Vec3f planeNormal = osg::Vec3f(0,1,0),float pathWidth=2.0f,float innerRadius = 0.0f,int segment=8);
 
-public:
-    osg::Vec3f getPlaneNormal() const;
-    void setPlaneNormal(const osg::Vec3f& planeNormal);
+    void setPathWidth(const char* propertyName,float rhs);
+    void setInnerRadius(const char* propertyName,float rhs);
+    void setPlaneNormal(const char* propertyName,const osg::Vec3f& planeNormal);
+    float getPathWidth(const char* propertyName) const;
+    float getInnerRadius(const char* propertyName) const;
+    osg::Vec3f getPlaneNormal(const char* propertyName) const;
+// public:
+// private:
+//     osg::Vec3f m_planeNormal;
+//     std::unique_ptr<std::vector<osg::Vec3f>> m_pathKeyPoints;
 private:
-    osg::Vec3f m_planeNormal;
-    std::unique_ptr<std::vector<osg::Vec3f>> m_pathKeyPoints;
+    osg::ref_ptr<Render::BaseGeometry> m_roadGeometry;
+    float pathWidth = 1.0f;
+    float innerRadius = 2.0f;
 
-
-
-private:
-
-    osg::Vec4 wallTintColor = osg::Vec4(0,0.87,1.,0.235);
-
-    float wallTextureDensity = 1.9;
-    float wallAnimSpeed = -.6;
-    float wallPatternWidth = .258;
-    osg::Vec4 wallPatternColor = osg::Vec4(0,0.87,1.,1.0);
-    float wallFlashFrequency = 4;
-    int wallBackStyle = 0;
-    int wallPatternShape = 1;
-    float wallOuterWidth = 0;
-
-    float bottomOuterWidth = 0.2;
-    osg::Vec4 bottomOuterTintColor = osg::Vec4(0,0.87,1.,1.0);
-    osg::Vec4 bottomInnerTintColor = osg::Vec4(0,0.87,1.,0);
-    bool wallFade = true;
-
-
-    float bottomInnerAlphaScale = .547;
-
-    float bottomFlashFrequency = 1.7;
-    float bottomAnimSpeed = 0;
-    float bottomPatternDensity = 1.73;
-    float bottomPatternWidth = .039;
-    osg::Vec4 bottomPatternColor = osg::Vec4(1.0,0.0,0.0,0.0);
-    int bottomPatternShape = 1;
+    float outerWidth = 0.198;
+    osg::Vec4f backColor = osg::Vec4f(0.5377,0.5377,0.5377,0.5377);
+    float flashFrequency = 1.0;
+    osg::Vec4f outerColor = osg::Vec4f(0,0.968,1,0.877);
+    float outerGradientLowerBound = 0;
+    float patternDensity = 1.0;
+    float patternWidth = 0.22;
+    osg::Vec4f patternColor = osg::Vec4f(0.3162602,0.6164126,0.6509434,0.6470588);
+    int patternShape = 2;
+    float animSpeed = 1;
 };
 }
 

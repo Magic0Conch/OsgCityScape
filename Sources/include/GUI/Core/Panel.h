@@ -33,12 +33,28 @@ public:
             (object.*setter)(propertyName,tempValue);
         }
     }
+    
+    template<typename T, typename Getter, typename Setter>
+    static void SliderFloatWithSetter(const char* label,T& object, Getter getter, Setter setter,float minRange = 0.0f,float maxRange = 1.0f) {
+        float tempValue = (object.*getter)();
+        if (ImGui::SliderFloat(label, &tempValue, minRange, maxRange)) {
+            (object.*setter)(tempValue);
+        }
+    }
 
     template<typename T, typename Getter, typename Setter>
     static void SliderIntWithSetter(const char* label,const char* propertyName,T& object, Getter getter, Setter setter,int minRange = 0,int maxRange = 1) {
         int tempValue = (object.*getter)(propertyName);
         if (ImGui::SliderInt(label, &tempValue, minRange, maxRange)) {
             (object.*setter)(propertyName,tempValue);
+        }
+    }
+
+    template<typename T, typename Getter, typename Setter>
+    static void SliderIntWithSetter(const char* label,T& object, Getter getter, Setter setter,int minRange = 0,int maxRange = 1) {
+        int tempValue = (object.*getter)();
+        if (ImGui::SliderInt(label, &tempValue, minRange, maxRange)) {
+            (object.*setter)(tempValue);
         }
     }
 

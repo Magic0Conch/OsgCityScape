@@ -34,6 +34,11 @@ void BaseGeometry::setSegments(float rhs){
     setIntProperty("_Segments", rhs);
 }
 
+float BaseGeometry::getSegments(){
+    return getProperty<int>("_Segments");
+
+}
+
 std::unordered_map<std::string, std::any>& BaseGeometry::getProperties(){
     return m_properties;
 }
