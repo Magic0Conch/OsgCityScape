@@ -22,7 +22,7 @@ namespace CSEditor::GUI{
 
 class UIManager: public osgGA::GUIEventHandler{
 public:
-    UIManager();
+    UIManager(std::shared_ptr<int> m_captureFlag);
     ~UIManager();
     
     template<typename T,typename... Args>
@@ -61,6 +61,7 @@ private:
     float mouseWheel_;
     bool initialized_;
     std::shared_ptr<Core::Event<int,int>> onScenePanelSizeChanged;
+    std::shared_ptr<int> m_captureFlag;
 };
 
 }

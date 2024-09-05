@@ -245,7 +245,7 @@ int main( int argc, char** argv )
     manipulator->setHomePosition(osg::Vec3d(0,40,0), osg::Vec3d(0,0,0),osg::Vec3f(0,0,1));
     viewer.setCameraManipulator(manipulator);
     viewer.setSceneData(setupScene());
-    viewer.addEventHandler(new UIManager);
+    // viewer.addEventHandler(new UIManager);
     viewer.setRealizeOperation(new ImGuiInitOperation);
     osg::Camera* cam = viewer.getCamera();
 

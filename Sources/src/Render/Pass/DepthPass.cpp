@@ -1,4 +1,4 @@
-#include "Render/LowRender/RenderDepthToTexture.h"
+#include "Render/Pass/DepthPass.h"
 #include "Editor/Core/RuntimeContext.h"
 #include "osg/CullFace"
 #include "osg/StateAttribute"
@@ -10,10 +10,19 @@
 #include "Resources/Loaders/ShaderLoader.h"
 #include "osg/Uniform"
 
-namespace CSEditor::Render {
+using namespace CSEditor::Render; 
 
+void DepthPass::setup(osg::ref_ptr<osg::GraphicsContext> gc,const int width,const int height,
+osg::ref_ptr<osg::Texture2DArray> depthArray,int depthTextureIndex,unsigned int cullMask,int renderOrder){
+    setGraphicsContext(gc);
+    setViewport(0,0,width,height);
+    attach(osg::Camera::DEPTH_BUFFER,depthArray.get(),0,depthTextureIndex);
+    setCullMask(0x1);
+    setRenderOrder(osg::Camera::PRE_RENDER, 0);
+    setName("DepthPass");
+}
 
-void createDepthShader(osg::StateSet* ss) {
+void DepthPass::createDepthShader(osg::StateSet* ss) {
     const std::string& vertPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "common/Depth.vert").string();
     const std::string& fragPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "common/Depth.frag").string();
     osg::ref_ptr<osg::Program> program = Resources::ShaderLoader::create(vertPath, fragPath);        
@@ -21,7 +30,7 @@ void createDepthShader(osg::StateSet* ss) {
 }
 
 
-RenderDepthToTexture::RenderDepthToTexture()
+DepthPass::DepthPass()
 {
     setClearMask(GL_DEPTH_BUFFER_BIT);
     setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
@@ -44,12 +53,12 @@ RenderDepthToTexture::RenderDepthToTexture()
     ss->setAttributeAndModes(cullFace, osg::StateAttribute::ON);
 }
 
-osg::Texture2D* RenderDepthToTexture::getTexture() const
+osg::Texture2D* DepthPass::getTexture() const
 {
     return _texture.get();
 }
 
-void RenderDepthToTexture::setViewMatrix(const osg::Matrixd& viewMatrix){
+void DepthPass::setViewMatrix(const osg::Matrixd& viewMatrix){
     auto ss = getOrCreateStateSet();
     osg::ref_ptr<osg::Uniform> viewMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4,"_ViewMatrix");
     if (viewMatrixUniform) {
@@ -63,7 +72,7 @@ void RenderDepthToTexture::setViewMatrix(const osg::Matrixd& viewMatrix){
     ss->addUniform(viewMatrixUniform);
 }
 
-void RenderDepthToTexture::setProjectionMatrix(const osg::Matrixd& projectionMatrix){
+void DepthPass::setProjectionMatrix(const osg::Matrixd& projectionMatrix){
     auto ss = getOrCreateStateSet();
     osg::ref_ptr<osg::Uniform> projectionMatrixUniform = ss->getUniform("_ProjectionMatrix");
     if (projectionMatrixUniform) {
@@ -75,11 +84,11 @@ void RenderDepthToTexture::setProjectionMatrix(const osg::Matrixd& projectionMat
     }
 }
 
-RenderDepthToTexture::~RenderDepthToTexture(){
-    spdlog::info("RenderDepthToTexture destroyed");
-}
+DepthPass::~DepthPass(){
 
 }
+
+
 
 // void RenderDepthToTexture::setViewProjectionMatrix(const osg::Matrixd& viewMatrix){
 //     auto ss = getOrCreateStateSet();

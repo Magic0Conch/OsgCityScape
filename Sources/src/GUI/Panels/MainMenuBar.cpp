@@ -6,6 +6,7 @@
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include "imgui_internal.h"
+#include "Render/RenderSystem.h"
 #include "Windowing/Window.h"
 using namespace CSEditor::GUI;
 
@@ -85,6 +86,11 @@ void MainMenuBar::drawImpl(){
                     activeLevel->importObjFromFolderRecursively(folderPath,"obj");                
                 }
                 if (ImGui::MenuItem("Save As","CTRL + SHIFT + S")){
+                    
+                }
+                if (ImGui::MenuItem("Capture Frame")){
+                    Core::g_runtimeContext.renderSystem->captureFrame();
+
                 }
                 ImGui::EndMenu();
             }
@@ -111,6 +117,20 @@ void MainMenuBar::drawImpl(){
                     }
                     if (ImGui::MenuItem("DatasetGen")){
                     }
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Render Pipeline Mode")){
+                    static int selectedOption = 0;
+
+                    if (ImGui::MenuItem("Default", NULL, selectedOption == 0)) {
+                        selectedOption = 0;
+                        Core::g_runtimeContext.renderSystem->setRenderPipelineState(Render::RenderPipelineState::Default);
+                    }
+                    if (ImGui::MenuItem("TextureBaking", NULL, selectedOption == 1)) {
+                        selectedOption = 1;
+                        Core::g_runtimeContext.renderSystem->setRenderPipelineState(Render::RenderPipelineState::TextureBaking);
+                    }
+                    
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenu();
