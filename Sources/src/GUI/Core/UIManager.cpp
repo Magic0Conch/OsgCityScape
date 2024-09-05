@@ -33,10 +33,6 @@ struct UIManager::ImGuiRenderCallback : public osg::Camera::DrawCallback
 
     void operator()(osg::RenderInfo& renderInfo) const override{
         handler_.render(renderInfo);
-        // auto contextId = renderInfo.getContextID();
-        // auto textureObject = Core::g_runtimeContext.windowSystem->getScreenTexture()->getTextureObject(contextId);
-        // auto id = textureObject->id();
-        // std::cout<<id<<std::endl;
     }
 
 private:
@@ -44,7 +40,8 @@ private:
 };
 
 
-UIManager::UIManager(): time_(0.0f), mousePressed_{false,false,false}, mouseWheel_(0.0f), initialized_(false){
+UIManager::UIManager(std::shared_ptr<int> captureFlag): time_(0.0f), mousePressed_{false,false,false}, mouseWheel_(0.0f), initialized_(false){
+    m_captureFlag = captureFlag;
     auto& event = Core::g_runtimeContext.eventManager->getOrCreateEvent<Core::Event<int,int>>("ScenePanelSizeChanged");
     onScenePanelSizeChanged.reset(&event);        
     IMGUI_CHECKVERSION();
@@ -70,8 +67,8 @@ UIManager::~UIManager(){
 
 void UIManager::setCameraCallbacks(osg::Camera* camera)
 {
-    camera->setPreDrawCallback(new ImGuiNewFrameCallback(*this));
-    camera->setPostDrawCallback(new ImGuiRenderCallback(*this));
+    camera->setPostDrawCallback(new ImGuiNewFrameCallback(*this));
+    camera->setFinalDrawCallback(new ImGuiRenderCallback(*this));
 }
 
 static int ConvertFromOSGKey(int key)
@@ -321,9 +318,9 @@ void UIManager::newFrame(osg::RenderInfo& renderInfo){
     // if (!panels_.size()) return;
     ImGui_ImplOpenGL3_NewFrame();
     ImGuiIO& io = ImGui::GetIO();
-    
+    auto windowSize = Core::g_runtimeContext.windowSystem->getSize();
     auto viewport = Core::g_runtimeContext.windowSystem->getViewport();
-    io.DisplaySize = ImVec2(viewport->width(), viewport->height());
+    io.DisplaySize = ImVec2(windowSize.first,windowSize.second);
 
 
     double currentTime = renderInfo.getView()->getFrameStamp()->getSimulationTime();
@@ -336,6 +333,7 @@ void UIManager::newFrame(osg::RenderInfo& renderInfo){
     io.MouseWheel = mouseWheel_;
     mouseWheel_ = 0.0f;
 	ImGui::NewFrame();
+
     auto [x,y]  = ImGui::GetWindowSize();
     if (dockspace_on_){
         ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -355,12 +353,16 @@ void UIManager::newFrame(osg::RenderInfo& renderInfo){
         ImGui::End();
         ImGui::PopStyleVar(3);      
     }
+
+
 }
 
 void UIManager::render(osg::RenderInfo&){
+
     for (auto& panel : panels_){
         panel->drawUi();
     }
+    
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

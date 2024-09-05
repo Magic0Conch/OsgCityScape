@@ -5,7 +5,7 @@ namespace CSEditor::Settings {
 struct WindowSettings{
     // static const int32_t DontCare = -1;
     std::string title = "City Scape Editor";
-    uint16_t width = 1080;
+    uint16_t width = 1280;
     uint16_t height = 720;
     bool fullscreen = true;
     bool decorated = true;

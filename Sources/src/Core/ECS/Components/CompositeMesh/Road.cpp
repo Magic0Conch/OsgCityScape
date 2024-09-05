@@ -105,9 +105,9 @@ osg::Vec3f Road::getPlaneNormal(const char* propertyName) const{
 void Road::drawImGui() {    
     if (ImGui::CollapsingHeader("Road FX")){
         if (ImGui::TreeNode("Geometry")){
-            GUI::Panel::SliderIntWithSetter("Segments", *m_roadGeometry, m_roadGeometry->getProperty<int>("_Segments"), &Render::BaseGeometry::setSegments, 3,32);
+            // GUI::Panel::SliderIntWithSetter("Segments", *m_roadGeometry, m_roadGeometry->getProperty<int>("_Segments"), &Render::BaseGeometry::setSegments, 3,32);
             GUI::Panel::SliderFloatWithSetter("PathWidth","_PathWidth", *this, &Road::getPathWidth,&Road::setPathWidth, 0.1f,10.0f);
-            GUI::Panel::SliderFloatWithSetter("InnerRadius", *m_roadGeometry, &Road::getInnerRadius,&Road::setInnerRadius, 0.1f,10.0f);            
+            // GUI::Panel::SliderFloatWithSetter("InnerRadius", *m_roadGeometry, &Road::getInnerRadius,&Road::setInnerRadius, 0.1f,10.0f);            
             ImGui::TreePop();
         }
         if (ImGui::TreeNode("Bottom")){
