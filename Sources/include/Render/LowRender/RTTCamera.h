@@ -17,7 +17,9 @@
 #include "Resources/Material.h"
 #include "Resources/RenderTexture.h"
 #include "osg/Geometry"
+#include "osg/Image"
 #include "osg/StateSet"
+#include "osg/Texture2D"
 #include "osg/Vec2"
 #include "osg/Vec3"
 #include "osg/Vec4"
@@ -27,13 +29,14 @@ class RTTCamera:public osg::Referenced{
 
 public:
     /*constructor*/
-    RTTCamera(RenderTexture* source,RenderTexture* destination,const std::string& vertPath,const std::string& fragPath);
-    RTTCamera(osg::Group* source,RenderTexture* destination,const std::string& vertPath,const std::string& fragPath);
-    RTTCamera(RenderTexture* destination);
-    RTTCamera(RenderTexture* destination,osg::ref_ptr<Material> material);
+    RTTCamera(osg::Texture2D* source,osg::Texture2D* destination,const std::string& vertPath,const std::string& fragPath);
+    RTTCamera(osg::Texture2D* source,osg::Image* destination,const std::string& vertPath,const std::string& fragPath);
+    RTTCamera(osg::Group* source,osg::Texture2D* destination,const std::string& vertPath,const std::string& fragPath);
+    RTTCamera(osg::Texture2D* destination);
+    RTTCamera(osg::Texture2D* destination,osg::ref_ptr<Material> material);
 
     /*setter and getter*/
-    osg::ref_ptr<RenderTexture> getDestinationTexture() const;
+    osg::ref_ptr<osg::Texture2D> getDestinationTexture() const;
     osg::ref_ptr<osg::Geode> getDestinationQuadGeode() const;
     osg::ref_ptr<osg::Camera> getRTTCamera() const;
     osg::ref_ptr<Render::Material> getMaterial() const;
@@ -43,8 +46,9 @@ public:
 
 private:
     osg::ref_ptr<Render::Material> m_material;
-    osg::ref_ptr<RenderTexture> m_sourceTexture = nullptr;
-    osg::ref_ptr<RenderTexture> m_destinationTexture = nullptr;
+    osg::ref_ptr<osg::Texture2D> m_sourceTexture = nullptr;
+    osg::ref_ptr<osg::Texture2D> m_destinationTexture = nullptr;
+    osg::ref_ptr<osg::Image> m_destinationImage = nullptr;
     osg::ref_ptr<osg::Camera> m_camera;
     osg::ref_ptr<osg::Geode> m_sourceGeode;
     bool m_mutisample = false;

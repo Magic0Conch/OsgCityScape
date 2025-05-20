@@ -10,38 +10,36 @@
 #include "osg/Image"
 #include "osg/StateAttribute"
 #include "osg/ref_ptr"
+#include "osgDB/WriteFile"
 
 using namespace CSEditor::Render;
 using namespace CSEditor;
-void createTextureProjectionShader(osg::StateSet* ss) {
-    const std::string& vertPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "common/TextureProjection.vert").string();
-    const std::string& fragPath = (Core::g_runtimeContext.configManager->getShaderFolder() / "common/TextureProjection.frag").string();
+
+void TextureProjectionPass::createTextureProjectionShader(const std::string& shaderName) {
+    //UVUnwrap TextureProjection
+    auto ss = m_camera->getOrCreateStateSet();
+    const std::string& vertPath = (Core::g_runtimeContext.configManager->getShaderFolder() / fmt::format("common/{}.vert", shaderName)).string();
+    const std::string& fragPath = (Core::g_runtimeContext.configManager->getShaderFolder() / fmt::format("common/{}.frag", shaderName)).string();
     osg::ref_ptr<osg::Program> program = Resources::ShaderLoader::create(vertPath, fragPath);   
     
     ss->setAttributeAndModes(program.get(), osg::StateAttribute::ON);
 }
 
-TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m_camera(camera) {
+TextureProjectionPass::TextureProjectionPass() {
+}
+
+void TextureProjectionPass::setup(osg::ref_ptr<osg::Camera> camera,osg::ref_ptr<osg::Texture2D> colorTexture,
+    osg::ref_ptr<osg::Texture2D> depthStencilTexture,unsigned int cullMask,int renderOrder){
+    m_camera = camera;
     m_camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     m_camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
     m_camera->setName("RenderColor");
 
-    _texture = new osg::Texture2D();
-    _texture->setWrap(osg::Texture2D::WrapParameter::WRAP_T,osg::Texture2D::WrapMode::REPEAT);
-    _texture->setWrap(osg::Texture2D::WrapParameter::WRAP_S,osg::Texture2D::WrapMode::REPEAT);
-    _texture->setSourceFormat(GL_RGBA);
-    _texture->setInternalFormat(GL_RGBA8);
-    _texture->setSourceType(GL_FLOAT);
-
-    _depthStencilTexture = new osg::Texture2D();
-    _depthStencilTexture->setWrap(osg::Texture2D::WrapParameter::WRAP_T,osg::Texture2D::WrapMode::REPEAT);
-    _depthStencilTexture->setWrap(osg::Texture2D::WrapParameter::WRAP_S,osg::Texture2D::WrapMode::REPEAT);
-    _depthStencilTexture->setSourceFormat(GL_DEPTH_STENCIL);
-    _depthStencilTexture->setInternalFormat(GL_DEPTH24_STENCIL8);
-    _depthStencilTexture->setSourceType(GL_UNSIGNED_INT_24_8);    
+    _texture = colorTexture;
+    _depthStencilTexture = depthStencilTexture;    
 
     auto stateSet = m_camera->getOrCreateStateSet();
-    createTextureProjectionShader(stateSet);
+    createTextureProjectionShader("TextureProjection");
     stateSet->addUniform(new osg::Uniform("depthMap", 1));
     stateSet->addUniform(new osg::Uniform("colorMap", 2));
     stateSet->addUniform(new osg::Uniform("mainTexture", 0));
@@ -56,13 +54,16 @@ TextureProjectionPass::TextureProjectionPass(osg::ref_ptr<osg::Camera> camera):m
     // m_camera->setNodeMask(0x1);
     m_camera->setCullingMode(m_camera->getCullingMode() & ~osg::CullSettings::SMALL_FEATURE_CULLING);
     m_camera->attach(osg::Camera::COLOR_BUFFER0, _texture);
-    
     m_camera->attach(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER, _depthStencilTexture);
     Core::g_runtimeContext.windowSystem->setScreenTexture(_texture);
     auto cullFace = new osg::CullFace;
     cullFace->setMode(osg::CullFace::BACK);
     stateSet->setAttributeAndModes(cullFace, osg::StateAttribute::ON);
+
+    m_camera->setCullMask(cullMask);
+    m_camera->setRenderOrder(osg::Camera::PRE_RENDER, renderOrder);
 }
+
 
 
 void TextureProjectionPass::setTextureArray(osg::ref_ptr<osg::Texture2DArray> depthMapArray, std::vector<osg::ref_ptr<osg::Texture2D>> colorTexVec, std::vector<osg::Matrixd>& projectionMatrixVec) {
@@ -130,4 +131,27 @@ void TextureProjectionPass::setLightSpaceMatrixUniform(int index,osg::Matrixd& l
 
 void TextureProjectionPass::setProjectionEnabled(int index, bool enable){
     m_enableProjectionUniform->setElement(index, enable);
+}
+
+void TextureProjectionPass::saveTexture(std::string savePath){
+    osg::ref_ptr<osg::Image> image = new osg::Image;
+    // image->allocateImage(4096, 4096, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+    image->readPixels(0, 0, 4096, 4096, GL_RGBA, GL_UNSIGNED_BYTE);
+    
+    osg::ref_ptr<osg::FrameBufferObject> fbo = new osg::FrameBufferObject;
+    fbo->setAttachment(osg::Camera::COLOR_BUFFER, osg::FrameBufferAttachment(_texture));
+    auto state = m_camera->getGraphicsContext()->getState();
+    fbo->apply(*state);
+    glReadPixels(0, 0,4096, 4096, GL_RGBA, GL_UNSIGNED_BYTE, image->data());
+    try {
+        // bool result = osgDB::writeImageFile(*outputImage, "output.jpg");
+        bool result = osgDB::writeImageFile(*image,"output.jpg");
+        if (!result) {
+            std::cerr << "Error writing file output.jpg" << std::endl;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Exception caught: " << e.what() << std::endl;
+    }
+    _texture->apply(*state);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->data());
 }

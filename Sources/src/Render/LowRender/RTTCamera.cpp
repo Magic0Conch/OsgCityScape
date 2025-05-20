@@ -12,7 +12,7 @@
 
 using namespace CSEditor::Render;
 
-RTTCamera::RTTCamera(RenderTexture* source,RenderTexture* destination,const std::string& vertPath,const std::string& fragPath):
+RTTCamera::RTTCamera(osg::Texture2D* source,osg::Texture2D* destination,const std::string& vertPath,const std::string& fragPath):
 m_sourceTexture(source),m_destinationTexture(destination){
     m_material = new Material(vertPath,fragPath);
     m_camera = new osg::Camera();
@@ -26,7 +26,25 @@ m_sourceTexture(source),m_destinationTexture(destination){
     setDefaultUniformParameters();
     m_camera->addChild(m_sourceGeode);
 }
-RTTCamera::RTTCamera(osg::Group* source,RenderTexture* destination,
+
+RTTCamera::RTTCamera(osg::Texture2D* source,osg::Image* destination,const std::string& vertPath,const std::string& fragPath):
+m_sourceTexture(source){
+    m_material = new Material(vertPath,fragPath);
+    m_camera = new osg::Camera();
+    m_destinationImage = destination;
+    initializeRTTCameraParameters();
+    m_sourceGeode = new osg::Geode;
+    osg::ref_ptr<osg::Geometry> quad = osg::createTexturedQuadGeometry(osg::Vec3(-1,-1,0), osg::Vec3(2,0,0), osg::Vec3(0,2,0));
+    quad->setVertexAttribArray(0,quad->getVertexArray());
+    quad->setVertexAttribArray(1,quad->getTexCoordArray(0));
+    m_sourceGeode->addDrawable(quad);
+
+    setDefaultUniformParameters();
+    m_camera->addChild(m_sourceGeode);
+}
+
+
+RTTCamera::RTTCamera(osg::Group* source,osg::Texture2D* destination,
 const std::string& vertPath,const std::string& fragPath):
 m_destinationTexture(destination){
     m_material = new Material(vertPath,fragPath);
@@ -43,12 +61,12 @@ m_destinationTexture(destination){
     }    
 }
 
-RTTCamera::RTTCamera(RenderTexture* destination):m_destinationTexture(destination){
+RTTCamera::RTTCamera(osg::Texture2D* destination):m_destinationTexture(destination){
     m_camera = new osg::Camera();
     initializeRTTCameraParameters();
 }
 
-RTTCamera::RTTCamera(RenderTexture* destination,osg::ref_ptr<Material> material):m_destinationTexture(destination),m_material(material){
+RTTCamera::RTTCamera(osg::Texture2D* destination,osg::ref_ptr<Material> material):m_destinationTexture(destination),m_material(material){
     m_camera = new osg::Camera();
     initializeRTTCameraParameters();
     m_sourceGeode = new osg::Geode;
@@ -62,17 +80,21 @@ RTTCamera::RTTCamera(RenderTexture* destination,osg::ref_ptr<Material> material)
 }
 
 void RTTCamera::initializeRTTCameraParameters(){
-    osg::ref_ptr<osg::Texture2D>  texture = new osg::Texture2D;
+    // osg::ref_ptr<osg::Texture2D>  texture = new osg::Texture2D;
     // texture->MULTISAMPLE
     
     m_camera->setClearColor(osg::Vec4f(0,0,0,0));
     m_camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // m_camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-    m_camera->setRenderOrder(osg::Camera::PRE_RENDER);
+    m_camera->setRenderOrder(osg::Camera::POST_RENDER,3);
     m_camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
     m_camera->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     //attach destination texture
-    if(m_destinationTexture){
+    if(m_destinationImage!=nullptr){
+        m_camera->setViewport(0, 0, 4096,4096);
+        m_camera->attach(osg::Camera::COLOR_BUFFER0, m_destinationImage.get());
+    }
+    else if(m_destinationTexture){
         m_camera->setViewport(0, 0, m_destinationTexture->getTextureWidth(), m_destinationTexture->getTextureHeight());
         if (m_mutisample) {
             m_camera->attach(osg::Camera::COLOR_BUFFER0, m_destinationTexture.get(),0,0,false,4);
@@ -95,7 +117,7 @@ void RTTCamera::setDefaultUniformParameters(){
     
 }
 
-osg::ref_ptr<RenderTexture> RTTCamera::getDestinationTexture() const{
+osg::ref_ptr<osg::Texture2D> RTTCamera::getDestinationTexture() const{
     return m_destinationTexture;
 }
 

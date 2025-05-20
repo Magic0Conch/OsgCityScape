@@ -145,7 +145,7 @@ int main(){
     osgViewer::Viewer viewer;
     viewer.setUpViewInWindow(100, 100,width, height);
     viewer.addEventHandler(new osgViewer::StatsHandler());
-    viewer.addEventHandler(new UIManager());
+    // viewer.addEventHandler(new UIManager());
     viewer.setRealizeOperation(new ImGuiInitOperation);
     auto scene = setupScene();
     scene->setUpdateCallback(new Portal2DUpdateUniformCallback(portal2DPipeline));

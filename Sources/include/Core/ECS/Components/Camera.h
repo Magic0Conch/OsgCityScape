@@ -1,7 +1,7 @@
 #pragma once
 #include "Component.h"
 #include "Core/ECS/Components/Transform.h"
-#include "Render/LowRender/RenderDepthToTexture.h"
+#include "Render/Pass/DepthPass.h"
 #include "Render/Pass/TextureProjectionPass.h"
 #include "osg/Camera"
 #include "osg/CullSettings"
@@ -47,7 +47,7 @@ public:
     void setProjectionTextureSize(int width, int height);
     std::string getProjectionTexturePath() const;
 
-    void setRenderDepthToTexturePass(std::shared_ptr<Render::RenderDepthToTexture> renderDepthToTexture);
+    void setRenderDepthToTexturePass(std::shared_ptr<Render::DepthPass> renderDepthToTexture);
     void setIndexInProjectionPass(short index);
     void setTextureProjectionPass(std::shared_ptr<Render::TextureProjectionPass> textureProjectionPass);
     void setMatrixInRenderSystem();
@@ -116,7 +116,7 @@ private:
     osg::Vec3 m_localForward = m_defaultForward;
     osg::Vec3 m_localUp = m_defaultUp;
 
-    std::shared_ptr<Render::RenderDepthToTexture> m_renderDepthToTexture;
+    std::shared_ptr<Render::DepthPass> m_renderDepthToTexture;
     short m_indexInProjectionPass = -1;
     std::shared_ptr<Render::TextureProjectionPass> m_textureProjectionPass;
     osg::Matrixd m_viewProjectionMatrix;

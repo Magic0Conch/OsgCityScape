@@ -68,7 +68,6 @@ bool Level::load(const std::string& levelResourceUrl){
     
     Core::g_runtimeContext.assetManager->loadAsset(levelResourceUrl, *m_levelResource);
     auto rootSceneNode = getRootObject()->getTransformComponent().getNode().get();
-    // rootSceneNode->setNodeMask(0x1);
     Core::g_runtimeContext.viewer->setSceneData(rootSceneNode);
     auto objects = m_levelResource->getObjects();
     for (const ResourceType::ObjectInstance& objectInstanceRes:objects) {

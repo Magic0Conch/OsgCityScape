@@ -107,7 +107,7 @@ void Road::drawImGui() {
         if (ImGui::TreeNode("Geometry")){
             GUI::Panel::SliderIntWithSetter("Segments", *m_roadGeometry,&Render::Road::getSegments, &Render::Road::setSegments, 3,128);
             GUI::Panel::SliderFloatWithSetter("PathWidth","_PathWidth", *this, &Road::getPathWidth,&Road::setPathWidth, 0.1f,10.0f);
-            GUI::Panel::SliderFloatWithSetter("InnerRadius", *m_roadGeometry, &Render::Road::getInnerRadius,&Render::Road::setInnerRadius, 0.1f,10.0f);
+            // GUI::Panel::SliderFloatWithSetter("InnerRadius", *m_roadGeometry, &Render::Road::getInnerRadius,&Render::Road::setInnerRadius, 0.1f,10.0f);
             ImGui::TreePop();
         }
         if (ImGui::TreeNode("Bottom")){

@@ -141,7 +141,7 @@ std::vector<float> Camera::getRotationVector() const{
     return {m_rotation.x(), m_rotation.y(), m_rotation.z(), m_rotation.w()};
 }
 
-void Camera::setRenderDepthToTexturePass(std::shared_ptr<Render::RenderDepthToTexture> renderDepthToTexture){
+void Camera::setRenderDepthToTexturePass(std::shared_ptr<Render::DepthPass> renderDepthToTexture){
     m_renderDepthToTexture = renderDepthToTexture;
 }
 

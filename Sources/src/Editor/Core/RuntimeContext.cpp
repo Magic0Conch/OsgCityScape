@@ -37,7 +37,7 @@ RuntimeContext::RuntimeContext(){
     editorInputManager = std::make_unique<Core::EditorInputManager>(CSEditor::Core::g_runtimeContext.viewer->getCamera());
 
     assetManager = std::make_unique<Resources::AssetManager>();
-    uiManager = new GUI::UIManager;
+    uiManager = new GUI::UIManager(renderSystem->getCaptureFlag());
     // GUI::Hierachy hie;
     
 }
