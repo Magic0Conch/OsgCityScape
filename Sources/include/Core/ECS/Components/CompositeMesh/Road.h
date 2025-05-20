@@ -37,5 +37,3 @@ private:
     float animSpeed = 1;
 };
 }
-
-

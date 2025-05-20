@@ -8,7 +8,7 @@ using namespace CSEditor::GUI;
 
 Hierachy::Hierachy():m_level(Core::g_runtimeContext.worldManager->getCurrentActiveLevel()),m_objectsMap(m_level->getSceneObjectsMap()){    
     auto& event = Core::g_runtimeContext.eventManager->getOrCreateEvent<Core::Event<int>>("SelectedObjectChanged");
-    onSelectedObjectChanged.reset(&event);        
+    onSelectedObjectChanged.reset(&event);
 }
 
 void Hierachy::drawHierachyNodeRecursively(ECS::ObjectID objectID){

@@ -6,6 +6,7 @@
 #include "Render/Debugging/CaptureCallback.h"
 #include "Render/Pass/ObjectPickerPass.h"
 #include "Render/Config/RenderConfig.h"
+#include "Core/Helpers/TaskQueue.h"
 
 namespace CSEditor::Render {
 class RenderSystem{

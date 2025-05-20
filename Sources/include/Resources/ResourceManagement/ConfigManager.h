@@ -21,6 +21,8 @@ namespace CSEditor::Resources
         const std::filesystem::path& getShaderFolder() const;
         const std::filesystem::path& getMaterialFolder() const;
         const std::filesystem::path& getBinaryFolder() const;
+        const std::filesystem::path& getCaptureImageFolder() const;
+        
         // const std::string& getGlobalRenderingResUrl() const;
 
     private:
@@ -30,5 +32,6 @@ namespace CSEditor::Resources
         std::filesystem::path m_defaultWorldUrl;
         std::filesystem::path m_shaderRootPath;
         std::filesystem::path m_materialRootPath;
+        std::filesystem::path m_captureImageFolder;
     };
 } 

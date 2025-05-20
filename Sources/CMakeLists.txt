@@ -11,7 +11,7 @@ target_include_directories(
 )
 find_package(OpenGL REQUIRED)
 message(STATUS "OpenGL found: ${OPENGL_FOUND} " ${OPENGL_LIBRARIES})
-
+# find_package(PNG REQUIRED)
 target_link_libraries(${TEST_NAME}
     PUBLIC
       imgui
@@ -21,6 +21,7 @@ target_link_libraries(${TEST_NAME}
       json11
       glm
       ${OPENGL_LIBRARIES}
+      # PNG::PNG
 )
 
 install (TARGETS ${TEST_NAME}

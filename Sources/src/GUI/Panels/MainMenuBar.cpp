@@ -104,6 +104,9 @@ void MainMenuBar::drawImpl(){
                     auto activeLevel = Core::g_runtimeContext.worldManager->getCurrentActiveLevel();
                     activeLevel->printSceneGraph();
                 }
+                if(ImGui::MenuItem("Test")){
+                    Core::g_runtimeContext.assetManager->loadImage(R"(E:\work\2401\OsgCityScape\resources\textures\tryforfree_light.png)");
+                }
                 if (ImGui::BeginMenu("Add Object")){
                     if (ImGui::MenuItem("Add Empty Object")){
                         auto activeLevel = Core::g_runtimeContext.worldManager->getCurrentActiveLevel();

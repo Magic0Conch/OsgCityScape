@@ -90,15 +90,15 @@ void Road::setPlaneNormal(const char* propertyName,const osg::Vec3f& planeNormal
 }
 
 float Road::getPathWidth(const char* propertyName) const{
-
+    return 0;
 }
 
 float Road::getInnerRadius(const char* propertyName) const{
-
+    return 0;
 }
 
 osg::Vec3f Road::getPlaneNormal(const char* propertyName) const{
-
+    return osg::Vec3f(1.0f,1.0f,1.0f);
 }
 
 

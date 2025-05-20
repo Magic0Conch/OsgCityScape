@@ -7,7 +7,6 @@
 #include <glm/fwd.hpp>
 #include <vector>
 
-
 namespace CSEditor::Math {
     class Math{
     public:

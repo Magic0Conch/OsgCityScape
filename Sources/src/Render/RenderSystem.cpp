@@ -160,7 +160,44 @@ namespace CSEditor::Render {
     }
 
     void RenderSystem::captureFrame(){
+        // std::string libraryName = "osgPlugins-3.6.4/osgdb_png"; // 例如加载PNG插件
+
+        // if (osgDB::Registry::instance()->loadLibrary(libraryName)) {
+        //     std::cout << "Successfully loaded library: " << libraryName << std::endl;
+        // } else {
+        //     std::cerr << "Failed to load library: " << libraryName << std::endl;
+        // }
+
+        m_captureCallback->directoryPath = Core::g_runtimeContext.configManager->getCaptureImageFolder().string();
+        auto sceneObjects = m_level->getSceneObjectsMap();
+        m_captureCallback->fileName = "SceneImage.jpg";
         *m_captureFlag = 0;
+        
+        // TaskQueue taskQueue;
+        // for (const auto [id, objectPtr] : sceneObjects) {
+        //     auto idCopy = id;
+        //     auto objectPtrCopy = objectPtr;            
+        //     taskQueue.pushTask([this,idCopy,objectPtrCopy]()
+        //     {
+        //         std::cout << "ID: " << idCopy << ", Object Pointer: " << objectPtrCopy << std::endl;
+        //         auto mesh = objectPtrCopy->getComponent<ECS::ModelMesh>();
+        //         if(mesh){
+        //             while (!m_captureCallback->readyToCapture()) {
+        //                 //忙等待
+        //             }
+        //             m_captureCallback->fileName = objectPtrCopy->getName() + ".jpg";
+        //             auto& event = Core::g_runtimeContext.eventManager->getOrCreateEvent<Core::Event<int>>("SelectedObjectChanged");
+        //             // onSelectedObjectChanged.reset(&event);
+        //             event.invoke(idCopy);
+        //             *m_captureFlag = 0;
+        //         }                
+        //     }
+        //     );
+        // }
+        // std::thread taskThread([&taskQueue]() {
+        //     taskQueue.processTasks();
+        // });
+        // taskThread.detach();
     }
     
     std::shared_ptr<int> RenderSystem::getCaptureFlag(){

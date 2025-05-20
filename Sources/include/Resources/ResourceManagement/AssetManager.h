@@ -1,10 +1,10 @@
 #pragma once
 #include "Core/Helpers/ISerializer.h"
 #include "Core/Helpers/Serializer.h"
+#include <osgDB/ReadFile>
 #include "spdlog/spdlog.h"
 #include <filesystem>
 #include <fstream>
-#include <memory>
 #include <sstream>
 #include <string>
 #include <json11.hpp>
@@ -67,5 +67,16 @@ namespace CSEditor::Resources
         }
         
         std::filesystem::path getFullPath(const std::string& relativePath) const;
+
+        osg::ref_ptr<osg::Image> loadImage(const std::string& fileName) {
+            osg::ref_ptr<osg::Image> image = osgDB::readImageFile(fileName);
+            if (!image) {
+                std::cerr << "Error: Failed to load image: " << fileName << std::endl;
+            } else {
+                std::cout << "Successfully loaded image: " << fileName << std::endl;
+            }
+            return image;
+        }
+
     };
 } 
