@@ -37,15 +37,3 @@ osgcityscape_base
 set_target_properties(osgcityscape PROPERTIES
 RUNTIME_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}
 )
-
-
-
-add_executable(osgcityscape main.cpp)
-target_link_libraries(osgcityscape
-PRIVATE
-osgcityscape_base
-
-)
-set_target_properties(osgcityscape PROPERTIES
-RUNTIME_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}
-)
