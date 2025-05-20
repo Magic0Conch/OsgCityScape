@@ -50,6 +50,7 @@ Editor::~Editor(){
 
 void Editor::run(){
     double frameTime = 0.02;
+    g_runtimeContext.viewer->realize();
     while(!g_runtimeContext.viewer->done())
     {
         osg::Timer_t startFrameTick = osg::Timer::instance()->tick();
@@ -100,7 +101,8 @@ void Editor::setUpUI(){
     // auto data = CSEditor::Core::g_runtimeContext.viewer->getSceneData();
     // data->asGroup()->addChild(root);
     // CSEditor::Core::g_runtimeContext.viewer->setSceneData(pat);
-    CSEditor::Core::g_runtimeContext.viewer->realize();
+    // CSEditor::Core::g_runtimeContext.viewer->realize();
     g_runtimeContext.logSystem = std::make_unique<Helpers::LogSystem>();
     g_runtimeContext.logSystem->info("Hello world");
 }
+              

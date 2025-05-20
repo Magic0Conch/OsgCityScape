@@ -90,24 +90,24 @@ void Road::setPlaneNormal(const char* propertyName,const osg::Vec3f& planeNormal
 }
 
 float Road::getPathWidth(const char* propertyName) const{
-
+    return m_geometries[0]->getProperty<float>(propertyName);
 }
 
 float Road::getInnerRadius(const char* propertyName) const{
-
+    return m_geometries[0]->getProperty<float>(propertyName);
 }
 
 osg::Vec3f Road::getPlaneNormal(const char* propertyName) const{
-
+    return m_geometries[0]->getProperty<osg::Vec3f>(propertyName);
 }
 
 
 void Road::drawImGui() {    
     if (ImGui::CollapsingHeader("Road FX")){
         if (ImGui::TreeNode("Geometry")){
-            GUI::Panel::SliderIntWithSetter("Segments", *m_roadGeometry, m_roadGeometry->getProperty<int>("_Segments"), &Render::BaseGeometry::setSegments, 3,32);
+            GUI::Panel::SliderIntWithSetter("Segments", *m_roadGeometry,&Render::Road::getSegments, &Render::Road::setSegments, 3,128);
             GUI::Panel::SliderFloatWithSetter("PathWidth","_PathWidth", *this, &Road::getPathWidth,&Road::setPathWidth, 0.1f,10.0f);
-            GUI::Panel::SliderFloatWithSetter("InnerRadius", *m_roadGeometry, &Road::getInnerRadius,&Road::setInnerRadius, 0.1f,10.0f);            
+            GUI::Panel::SliderFloatWithSetter("InnerRadius", *m_roadGeometry, &Render::Road::getInnerRadius,&Render::Road::setInnerRadius, 0.1f,10.0f);
             ImGui::TreePop();
         }
         if (ImGui::TreeNode("Bottom")){

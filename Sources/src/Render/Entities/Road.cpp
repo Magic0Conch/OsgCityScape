@@ -41,12 +41,20 @@ osg::Vec3f Road::getPlaneNormal() const{
     return m_planeNormal;
 }
 
+float Road::getPathWidth(){
+    return getProperty<float>("pathWidth");
+}
+
+float Road::getInnerRadius(){
+    return getProperty<float>("innerRadius");
+}
+
 void Road::update(){
     if(m_isDirty){
         if(m_pathKeyPoints->size() < 2) return;
         float pathWidth = std::any_cast<float>(m_properties["pathWidth"]);
         float innerRadius = std::any_cast<float>(m_properties["innerRadius"]);
-        int segments = std::any_cast<int>(m_properties["segments"]);
+        int segments = std::any_cast<int>(m_properties["_Segments"]);
         int vertexCountPerCorner = 2 + segments*2;
         int vertexSize = 4 + (m_pathKeyPoints->size()-2)*vertexCountPerCorner;
         //路径上的2个 + 拐弯处的segment

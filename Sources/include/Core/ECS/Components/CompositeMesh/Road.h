@@ -1,6 +1,7 @@
 #pragma once
 #include "Core/ECS/Components/ProceduralMesh.h"
 #include "GUI/Core/Panel.h"
+#include "Render/Entities/Road.h"
 namespace CSEditor::ECS {
 
 class Road:public ProceduralMesh{
@@ -21,7 +22,7 @@ public:
 //     osg::Vec3f m_planeNormal;
 //     std::unique_ptr<std::vector<osg::Vec3f>> m_pathKeyPoints;
 private:
-    osg::ref_ptr<Render::BaseGeometry> m_roadGeometry;
+    osg::ref_ptr<Render::Road> m_roadGeometry;
     float pathWidth = 1.0f;
     float innerRadius = 2.0f;
 

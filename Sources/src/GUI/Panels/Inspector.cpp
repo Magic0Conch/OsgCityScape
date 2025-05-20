@@ -1,4 +1,5 @@
 #include "GUI/Panels/Inspector.h"
+#include "Core/ECS/Components/CompositeMesh/Road.h"
 #include "Core/ECS/Components/ModelMesh.h"
 #include "Core/ECS/Components/CompositeMesh/HighlightArea.h"
 #include "Core/ECS/Components/Transform.h"
@@ -226,6 +227,9 @@ void Inspector::drawImpl(){
             if(name == "HighlightArea"){
                 component->drawImGui();
             }
+            if(name == "Road"){
+                component->drawImGui();
+            }
         }
         if(ImGui::Button("Add Component")){
             ImGui::OpenPopup("AddComponentPopup");
@@ -239,6 +243,9 @@ void Inspector::drawImpl(){
             }
             if(ImGui::Selectable("HighlightArea")){
                 m_curSceneObject->addComponent<ECS::HighlightArea>();
+            }
+            if(ImGui::Selectable("Road")){
+                m_curSceneObject->addComponent<ECS::Road>();
             }
             if (ImGui::Selectable("Camera")) {
                 m_curSceneObject->addComponent<ECS::Camera>();

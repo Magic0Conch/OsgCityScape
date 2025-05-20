@@ -41,19 +41,6 @@ public:
     osg::ref_ptr<osg::StateSet> getDestinationQuadStateSet() const;
     void setMutisample(bool flag);
 
-    // void renderToImage(RenderTexture* source,RenderTexture* destination,Material* material=nullptr){
-    //     m_camera->setViewport(0, 0, destination->getTextureWidth(), destination->getTextureHeight());
-    //     m_camera->attach(osg::Camera::COLOR_BUFFER0, destination);
-    //     ShaderUtils::setShaderProgram(m_sourceGeode->getOrCreateStateSet(),m_vertShaderPath, m_fragShaderPath);
-    //     m_sourceGeode = new osg::Geode;
-    //     m_sourceGeode->addDrawable(BaseGeometryFactory::createBaseGeometry(BaseGeometryType::QUAD));
-    //     if(m_sourceTexture){
-    //         m_sourceGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0,source,
-    //         osg::StateAttribute::ON| osg::StateAttribute::OVERRIDE);
-    //     }
-    //     m_sourceGeode->getOrCreateStateSet()->addUniform(new osg::Uniform("_MainTex",0));
-    //     m_camera->addChild(m_sourceGeode);
-    // }
 private:
     osg::ref_ptr<Render::Material> m_material;
     osg::ref_ptr<RenderTexture> m_sourceTexture = nullptr;
