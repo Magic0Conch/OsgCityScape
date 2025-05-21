@@ -112,7 +112,7 @@ namespace CSEditor::Render {
 
                 //depth
                 osg::ref_ptr<Render::DepthPass> depthPass =  new Render::DepthPass;
-                depthPass->setup(m_graphicsContext, width, height, depthArray, index, 0x1, 0);    
+                depthPass->setup(m_graphicsContext, width, height, depthArray, index, 0x1, index+10);    
                 depthPass->setViewMatrix(cameraViewMatrix);
                 depthPass->setProjectionMatrix(cameraProjectionMatrix);
                 camera->setRenderDepthToTexturePass(depthPass);
@@ -124,7 +124,7 @@ namespace CSEditor::Render {
                 // Texture Projection
                 osg::ref_ptr<Render::ImageProjectionPass> imageProjectionPass = new ImageProjectionPass;
                 
-                imageProjectionPass->setup(m_graphicsContext, width, height, projectionTexture,depthArray ,m_lightMatrices[0],m_projectorDepthStencilTexture,m_projectorColorTexture,0x1,index);
+                imageProjectionPass->setup(m_graphicsContext, width, height, projectionTexture,depthArray ,m_lightMatrices[0],m_mainDepthStencilTexture,m_mainColorTexture,0x1,index+30);
                 
                 
                 imageProjectionPass->setProjectionMatrix(*m_mainProjectionMatrix);
@@ -198,14 +198,14 @@ namespace CSEditor::Render {
 
         // Texture Projection Pass        
         m_textureProjectionPass = std::make_unique<Render::TextureProjectionPass>();
-        m_textureProjectionPass->setup(m_mainCamera,m_mainColorTexture,m_mainDepthStencilTexture,0x1,1);
+        m_textureProjectionPass->setup(m_mainCamera,m_mainColorTexture,m_mainDepthStencilTexture,0x1,60);
         
         m_captureCallback = new CaptureCallback(m_captureFlag,m_mainColorTexture);        
         m_mainCamera->setPreDrawCallback(m_captureCallback);
 
         // Opaque Effect Pass
         m_opaqueEffectPass = new OpaqueEffectPass;
-        m_opaqueEffectPass->setup(m_graphicsContext, mainViewport, m_mainColorTexture, m_mainDepthStencilTexture, 0x2,2);
+        m_opaqueEffectPass->setup(m_graphicsContext, mainViewport, m_mainColorTexture, m_mainDepthStencilTexture, 0x2,90);
         m_opaqueEffectPass->setProjectionMatrix(*m_mainProjectionMatrix);
         viewer->addSlave(m_opaqueEffectPass);
 

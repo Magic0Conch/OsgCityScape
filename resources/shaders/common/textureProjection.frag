@@ -45,6 +45,7 @@ void main()
     vec4 col = texture(mainTexture, texCoord);
     vec4 projColor = projectTexture();
     fragColor = projColor.x == 0?col/2:projColor;
-    // fragColor = col/2 + projectTexture()/2;
-    fragColor.a = 1.0;
+    fragColor = col/2 + projectTexture()/2;
+    // fragColor.a = 1.0;
+    // fragColor.r = 1.0;
 }

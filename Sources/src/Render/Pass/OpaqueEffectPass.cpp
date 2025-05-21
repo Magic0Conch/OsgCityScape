@@ -12,5 +12,5 @@ osg::ref_ptr<osg::Texture2D> depthStencilTexture,unsigned int cullMask,int rende
     attach(osg::Camera::COLOR_BUFFER0,colorTexture);
     attach(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER,depthStencilTexture);
     setClearMask(GL_NONE);
-    setRenderOrder(osg::Camera::PRE_RENDER,2);
+    setRenderOrder(osg::Camera::PRE_RENDER,renderOrder);
 }
