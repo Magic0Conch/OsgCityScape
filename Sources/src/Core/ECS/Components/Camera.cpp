@@ -1,4 +1,5 @@
 #include "Core/ECS/Components/Camera.h"
+#include "Render/Pass/ImageProjectionPass.h"
 #include "Render/RenderSystem.h"
 #include "Core/ECS/WorldManager.h"
 #include "Editor/Core/RuntimeContext.h"
@@ -6,6 +7,7 @@
 #include "osg/Quat"
 #include <osgDB/ReadFile>
 #include "Core/Math/Math.h"
+#include "osg/ref_ptr"
 using namespace CSEditor::ECS;
 
 Camera::Camera(){
@@ -107,9 +109,9 @@ void Camera::setProjectionTexturePath(const std::string& path){
     m_projectionTexturePath = path;
     auto projectionImage = osgDB::readImageFile(path);
     projectionImage->scaleImage(m_projectionTextureWidth, m_projectionTextureHeight, 1);    
-    if(m_textureProjectionPass){
-        m_textureProjectionPass->setTexture(m_indexInProjectionPass, projectionImage);
-    }
+    // if(m_textureProjectionPass){
+    //     m_textureProjectionPass->setTexture(m_indexInProjectionPass, projectionImage);
+    // }
 }
 
 void Camera::setProjectionTextureSize(int width, int height){
@@ -141,11 +143,11 @@ std::vector<float> Camera::getRotationVector() const{
     return {m_rotation.x(), m_rotation.y(), m_rotation.z(), m_rotation.w()};
 }
 
-void Camera::setRenderDepthToTexturePass(std::shared_ptr<Render::DepthPass> renderDepthToTexture){
+void Camera::setRenderDepthToTexturePass(osg::ref_ptr<Render::DepthPass> renderDepthToTexture){
     m_renderDepthToTexture = renderDepthToTexture;
 }
 
-void Camera::setTextureProjectionPass(std::shared_ptr<Render::TextureProjectionPass> textureProjectionPass){
+void Camera::setTextureProjectionPass(osg::ref_ptr<Render::ImageProjectionPass> textureProjectionPass){
     m_textureProjectionPass = textureProjectionPass;
 }
 

@@ -2,11 +2,9 @@
 #include "Component.h"
 #include "Core/ECS/Components/Transform.h"
 #include "Render/Pass/DepthPass.h"
-#include "Render/Pass/TextureProjectionPass.h"
+#include "Render/Pass/ImageProjectionPass.h"
 #include "osg/Camera"
-#include "osg/CullSettings"
 #include "osg/Matrixd"
-#include "osg/Texture2D"
 #include "osg/Vec3f"
 #include "osg/ref_ptr"
 #include <memory>
@@ -47,9 +45,9 @@ public:
     void setProjectionTextureSize(int width, int height);
     std::string getProjectionTexturePath() const;
 
-    void setRenderDepthToTexturePass(std::shared_ptr<Render::DepthPass> renderDepthToTexture);
+    void setRenderDepthToTexturePass(osg::ref_ptr<Render::DepthPass> renderDepthToTexture);
     void setIndexInProjectionPass(short index);
-    void setTextureProjectionPass(std::shared_ptr<Render::TextureProjectionPass> textureProjectionPass);
+    void setTextureProjectionPass(osg::ref_ptr<Render::ImageProjectionPass> textureProjectionPass);
     void setMatrixInRenderSystem();
 
     void setEnableProjectionTexture(bool enable);
@@ -101,10 +99,10 @@ public:
     // }
 
 private:
-    float m_fov = 65.657;
+    float m_fov = 65.657f;
     float m_near;
     float m_far;
-    float m_aspectRatio = 1.333333;
+    float m_aspectRatio = 1.333333f;
     void loadResourceAsync(std::shared_ptr<Object> parentObject);
     osg::ref_ptr<osg::Camera> m_cameraNode;
     
@@ -116,9 +114,9 @@ private:
     osg::Vec3 m_localForward = m_defaultForward;
     osg::Vec3 m_localUp = m_defaultUp;
 
-    std::shared_ptr<Render::DepthPass> m_renderDepthToTexture;
+    osg::ref_ptr<Render::DepthPass> m_renderDepthToTexture;
     short m_indexInProjectionPass = -1;
-    std::shared_ptr<Render::TextureProjectionPass> m_textureProjectionPass;
+    osg::ref_ptr<Render::ImageProjectionPass> m_textureProjectionPass;
     osg::Matrixd m_viewProjectionMatrix;
     bool m_enableProjectionTexture = true;
 };

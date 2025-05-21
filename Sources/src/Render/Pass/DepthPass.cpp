@@ -14,12 +14,23 @@ using namespace CSEditor::Render;
 
 void DepthPass::setup(osg::ref_ptr<osg::GraphicsContext> gc,const int width,const int height,
 osg::ref_ptr<osg::Texture2DArray> depthArray,int depthTextureIndex,unsigned int cullMask,int renderOrder){
+    osg::ref_ptr<osg::Texture2D> dummyColor = new osg::Texture2D();
+    dummyColor->setTextureSize(width, height); // 或width, height
+    dummyColor->setInternalFormat(GL_RGBA);
+    dummyColor->setSourceFormat(GL_RGBA);
+    dummyColor->setSourceType(GL_UNSIGNED_BYTE);
+    dummyColor->setFilter(osg::Texture::MIN_FILTER, osg::Texture::NEAREST);
+    dummyColor->setFilter(osg::Texture::MAG_FILTER, osg::Texture::NEAREST);
+
     setGraphicsContext(gc);
     setViewport(0,0,width,height);
-    attach(osg::Camera::DEPTH_BUFFER,depthArray.get(),0,depthTextureIndex);
+    attach(osg::Camera::DEPTH_BUFFER,depthArray.get());
+    attach(osg::Camera::COLOR_BUFFER0, dummyColor.get());
     setCullMask(0x1);
     setRenderOrder(osg::Camera::PRE_RENDER, 0);
     setName("DepthPass");
+    
+
 }
 
 void DepthPass::createDepthShader(osg::StateSet* ss) {
@@ -51,6 +62,8 @@ DepthPass::DepthPass()
     auto cullFace = new osg::CullFace;
     cullFace->setMode(osg::CullFace::BACK);
     ss->setAttributeAndModes(cullFace, osg::StateAttribute::ON);
+
+
 }
 
 osg::Texture2D* DepthPass::getTexture() const

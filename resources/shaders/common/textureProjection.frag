@@ -7,11 +7,11 @@ uniform sampler2DArray colorMap;
 uniform sampler2D mainTexture;
 uniform int mapSize;
 in vec2 texCoord;
-in vec4 lightSpacePos[16];
-uniform bool _EnableProjection[16];
+in vec4 lightSpacePos[1];
+uniform bool _EnableProjection[1];
 out vec4 fragColor;
 
-bool flag[16];
+bool flag[1];
 
 vec4 projectTexture() {
     vec4 outColor = vec4(0);

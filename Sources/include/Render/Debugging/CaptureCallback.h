@@ -4,6 +4,7 @@
 #include <osg/Texture2D>
 #include <string>
 #include <osgDB/WriteFile>
+#include "GL/glcorearb.h"
 #include "osg/GL2Extensions"
 #include "osg/GLExtensions"
 #include "osg/ref_ptr"
@@ -45,8 +46,8 @@ struct CaptureCallback :public osg::Camera::DrawCallback
 
             ext->glBindFramebuffer(GL_FRAMEBUFFER, textureObjectID);
             // glReadBuffer(GL_COLOR_ATTACHMENT0);
-            _image->readPixels(0, 0, textureWidth, textureHeight,  GL_RGB, GL_UNSIGNED_BYTE);
-            osgDB::writeImageFile(*_image, u8"./SceneImage.jpg");
+            _image->readPixels(0, 0, textureWidth, textureHeight,  GL_RGBA, GL_UNSIGNED_BYTE);
+            osgDB::writeImageFile(*_image, u8"./SceneImage.png");
             ++(*captureFlag);
         }
     }

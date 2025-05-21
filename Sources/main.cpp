@@ -9,6 +9,9 @@ int main(){
     return 0;
 }
 
+//m_mainCamera->setClearColor(osg::Vec4f(0,0,0,0));
+
+
 // #include <osgViewer/Viewer>
 
 // int main() {

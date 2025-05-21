@@ -1,6 +1,7 @@
 #include "Core/ECS/Object.h"
 #include "Editor/Core/RuntimeContext.h"
 #include "Core/ECS/Components/ModelMesh.h"
+#include "Resources/Loaders/TextureDownsampleVisitor.h"
 #include "Resources/ResourceManagement/MaterialManager.h"
 #include "osg/Geode"
 #include "osg/Node"
@@ -9,10 +10,8 @@
 #include "Resources/ResourceManagement/ConfigManager.h"
 #include "Core/ECS/Level.h"
 #include "Core/ECS/WorldManager.h"
-#include "spdlog/spdlog.h"
 #include <memory>
 #include <string>
-#include <thread>
 #include <osgUtil/SmoothingVisitor>
 using namespace CSEditor::ECS;
 
@@ -40,13 +39,14 @@ void ModelMesh::loadResourceAsync(std::shared_ptr<Object> parentObject){
 }
 
 void ModelMesh::loadResource(std::shared_ptr<Object> parentObject){
-    osg::ref_ptr<osg::Node> group = osgDB::readNodeFile(m_meshPath);
-    auto geodeGroup = group->asGroup()->getChild(0)->asGeode();
-    m_meshNode = geodeGroup;
-    if(geodeGroup){
-        const auto childrenCount = geodeGroup->getNumChildren();
+    osg::ref_ptr<osg::Node> group = osgDB::readNodeFile(m_meshPath);    
+    m_meshNode = group->asGroup()->getChild(0)->asGeode();
+    if(m_meshNode){
+        TextureDownsampleVisitor visitor;
+        group->accept(visitor);
+        const auto childrenCount = m_meshNode->getNumChildren();
         for (int i = 0;i<childrenCount;i++) {
-            auto geom = geodeGroup->getChild(i)->asGeometry();
+            auto geom = m_meshNode->getChild(i)->asGeometry();
             if(geom){
                 osgUtil::SmoothingVisitor::smooth(*geom);
             }
@@ -59,7 +59,7 @@ void ModelMesh::loadResource(std::shared_ptr<Object> parentObject){
         matertial->loadResource(parentObject);
     }
     m_meshNode->setNodeMask(0x1);
-    // commpressTexture();
+    commpressTexture();
     // onComponentAdded(parentObject);
 }
 

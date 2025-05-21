@@ -54,7 +54,7 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                 x = x * windowSize.first;
                 y = y * windowSize.second;
                 osgUtil::Intersector::CoordinateFrame cf = osgUtil::Intersector::WINDOW;                
-                log->info(fmt::format("Mouse Clicked at: {},{}",x,y));          
+                // log->info(fmt::format("Mouse Clicked at: {},{}",x,y));          
                 if (x>0&&y>0&&m_viewer->computeIntersections(m_camera, cf,x, y,intersections))
                 {
                     //得到选择的节点
@@ -69,8 +69,8 @@ bool EditorInputManager::handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
                     //点击节点切换高亮
                     auto parent = nodePath[nodePath.size() - 2];//当前选择节点的父节点
                     std::string ptrString = std::to_string(reinterpret_cast<uintptr_t>(node.get()));
-                    std::string formattedString = fmt::format("Selected Node: {}, Ptr: {}, Position:{},{}.",objectID,ptrString,x,y);
-                    log->info(formattedString);
+                    // std::string formattedString = fmt::format("Selected Node: {}, Ptr: {}, Position:{},{}.",objectID,ptrString,x,y);
+                    // log->info(formattedString);
                     
                     while(!parents.empty()){
                         auto node = parents.back();

@@ -50,7 +50,9 @@ Editor::~Editor(){
 
 void Editor::run(){
     double frameTime = 0.02;
-    g_runtimeContext.viewer->realize();
+    // g_runtimeContext.viewer->realize();
+    
+
     while(!g_runtimeContext.viewer->done())
     {
         osg::Timer_t startFrameTick = osg::Timer::instance()->tick();
@@ -88,6 +90,7 @@ void Editor::renderTick(float frameTime){
 void Editor::setUpUI(){
     // g_runtimeContext.viewer->addEventHandler(new osgViewer::StatsHandler());
     g_runtimeContext.viewer->addEventHandler(Core::g_runtimeContext.uiManager.get());
+    g_runtimeContext.viewer->addEventHandler(Core::g_runtimeContext.editorInputManager.get());
     g_runtimeContext.uiManager->createPanel<GUI::Hierachy>("Hierachy");
     g_runtimeContext.uiManager->createPanel<GUI::Inspector>("Inspector");
     g_runtimeContext.uiManager->createPanel<GUI::Console>("Console");
