@@ -14,9 +14,8 @@ class ImageProjectionPass : public osg::Camera
 public:
     ImageProjectionPass();
     
-    void setup(osg::ref_ptr<osg::GraphicsContext> gc,const int width,const int height,osg::ref_ptr<osg::Texture2D> colorTexture,osg::ref_ptr<osg::Texture2DArray> depthMap,
-    osg::Matrixd projectorProjectionMatrix,osg::ref_ptr<osg::Texture2D> targetDepthStencilTexture,osg::ref_ptr<osg::Texture2D> targetTexture,
-    unsigned int cullMask,int renderOrder);
+    void setup(osg::ref_ptr<osg::GraphicsContext> gc,const int width,const int height,osg::ref_ptr<osg::Texture2D> mainTexture,osg::ref_ptr<osg::Texture2D> colorTexture,osg::ref_ptr<osg::Texture2D> depthMap,
+    osg::Matrixd projectorProjectionMatrix,osg::ref_ptr<osg::Texture2D> targetDepthStencilTexture,osg::ref_ptr<osg::Texture2D> targetTexture,unsigned int cullMask,int renderOrder);
     void setProjectionMatrix(const osg::Matrixd& projectionMatrix);
     void setLightSpaceMatrixUniform(int index, osg::Matrixd& lightSpaceMatrix);
     void setProjectionEnabled(int index, bool enable);
@@ -26,7 +25,7 @@ public:
     osg::ref_ptr<osg::Texture2D> getDepthStencilTexture();
     
 private:    
-    osg::ref_ptr<osg::Texture2DArray> m_colorMap;
+    osg::ref_ptr<osg::Texture2D> m_colorMap;
     osg::ref_ptr<osg::Uniform> m_lightSpaceMatrixUniform;
     osg::ref_ptr<osg::Uniform> m_enableProjectionUniform;
     osg::ref_ptr<osg::Texture2D> _texture;

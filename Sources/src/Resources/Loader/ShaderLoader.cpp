@@ -18,3 +18,4 @@ osg::ref_ptr<osg::Program> ShaderLoader::create(const std::string& vertFilePath)
     program->addShader(vertShader);
     return program;
 }
+

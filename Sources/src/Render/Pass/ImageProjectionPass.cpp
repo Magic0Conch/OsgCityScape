@@ -31,7 +31,7 @@ ImageProjectionPass::ImageProjectionPass() {
     setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
     setName("TextureProjection");
     auto ss = getStateSet();
-    createTextureProjectionShader("TextureProjection");
+    createTextureProjectionShader("ImageProjection");
 
     // _texture = new osg::Texture2D();
     // _texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
@@ -49,7 +49,7 @@ ImageProjectionPass::ImageProjectionPass() {
     ss->setAttributeAndModes(cullFace, osg::StateAttribute::ON);    
 }
 
-void ImageProjectionPass::setup(osg::ref_ptr<osg::GraphicsContext> gc,const int width,const int height,osg::ref_ptr<osg::Texture2D> colorTexture,osg::ref_ptr<osg::Texture2DArray> depthMap,
+void ImageProjectionPass::setup(osg::ref_ptr<osg::GraphicsContext> gc,const int width,const int height,osg::ref_ptr<osg::Texture2D> mainTexture,osg::ref_ptr<osg::Texture2D> colorTexture,osg::ref_ptr<osg::Texture2D> depthMap,
     osg::Matrixd projectorProjectionMatrix,osg::ref_ptr<osg::Texture2D> targetDepthStencilTexture,osg::ref_ptr<osg::Texture2D> targetTexture,unsigned int cullMask,int renderOrder){
     setGraphicsContext(gc);
     setViewport(0,0,width,height);
@@ -59,15 +59,17 @@ void ImageProjectionPass::setup(osg::ref_ptr<osg::GraphicsContext> gc,const int 
     _targetTexture = targetTexture;
     auto stateSet = getOrCreateStateSet();
     
+    osg::ref_ptr<osg::Uniform> screenSizeUniform = new osg::Uniform("u_ScreenSize", osg::Vec2(width, height));
+    stateSet->addUniform(screenSizeUniform);
+
     stateSet->addUniform(new osg::Uniform("depthMap", 1));
     stateSet->addUniform(new osg::Uniform("colorMap", 2));
-    stateSet->addUniform(new osg::Uniform("mainTexture", 0));
-    stateSet->addUniform(new osg::Uniform("mapSize", 0));
-    m_lightSpaceMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "lightSpaceMatrix", 1);
+    stateSet->addUniform(new osg::Uniform("mainTexture", 3));
+    m_lightSpaceMatrixUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "lightSpaceMatrix");
     stateSet->addUniform(m_lightSpaceMatrixUniform);
     stateSet->addUniform(projectionUniform);
 
-    m_enableProjectionUniform = new osg::Uniform(osg::Uniform::BOOL, "_EnableProjection", 1);
+    m_enableProjectionUniform = new osg::Uniform(osg::Uniform::BOOL, "_EnableProjection");
     stateSet->addUniform(m_enableProjectionUniform);
 
     setNodeMask(0x1);
@@ -83,15 +85,15 @@ void ImageProjectionPass::setup(osg::ref_ptr<osg::GraphicsContext> gc,const int 
     setRenderOrder(osg::Camera::PRE_RENDER, renderOrder);
 
     
-    m_colorMap = new osg::Texture2DArray;
+    m_colorMap = new osg::Texture2D;
     m_colorMap->setInternalFormat(GL_RGBA);    
-    m_colorMap->setTextureSize(colorTexture->getTextureWidth(), colorTexture->getTextureHeight(), 1);
+    m_colorMap->setTextureSize(colorTexture->getTextureWidth(), colorTexture->getTextureHeight());
     m_colorMap->setInternalFormat(colorTexture->getInternalFormat());
     m_colorMap->setImage(0, colorTexture->getImage());
 
+    stateSet->setTextureAttributeAndModes(3, mainTexture, osg::StateAttribute::ON);
     stateSet->setTextureAttributeAndModes(1, depthMap, osg::StateAttribute::ON);
     stateSet->setTextureAttributeAndModes(2, m_colorMap, osg::StateAttribute::ON);
-    stateSet->getUniform("mapSize")->set(1);
     
     m_lightSpaceMatrixUniform->setElement(0, projectorProjectionMatrix);
     m_enableProjectionUniform->setElement(0, true);

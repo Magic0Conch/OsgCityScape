@@ -48,8 +48,8 @@ namespace CSEditor::Render {
             }
             m_mainCamera->setCullMask(0x1);
             m_mainCamera->setClearColor(osg::Vec4f(0.529f, 0.808f, 0.922f,1.0f));
-            m_textureProjectionPass->setProjectionMatrix(*m_mainProjectionMatrix);
-            m_textureProjectionPass->createTextureProjectionShader("TextureProjection");
+            // m_textureProjectionPass->setProjectionMatrix(*m_mainProjectionMatrix);
+            // m_textureProjectionPass->createTextureProjectionShader("TextureProjection");
         }
         else if (renderPipelineState == RenderPipelineState::TextureBaking) {
             for (auto depthPass : m_depthPasses) {
@@ -59,8 +59,8 @@ namespace CSEditor::Render {
             m_mainCamera->setClearColor(osg::Vec4f(0,0,0,0));
             auto scaleMatrix = osg::Matrix::scale(2,2,1);
             osg::Matrix translationMatrix = osg::Matrix::translate(-0.5, -0.5, 0.0);
-            m_textureProjectionPass->setProjectionMatrix(translationMatrix*scaleMatrix);        
-            m_textureProjectionPass->createTextureProjectionShader("UVUnwrap");
+            // m_textureProjectionPass->setProjectionMatrix(translationMatrix*scaleMatrix);        
+            // m_textureProjectionPass->createTextureProjectionShader("UVUnwrap");
         }
     }
 
@@ -88,13 +88,13 @@ namespace CSEditor::Render {
                 projectionTexture->setImage(projectionImage);
                 m_colorTextureVector.emplace_back(projectionTexture);    
 
-                osg::ref_ptr<osg::Texture2DArray> depthArray = new osg::Texture2DArray;
-                depthArray->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
-                depthArray->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
-                depthArray->setInternalFormat(GL_DEPTH_COMPONENT);
-                depthArray->setSourceFormat(GL_DEPTH_COMPONENT);
-                depthArray->setSourceType(GL_FLOAT);
-                depthArray->setTextureSize(width, height, 1);
+                osg::ref_ptr<osg::Texture2D> depthMap = new osg::Texture2D;
+                depthMap->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
+                depthMap->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
+                depthMap->setInternalFormat(GL_DEPTH_COMPONENT);
+                depthMap->setSourceFormat(GL_DEPTH_COMPONENT);
+                depthMap->setSourceType(GL_FLOAT);
+                depthMap->setTextureSize(width, height);
 
                 // auto projectorColorTexture = new osg::Texture2D();
                 // projectorColorTexture->setWrap(osg::Texture2D::WrapParameter::WRAP_T,osg::Texture2D::WrapMode::REPEAT);
@@ -112,33 +112,30 @@ namespace CSEditor::Render {
 
                 //depth
                 osg::ref_ptr<Render::DepthPass> depthPass =  new Render::DepthPass;
-                depthPass->setup(m_graphicsContext, width, height, depthArray, index, 0x1, index+10);    
+                depthPass->setup(m_graphicsContext, width, height, depthMap, 0x1, index);    
                 depthPass->setViewMatrix(cameraViewMatrix);
                 depthPass->setProjectionMatrix(cameraProjectionMatrix);
                 camera->setRenderDepthToTexturePass(depthPass);
                 camera->setIndexInProjectionPass(index);
                 Core::g_runtimeContext.viewer->addSlave(depthPass.get());
                 m_depthPasses.emplace_back(depthPass);
-                m_depthArray.emplace_back(depthArray);
+                m_depthArray.emplace_back(depthMap);
 
                 // Texture Projection
+                bool pingpong = index&1;
                 osg::ref_ptr<Render::ImageProjectionPass> imageProjectionPass = new ImageProjectionPass;
                 
-                imageProjectionPass->setup(m_graphicsContext, width, height, projectionTexture,depthArray ,m_lightMatrices[0],m_mainDepthStencilTexture,m_mainColorTexture,0x1,index+30);
-                
-                
+                imageProjectionPass->setup(m_graphicsContext, width, height,pingpong?m_projectorColorTexture:m_mainColorTexture, projectionTexture,depthMap ,m_lightMatrices[0],m_projectorDepthStencilTexture,pingpong? m_mainColorTexture:m_projectorColorTexture,0x1,index+30);
                 imageProjectionPass->setProjectionMatrix(*m_mainProjectionMatrix);
-                imageProjectionPass->createTextureProjectionShader("TextureProjection");
+                // imageProjectionPass->createTextureProjectionShader("ImageProjection");
                 
                 m_imageProjectionPasses.emplace_back(imageProjectionPass);
                 Core::g_runtimeContext.viewer->addSlave(imageProjectionPass.get());
                 camera->setTextureProjectionPass(imageProjectionPass);
-
-
                 ++index;
             }
         }
-        m_textureProjectionPass->setTextureArray(m_depthArray[0], m_colorTextureVector, m_lightMatrices);
+        // m_textureProjectionPass->setTextureArray(m_depthArray[0], m_colorTextureVector, m_lightMatrices);
     }
 
     void RenderSystem::createLightMatrices(){
@@ -154,14 +151,6 @@ namespace CSEditor::Render {
     }
 
     void RenderSystem::createResources(){
-        // m_depthArray = new osg::Texture2DArray;
-        // m_depthArray->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
-        // m_depthArray->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
-        // m_depthArray->setInternalFormat(GL_DEPTH_COMPONENT);
-        // m_depthArray->setSourceFormat(GL_DEPTH_COMPONENT);
-        // m_depthArray->setSourceType(GL_FLOAT);
-        // m_depthArray->setTextureSize(width, height, 1);
-
         m_mainColorTexture = new osg::Texture2D();
         m_mainColorTexture->setWrap(osg::Texture2D::WrapParameter::WRAP_T,osg::Texture2D::WrapMode::REPEAT);
         m_mainColorTexture->setWrap(osg::Texture2D::WrapParameter::WRAP_S,osg::Texture2D::WrapMode::REPEAT);
@@ -196,12 +185,17 @@ namespace CSEditor::Render {
         auto viewer = Core::g_runtimeContext.viewer;
         auto mainViewport = Core::g_runtimeContext.windowSystem->getViewport();
 
+        //triangle
+        m_trianglePass = new Render::TrianglePass;
+        m_trianglePass->setup(m_graphicsContext,mainViewport->width(),mainViewport->height(),m_mainColorTexture,m_mainDepthStencilTexture,0x1,10);
+        m_trianglePass->setProjectionMatrix(*m_mainProjectionMatrix);
+        viewer->addSlave(m_trianglePass);
+
+
         // Texture Projection Pass        
-        m_textureProjectionPass = std::make_unique<Render::TextureProjectionPass>();
-        m_textureProjectionPass->setup(m_mainCamera,m_mainColorTexture,m_mainDepthStencilTexture,0x1,60);
+        // m_textureProjectionPass = std::make_unique<Render::TextureProjectionPass>();
+        // m_textureProjectionPass->setup(m_mainCamera,m_mainColorTexture,m_mainDepthStencilTexture,0x1,60);
         
-        m_captureCallback = new CaptureCallback(m_captureFlag,m_mainColorTexture);        
-        m_mainCamera->setPreDrawCallback(m_captureCallback);
 
         // Opaque Effect Pass
         m_opaqueEffectPass = new OpaqueEffectPass;
@@ -212,6 +206,14 @@ namespace CSEditor::Render {
         //Object Picker Pass
         m_objectPickerPass = std::make_unique<Render::ObjectPickerPass>(m_mainProjectionMatrix);
         setRenderPipelineState(RenderPipelineState::Default);
+
+        m_mainCamera->setCullMask(0x1);
+        m_captureCallback = new CaptureCallback(m_captureFlag,m_mainColorTexture);        
+        m_mainCamera->setPreDrawCallback(m_captureCallback);
+
+        m_displayPass = new TextureDisplayPass();
+        m_displayPass->setup(m_graphicsContext, mainViewport->width(),mainViewport->height(), m_mainColorTexture, 999); // 999保证最后显示
+        viewer->addSlave(m_displayPass,false);
     }
 
     void RenderSystem::initialize(){
